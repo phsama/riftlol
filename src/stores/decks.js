@@ -30,8 +30,9 @@ export const useDecksStore = defineStore('decks', () => {
         const deck = {
             id: generateId(),
             name,
-            cards: [],      // Main deck: [{ cardId, cardName, quantity, imageUrl, ... }]
-            sideboard: [],   // Sideboard: same structure
+            cards: [],
+            sideboard: [],
+            mainChampionId: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         }
@@ -257,6 +258,14 @@ export const useDecksStore = defineStore('decks', () => {
         return [...domains]
     }
 
+    function setMainChampion(deckId, cardId) {
+        const deck = getDeck(deckId)
+        if (deck) {
+            deck.mainChampionId = deck.mainChampionId === cardId ? null : cardId
+            deck.updatedAt = new Date().toISOString()
+        }
+    }
+
     return {
         decks,
         createDeck,
@@ -268,6 +277,7 @@ export const useDecksStore = defineStore('decks', () => {
         removeCard,
         setCardQuantity,
         importFromText,
+        setMainChampion,
         getTotalCards,
         getSideboardTotal,
         getDomains,

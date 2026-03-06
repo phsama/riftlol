@@ -105,20 +105,21 @@
         <span class="section-count">{{ totalCards }}</span>
       </h2>
 
-      <!-- Champions first -->
-      <div v-if="mainChampions.length" class="champion-group">
-        <h3 class="group-label">
-          <span class="champion-star">⭐</span> Lendas
+      <!-- Lendas (type=Legend) -->
+      <div v-if="mainLegends.length" class="legend-group">
+        <h3 class="group-label group-label--legend">
+          <span>⭐</span> Lendas
         </h3>
-        <div class="card-entries">
-          <div v-for="entry in mainChampions" :key="entry.cardId" class="card-entry card-entry--champion">
-            <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-img-link">
+        <div class="card-entries card-entries--grid">
+          <div v-for="entry in mainLegends" :key="entry.cardId" class="card-entry card-entry--legend">
+            <div class="entry-img-link">
               <img :src="entry.imageUrl" :alt="entry.cardName" class="entry-img" loading="lazy" />
-            </router-link>
+              <div class="entry-hover-preview"><img :src="entry.imageUrl" :alt="entry.cardName" /></div>
+            </div>
             <div class="entry-info">
-              <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name entry-name--champion">{{ entry.cardName }}</router-link>
+              <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name entry-name--legend">{{ entry.cardName }}</router-link>
               <div class="entry-meta">
-                <span v-if="entry.rarity" class="rarity-badge" :class="`rarity-${entry.rarity.toLowerCase()}`">{{ entry.rarity }}</span>
+                <span class="rarity-badge" :class="`rarity-${entry.rarity.toLowerCase()}`">{{ entry.rarity }}</span>
                 <span v-if="entry.energy != null" class="entry-energy">⚡{{ entry.energy }}</span>
               </div>
             </div>
@@ -131,29 +132,62 @@
         </div>
       </div>
 
-      <!-- Non-champion cards -->
-      <div v-if="mainOthers.length" class="card-entries">
-        <div v-for="entry in mainOthers" :key="entry.cardId" class="card-entry">
-          <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-img-link">
+      <!-- Main Champion (user-selected) -->
+      <div v-if="mainChampionEntry" class="champion-hero-group">
+        <h3 class="group-label group-label--champion">
+          <span>🛡️</span> Campeão Principal
+        </h3>
+        <div class="card-entry card-entry--main-champion">
+          <div class="entry-img-link">
+            <img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" class="entry-img" loading="lazy" />
+            <div class="entry-hover-preview"><img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" /></div>
+          </div>
+          <div class="entry-info">
+            <router-link :to="{ name: 'card-detail', params: { name: mainChampionEntry.cardName } }" class="entry-name entry-name--champion">{{ mainChampionEntry.cardName }}</router-link>
+            <div class="entry-meta">
+              <span class="rarity-badge" :class="`rarity-${mainChampionEntry.rarity.toLowerCase()}`">{{ mainChampionEntry.rarity }}</span>
+              <span v-if="mainChampionEntry.energy != null" class="entry-energy">⚡{{ mainChampionEntry.energy }}</span>
+            </div>
+          </div>
+          <div class="entry-qty">
+            <button class="qty-btn" @click="decksStore.removeCard(deck.id, mainChampionEntry.cardId)">−</button>
+            <span class="qty-value">{{ mainChampionEntry.quantity }}</span>
+            <button class="qty-btn" @click="decksStore.setCardQuantity(deck.id, mainChampionEntry.cardId, mainChampionEntry.quantity + 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other cards (2-col grid) -->
+      <div v-if="mainOthers.length" class="card-entries card-entries--grid">
+        <div v-for="entry in mainOthers" :key="entry.cardId" class="card-entry" :class="{ 'card-entry--champion-selectable': entry.supertype === 'Champion' }">
+          <div class="entry-img-link">
             <img :src="entry.imageUrl" :alt="entry.cardName" class="entry-img" loading="lazy" />
-          </router-link>
+            <div class="entry-hover-preview"><img :src="entry.imageUrl" :alt="entry.cardName" /></div>
+          </div>
           <div class="entry-info">
             <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name">{{ entry.cardName }}</router-link>
             <div class="entry-meta">
               <span v-if="entry.rarity" class="rarity-badge" :class="`rarity-${entry.rarity.toLowerCase()}`">{{ entry.rarity }}</span>
               <span v-if="entry.energy != null" class="entry-energy">⚡{{ entry.energy }}</span>
-              <span v-if="entry.type" class="entry-type">{{ entry.type }}</span>
             </div>
           </div>
-          <div class="entry-qty">
-            <button class="qty-btn" @click="decksStore.removeCard(deck.id, entry.cardId)">−</button>
-            <span class="qty-value">{{ entry.quantity }}</span>
-            <button class="qty-btn" @click="decksStore.setCardQuantity(deck.id, entry.cardId, entry.quantity + 1)">+</button>
+          <div class="entry-actions">
+            <button
+              v-if="entry.supertype === 'Champion'"
+              class="star-btn"
+              :class="{ 'star-btn--active': deck.mainChampionId === entry.cardId }"
+              @click="decksStore.setMainChampion(deck.id, entry.cardId)"
+              title="Definir como Campeão Principal"
+            >★</button>
+            <div class="entry-qty">
+              <button class="qty-btn" @click="decksStore.removeCard(deck.id, entry.cardId)">−</button>
+              <span class="qty-value">{{ entry.quantity }}</span>
+              <button class="qty-btn" @click="decksStore.setCardQuantity(deck.id, entry.cardId, entry.quantity + 1)">+</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Empty main -->
       <div v-if="!deck.cards.length" class="section-empty">
         <p>Use a busca acima ou importe uma lista para montar seu deck.</p>
       </div>
@@ -168,13 +202,14 @@
         Sideboard
         <span class="section-count">{{ sideboardTotal }}</span>
       </h2>
-      <div class="card-entries">
-        <div v-for="entry in deck.sideboard" :key="entry.cardId" class="card-entry" :class="{ 'card-entry--champion': entry.type === 'Legend' }">
-          <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-img-link">
+      <div class="card-entries card-entries--grid">
+        <div v-for="entry in deck.sideboard" :key="entry.cardId" class="card-entry" :class="{ 'card-entry--legend': entry.type === 'Legend' }">
+          <div class="entry-img-link">
             <img :src="entry.imageUrl" :alt="entry.cardName" class="entry-img" loading="lazy" />
-          </router-link>
+            <div class="entry-hover-preview"><img :src="entry.imageUrl" :alt="entry.cardName" /></div>
+          </div>
           <div class="entry-info">
-            <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name" :class="{ 'entry-name--champion': entry.type === 'Legend' }">{{ entry.cardName }}</router-link>
+            <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name" :class="{ 'entry-name--legend': entry.type === 'Legend' }">{{ entry.cardName }}</router-link>
             <div class="entry-meta">
               <span v-if="entry.rarity" class="rarity-badge" :class="`rarity-${entry.rarity.toLowerCase()}`">{{ entry.rarity }}</span>
               <span v-if="entry.energy != null" class="entry-energy">⚡{{ entry.energy }}</span>
@@ -308,8 +343,17 @@ const energyCurve = computed(() => {
 })
 
 // ── Separated card lists ──
-const mainChampions = computed(() => deck.value?.cards.filter((c) => c.type === 'Legend') || [])
-const mainOthers = computed(() => deck.value?.cards.filter((c) => c.type !== 'Legend') || [])
+const mainLegends = computed(() => deck.value?.cards.filter((c) => c.type === 'Legend') || [])
+const mainChampionEntry = computed(() => {
+  if (!deck.value?.mainChampionId) return null
+  return deck.value.cards.find((c) => c.cardId === deck.value.mainChampionId) || null
+})
+const mainOthers = computed(() => {
+  if (!deck.value) return []
+  return deck.value.cards.filter((c) =>
+    c.type !== 'Legend' && c.cardId !== deck.value.mainChampionId
+  )
+})
 
 // ── Quick add ──
 const allCards = ref([])
@@ -466,55 +510,93 @@ async function copyExport() {
   background: var(--color-bg-surface); color: var(--color-text-secondary); font-weight: 700;
 }
 
-/* Champions group */
-.champion-group { margin-bottom: 10px; }
+/* Group labels */
+.legend-group, .champion-hero-group { margin-bottom: 10px; }
 .group-label {
   display: flex; align-items: center; gap: 4px;
-  font-size: 0.72rem; font-weight: 700; color: var(--color-gold-400);
+  font-size: 0.72rem; font-weight: 700;
   margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;
 }
-.champion-star { font-size: 0.8rem; }
+.group-label--legend { color: var(--color-gold-400); }
+.group-label--champion { color: var(--color-rift-400); }
 
-/* ── Card entries ── */
+/* ── Card entries: 2-column grid ── */
 .card-entries { display: flex; flex-direction: column; gap: 2px; }
+.card-entries--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
 .card-entry {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 10px; border-radius: var(--radius-md);
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: var(--radius-md);
   background: var(--color-bg-raised); border: 1px solid var(--color-border-subtle);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s; min-width: 0;
 }
 .card-entry:active { background: var(--color-bg-surface); }
-.card-entry--champion {
-  border-color: rgba(201, 168, 76, 0.25);
-  background: linear-gradient(135deg, var(--color-bg-raised) 0%, rgba(201, 168, 76, 0.04) 100%);
+.card-entry--legend {
+  border-color: rgba(201, 168, 76, 0.3);
+  background: linear-gradient(135deg, var(--color-bg-raised) 0%, rgba(201, 168, 76, 0.06) 100%);
+}
+.card-entry--main-champion {
+  border-color: rgba(74, 127, 255, 0.3);
+  background: linear-gradient(135deg, var(--color-bg-raised) 0%, rgba(74, 127, 255, 0.06) 100%);
 }
 
-.entry-img-link { flex-shrink: 0; }
-.entry-img { width: 36px; height: 50px; object-fit: cover; border-radius: 3px; }
+/* ── Thumbnail with hover preview ── */
+.entry-img-link { flex-shrink: 0; position: relative; }
+.entry-img { width: 32px; height: 44px; object-fit: cover; border-radius: 3px; cursor: pointer; }
+.entry-hover-preview {
+  display: none; position: absolute; z-index: 100;
+  top: 50%; left: 110%; transform: translateY(-50%);
+  width: 220px; border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.12);
+  pointer-events: none;
+  animation: preview-pop 0.12s ease-out;
+}
+.entry-hover-preview img { width: 100%; height: auto; display: block; }
 
-.entry-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+@keyframes preview-pop {
+  from { opacity: 0; transform: translateY(-50%) scale(0.9); }
+  to   { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+.entry-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .entry-name {
-  font-size: 0.82rem; font-weight: 600; color: var(--color-text-primary);
+  font-size: 0.75rem; font-weight: 600; color: var(--color-text-primary);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none;
 }
 .entry-name:hover { color: var(--color-gold-400); }
-.entry-name--champion { color: var(--color-gold-400); font-weight: 700; }
-.entry-name--champion:hover { color: var(--color-gold-300); }
-.entry-meta { display: flex; align-items: center; gap: 4px; }
-.entry-meta .rarity-badge { font-size: 0.55rem; padding: 0 5px; }
-.entry-energy { font-size: 0.65rem; font-weight: 600; color: var(--color-rift-400); }
-.entry-type { font-size: 0.65rem; color: var(--color-text-tertiary); }
+.entry-name--legend { color: var(--color-gold-400); font-weight: 700; }
+.entry-name--legend:hover { color: var(--color-gold-300); }
+.entry-name--champion { color: var(--color-rift-400); font-weight: 700; }
+.entry-name--champion:hover { color: var(--color-rift-300); }
+.entry-meta { display: flex; align-items: center; gap: 3px; }
+.entry-meta .rarity-badge { font-size: 0.5rem; padding: 0 4px; }
+.entry-energy { font-size: 0.6rem; font-weight: 600; color: var(--color-rift-400); }
 
-.entry-qty { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+/* ── Star button (Main Champion selector) ── */
+.entry-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.star-btn {
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: var(--radius-sm); background: transparent;
+  color: var(--color-text-tertiary); font-size: 0.85rem;
+  cursor: pointer; transition: all 0.2s; padding: 0;
+}
+.star-btn:hover { color: var(--color-rift-400); transform: scale(1.15); }
+.star-btn--active { color: var(--color-rift-400) !important; text-shadow: 0 0 8px rgba(74,127,255,0.4); }
+
+.entry-qty { display: flex; align-items: center; gap: 1px; flex-shrink: 0; }
 .qty-btn {
-  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
   border: none; border-radius: var(--radius-sm); background: var(--color-bg-surface);
-  color: var(--color-text-secondary); font-size: 1rem; font-weight: 700;
+  color: var(--color-text-secondary); font-size: 0.85rem; font-weight: 700;
   cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
 }
 .qty-btn:hover { background: var(--color-bg-overlay); color: var(--color-text-primary); }
 .qty-btn:active { transform: scale(0.9); }
-.qty-value { font-family: var(--font-display); font-size: 1rem; font-weight: 700; min-width: 20px; text-align: center; }
+.qty-value { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; min-width: 16px; text-align: center; }
 
 .section-empty { padding: 28px 16px; text-align: center; font-size: 0.85rem; color: var(--color-text-secondary); }
 
@@ -567,6 +649,9 @@ async function copyExport() {
 /* ── Empty / toast ── */
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .empty-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 600; z-index: 1000; animation: toast-in 0.3s ease-out; }
+.toast-success { background: rgba(80,184,138,0.9); color: #fff; }
+@keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
 /* ── Desktop ── */
 @media (min-width: 769px) {
@@ -574,6 +659,9 @@ async function copyExport() {
   .editor-actions .btn { font-size: 0.8rem; padding: 8px 14px; }
   .modal-overlay { align-items: center; padding: 20px; }
   .modal { border-radius: var(--radius-xl); max-height: 85vh; }
-  .entry-img { width: 40px; height: 56px; }
+  .entry-img { width: 36px; height: 50px; }
+
+  /* Hover preview only on desktop */
+  .entry-img-link:hover .entry-hover-preview { display: block; }
 }
 </style>
