@@ -86,6 +86,8 @@ export const useDecksStore = defineStore('decks', () => {
             supertype: card.classification?.supertype || '',
             domains: card.classification?.domain || [],
             energy: card.attributes?.energy ?? null,
+            might: card.attributes?.might ?? null,
+            description: card.description?.raw || '',
         }
     }
 

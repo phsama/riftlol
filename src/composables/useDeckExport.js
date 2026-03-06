@@ -9,38 +9,31 @@ export function exportGeneric(cards, sideboard = []) {
     return text
 }
 
-export function exportTCGPlayer(cards, sideboard = []) {
-    let text = cards
-        .map((c) => {
-            const setInfo = c.setLabel ? ` [${c.setLabel}]` : ''
-            return `${c.quantity} ${c.cardName}${setInfo}`
-        })
-        .join('\n')
-    if (sideboard.length) {
-        text += '\nSideboard:\n'
-        text += sideboard.map((c) => {
-            const setInfo = c.setLabel ? ` [${c.setLabel}]` : ''
-            return `${c.quantity} ${c.cardName}${setInfo}`
-        }).join('\n')
+function formatFullCard(c) {
+    const energy = c.energy != null ? `[Cost: ${c.energy}]` : ''
+    const typeStr = [c.supertype, c.type].filter(Boolean).join(' ')
+    const type = typeStr ? `[Type: ${typeStr}]` : ''
+    const color = c.domains && c.domains.length ? `[Color: ${c.domains.join(', ')}]` : ''
+    const might = c.might != null ? `[Might: ${c.might}]` : ''
+
+    let text = `${c.quantity}x ${c.cardName}`
+    const attrs = [energy, type, color, might].filter(Boolean).join(' ')
+    if (attrs) text += `\n  ${attrs}`
+
+    if (c.description) {
+        // Clear newlines from description to keep it compact, or just indent it
+        const cleanDesc = c.description.replace(/\n/g, ' ')
+        text += `\n  Text: ${cleanDesc}`
     }
     return text
 }
 
-export function exportCardmarket(cards, sideboard = []) {
-    let text = cards
-        .map((c) => {
-            const setInfo = c.setId ? ` (${c.setId})` : ''
-            const collector = c.collectorNumber ? ` #${c.collectorNumber}` : ''
-            return `${c.quantity} ${c.cardName}${setInfo}${collector}`
-        })
-        .join('\n')
+export function exportFull(cards, sideboard = []) {
+    let text = cards.map(formatFullCard).join('\n\n')
+
     if (sideboard.length) {
-        text += '\nSideboard:\n'
-        text += sideboard.map((c) => {
-            const setInfo = c.setId ? ` (${c.setId})` : ''
-            const collector = c.collectorNumber ? ` #${c.collectorNumber}` : ''
-            return `${c.quantity} ${c.cardName}${setInfo}${collector}`
-        }).join('\n')
+        text += '\n\n--- Sideboard ---\n\n'
+        text += sideboard.map(formatFullCard).join('\n\n')
     }
     return text
 }
@@ -63,7 +56,6 @@ export async function copyToClipboard(text) {
 }
 
 export const EXPORT_FORMATS = [
-    { id: 'generic', label: 'Lista simples', description: '2x Carta Nome', fn: exportGeneric },
-    { id: 'tcgplayer', label: 'TCGPlayer', description: '2 Carta Nome [Set]', fn: exportTCGPlayer },
-    { id: 'cardmarket', label: 'Cardmarket', description: '2 Carta Nome (SET) #123', fn: exportCardmarket },
+    { id: 'generic', label: 'Clean', description: '2x Carta Nome', fn: exportGeneric },
+    { id: 'full', label: 'Full', description: 'Inclui regras e atributos', fn: exportFull },
 ]

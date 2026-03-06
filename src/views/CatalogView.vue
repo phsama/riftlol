@@ -174,7 +174,14 @@ const filteredCards = computed(() => {
   let result = allCards.value
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.trim().toLowerCase()
-    result = result.filter((c) => c.name.toLowerCase().includes(q))
+    result = result.filter((c) => {
+      return c.name.toLowerCase().includes(q) ||
+             c.description?.raw?.toLowerCase().includes(q) ||
+             c.description?.rich?.toLowerCase().includes(q) ||
+             c.classification?.supertype?.toLowerCase().includes(q) ||
+             c.classification?.subtype?.toLowerCase().includes(q) ||
+             c.tags?.some((t) => t.toLowerCase().includes(q))
+    })
   }
   if (selectedDomains.value.length > 0) {
     result = result.filter((c) => c.classification?.domain?.some((d) => selectedDomains.value.includes(d)))
@@ -467,18 +474,12 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 
   /* Hover preview */
   .card-hover-preview {
-    display: none;
-    position: absolute;
-    z-index: 100;
-    top: 50%;
-    left: 105%;
-    transform: translateY(-50%);
-    width: 280px;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 24px rgba(201,168,76,0.15);
-    pointer-events: none;
-    animation: preview-in 0.15s ease-out;
+    display: block; position: absolute; z-index: 100;
+    top: 50%; transform: translateY(-50%);
+    width: 440px; border-radius: var(--radius-lg); overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.12);
+    opacity: 0; pointer-events: none;
+    transition: all 0.2s ease-out;
   }
   .card-hover-preview img {
     width: 100%;

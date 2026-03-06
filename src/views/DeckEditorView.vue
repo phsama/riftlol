@@ -365,7 +365,14 @@ const toastMessage = ref('')
 const searchResults = computed(() => {
   if (!searchQuery.value.trim() || searchQuery.value.trim().length < 2) return []
   const q = searchQuery.value.trim().toLowerCase()
-  return allCards.value.filter((c) => c.name.toLowerCase().includes(q))
+  return allCards.value.filter((c) => {
+    return c.name.toLowerCase().includes(q) ||
+           c.description?.raw?.toLowerCase().includes(q) ||
+           c.description?.rich?.toLowerCase().includes(q) ||
+           c.classification?.supertype?.toLowerCase().includes(q) ||
+           c.classification?.subtype?.toLowerCase().includes(q) ||
+           c.tags?.some((t) => t.toLowerCase().includes(q))
+  })
 })
 
 // Deduplicate search results by name
@@ -550,7 +557,7 @@ async function copyExport() {
 .entry-hover-preview {
   display: none; position: absolute; z-index: 100;
   top: 50%; left: 110%; transform: translateY(-50%);
-  width: 220px; border-radius: var(--radius-lg); overflow: hidden;
+  width: 440px; border-radius: var(--radius-lg); overflow: hidden;
   box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.12);
   pointer-events: none;
   animation: preview-pop 0.12s ease-out;
