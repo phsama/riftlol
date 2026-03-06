@@ -1,0 +1,280 @@
+<template>
+  <div class="card-detail fade-in" v-if="card">
+    <!-- Back -->
+    <router-link to="/" class="back-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Voltar
+    </router-link>
+
+    <div class="detail-layout">
+      <!-- Card image -->
+      <div class="detail-image-wrap">
+        <img :src="card.media?.image_url" :alt="card.name" class="detail-image" />
+        <div v-if="isChampion" class="champion-badge">⭐ Lenda</div>
+      </div>
+
+      <!-- Card info -->
+      <div class="detail-info">
+        <h1 class="detail-name">{{ card.name }}</h1>
+
+        <div class="detail-classification">
+          <span class="detail-type">{{ card.classification?.supertype ? `${card.classification.supertype} ` : '' }}{{ card.classification?.type }}</span>
+          <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
+        </div>
+
+        <div class="detail-domains" v-if="card.classification?.domain?.length">
+          <span v-for="d in card.classification.domain" :key="d" class="domain-badge" :class="`domain-${d.toLowerCase()}`">{{ d }}</span>
+        </div>
+
+        <!-- Attributes -->
+        <div class="detail-attributes" v-if="hasAttributes">
+          <div class="attr-chip" v-if="card.attributes?.energy != null">
+            <span class="attr-label">Energia</span>
+            <span class="attr-value attr-energy">{{ card.attributes.energy }}</span>
+          </div>
+          <div class="attr-chip" v-if="card.attributes?.might != null">
+            <span class="attr-label">Might</span>
+            <span class="attr-value attr-might">{{ card.attributes.might }}</span>
+          </div>
+          <div class="attr-chip" v-if="card.attributes?.power != null">
+            <span class="attr-label">Power</span>
+            <span class="attr-value attr-power">{{ card.attributes.power }}</span>
+          </div>
+        </div>
+
+        <!-- Card text -->
+        <div class="detail-text" v-if="card.text?.rich" v-html="card.text.rich"></div>
+        <div class="detail-text" v-else-if="card.text?.plain">{{ card.text.plain }}</div>
+
+        <!-- Meta -->
+        <div class="detail-meta-row" v-if="card.set">
+          <span class="meta-label">Set:</span> {{ card.set.label }} ({{ card.set.id }})
+        </div>
+        <div class="detail-meta-row" v-if="card.media?.artist">
+          <span class="meta-label">Artista:</span> {{ card.media.artist }}
+        </div>
+        <div class="detail-meta-row" v-if="card.public_code">
+          <span class="meta-label">Código:</span> {{ card.public_code }}
+        </div>
+
+        <div class="detail-tags" v-if="card.tags?.length">
+          <span v-for="tag in card.tags" :key="tag" class="tag-chip">{{ tag }}</span>
+        </div>
+
+        <!-- Metadata badges -->
+        <div class="detail-badges" v-if="card.metadata?.alternate_art || card.metadata?.signature || card.metadata?.overnumbered">
+          <span v-if="card.metadata.alternate_art" class="meta-badge meta-alt">Arte Alternativa</span>
+          <span v-if="card.metadata.signature" class="meta-badge meta-sig">Assinada</span>
+          <span v-if="card.metadata.overnumbered" class="meta-badge meta-over">Overnumbered</span>
+        </div>
+
+        <!-- Add to deck (sticky on mobile) -->
+        <div class="detail-actions">
+          <div class="deck-selector" v-if="decksStore.decks.length">
+            <select v-model="selectedDeckId" class="input" id="deck-select">
+              <option value="" disabled>Selecionar deck...</option>
+              <option v-for="deck in decksStore.decks" :key="deck.id" :value="deck.id">{{ deck.name }}</option>
+            </select>
+            <button class="btn btn-primary" :disabled="!selectedDeckId" @click="addToDeck">Adicionar</button>
+          </div>
+          <router-link v-else to="/decks" class="btn btn-secondary" style="width:100%;">Criar seu primeiro deck</router-link>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showToast" class="toast toast-success">✓ Carta adicionada!</div>
+  </div>
+
+  <!-- Loading -->
+  <div v-else-if="loading" class="detail-loading fade-in">
+    <div class="skeleton" style="width: 100%; max-width: 280px; aspect-ratio: 744/1039; border-radius: var(--radius-lg); margin: 0 auto;"></div>
+    <div class="skeleton" style="width: 60%; height: 28px; margin: 16px auto 0;"></div>
+  </div>
+
+  <!-- Error -->
+  <div v-else class="empty-state fade-in">
+    <div style="font-size: 2.5rem;">😔</div>
+    <h3 class="empty-title">Carta não encontrada</h3>
+    <p class="empty-text">{{ error || 'Não foi possível carregar essa carta.' }}</p>
+    <router-link to="/" class="btn btn-primary">Voltar ao catálogo</router-link>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { getCards, searchCards } from '@/services/riftcodex'
+import { useDecksStore } from '@/stores/decks'
+
+const props = defineProps({ name: String })
+const route = useRoute()
+const decksStore = useDecksStore()
+
+const card = ref(null)
+const loading = ref(true)
+const error = ref(null)
+const selectedDeckId = ref('')
+const showToast = ref(false)
+
+const isChampion = computed(() => card.value?.classification?.type === 'Legend')
+const hasAttributes = computed(() => {
+  const a = card.value?.attributes
+  return a && (a.energy != null || a.might != null || a.power != null)
+})
+
+function addToDeck() {
+  if (!selectedDeckId.value || !card.value) return
+  decksStore.addCard(selectedDeckId.value, card.value)
+  showToast.value = true
+  setTimeout(() => { showToast.value = false }, 3000)
+}
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const cardName = decodeURIComponent(props.name || route.params.name)
+    const allCards = await getCards()
+    let found = allCards.find((c) => c.name === cardName)
+    if (!found) {
+      const searchResult = await searchCards(cardName)
+      const results = Array.isArray(searchResult) ? searchResult : (searchResult?.items || [])
+      found = results.find((c) => c.name === cardName) || results[0]
+    }
+    if (found) { card.value = found } else { error.value = 'Carta não encontrada no catálogo.' }
+  } catch (e) {
+    error.value = 'Erro ao carregar a carta.'
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+})
+</script>
+
+<style scoped>
+.card-detail { max-width: 960px; margin: 0 auto; }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--color-text-secondary); font-size: 0.82rem; font-weight: 500;
+  margin-bottom: 12px; transition: color 0.2s;
+}
+.back-link:hover { color: var(--color-text-primary); }
+
+/* ── Layout: stacked mobile, side-by-side desktop ── */
+.detail-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-image-wrap {
+  position: relative;
+  max-width: 280px;
+  margin: 0 auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), var(--shadow-glow-gold);
+}
+.detail-image { width: 100%; height: auto; display: block; }
+.champion-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(201, 168, 76, 0.9);
+  color: var(--color-text-inverse);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+}
+
+.detail-info { display: flex; flex-direction: column; gap: 12px; }
+
+.detail-name {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.detail-classification { display: flex; align-items: center; gap: 8px; }
+.detail-type { font-size: 0.85rem; color: var(--color-text-secondary); font-weight: 500; }
+.detail-domains { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.detail-attributes { display: flex; gap: 8px; }
+.attr-chip {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 14px; background: var(--color-bg-raised);
+  border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md);
+  min-width: 64px;
+}
+.attr-label {
+  font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--color-text-tertiary);
+}
+.attr-value { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; }
+.attr-energy { color: var(--color-rift-400); }
+.attr-might  { color: var(--color-domain-fury); }
+.attr-power  { color: var(--color-gold-400); }
+
+.detail-text {
+  padding: 12px; background: var(--color-bg-raised);
+  border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md);
+  font-size: 0.85rem; line-height: 1.6;
+}
+.detail-text :deep(em) { color: var(--color-text-secondary); font-style: italic; }
+
+.detail-meta-row { font-size: 0.78rem; color: var(--color-text-secondary); }
+.meta-label { font-weight: 600; color: var(--color-text-tertiary); margin-right: 4px; }
+
+.detail-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.tag-chip {
+  padding: 2px 7px; background: var(--color-bg-surface);
+  border-radius: var(--radius-full); font-size: 0.68rem; color: var(--color-text-secondary);
+}
+
+.detail-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.meta-badge {
+  padding: 3px 8px; border-radius: var(--radius-full);
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.meta-alt  { background: rgba(201, 168, 76, 0.15); color: var(--color-gold-400); }
+.meta-sig  { background: rgba(139, 111, 212, 0.15); color: var(--color-domain-mind); }
+.meta-over { background: rgba(74, 127, 255, 0.15); color: var(--color-rift-400); }
+
+/* ── Add to deck ── */
+.detail-actions {
+  margin-top: 4px; padding-top: 12px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+.deck-selector { display: flex; gap: 8px; }
+.deck-selector .input { flex: 1; }
+
+/* ── States ── */
+.detail-loading { padding: 20px; }
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px 20px; text-align: center; gap: 10px;
+}
+.empty-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+.empty-text { color: var(--color-text-secondary); font-size: 0.85rem; }
+
+/* ── Desktop ── */
+@media (min-width: 769px) {
+  .detail-layout {
+    flex-direction: row;
+    gap: 36px;
+    align-items: flex-start;
+  }
+  .detail-image-wrap {
+    flex-shrink: 0;
+    width: 320px;
+    max-width: 320px;
+    margin: 0;
+  }
+  .detail-name { font-size: 2rem; }
+}
+</style>
