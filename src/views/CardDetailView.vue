@@ -56,8 +56,8 @@
         </div>
 
         <!-- Card text -->
-        <div class="detail-text" v-if="card.text?.rich" v-html="card.text.rich"></div>
-        <div class="detail-text" v-else-if="card.text?.plain">{{ card.text.plain }}</div>
+        <div class="detail-text" v-if="card.text?.rich" v-html="formatCardText(card.text.rich)"></div>
+        <div class="detail-text" v-else-if="card.text?.plain" v-html="formatCardText(card.text.plain)"></div>
 
         <!-- Meta -->
         <div class="detail-meta-row" v-if="card.set">
@@ -137,6 +137,38 @@ const hasAttributes = computed(() => {
   const a = card.value?.attributes
   return a && (a.energy != null || a.might != null || a.power != null)
 })
+
+function formatCardText(text) {
+  if (!text) return ''
+  let formatted = text
+  
+  // Custom format: Bold bracketed keywords like [Action], [Repeat], [Deflect X]
+  formatted = formatted.replace(/\[(.*?)\]/g, '<strong>[$1]</strong>')
+
+  // Energy cost parser: :rb_energy_1:
+  formatted = formatted.replace(/:rb_energy_(\d+):/g, '<span class="inline-icon cost-energy"><span>$1</span></span>')
+  
+  // Rune cost parser: :rb_rune_mind:
+  formatted = formatted.replace(/:rb_rune_([a-zA-Z]+):/g, (match, runeGroup) => {
+      const rune = runeGroup.toLowerCase()
+      let symbol = ''
+      if (rune === 'mind') symbol = '🧠'
+      else if (rune === 'fury') symbol = '🔥'
+      else if (rune === 'body') symbol = '💪'
+      else if (rune === 'calm') symbol = '🌊'
+      else if (rune === 'chaos') symbol = '🌀'
+      else if (rune === 'order') symbol = '🛡️'
+      else if (rune === 'rainbow') symbol = '🌈'
+      else symbol = '✨'
+      
+      // We capitalize the text
+      const runeName = rune.charAt(0).toUpperCase() + rune.slice(1)
+      return `<span class="inline-icon cost-rune cost-${rune}" title="${runeName}"> ${symbol}</span>`
+  })
+
+  // Keep line breaks
+  return formatted.replace(/\n/g, '<br>')
+}
 
 function prevArt() {
   if (currentVersionIndex.value > 0) {
@@ -302,11 +334,27 @@ onMounted(async () => {
 .attr-power  { color: var(--color-gold-400); }
 
 .detail-text {
-  padding: 12px; background: var(--color-bg-raised);
+  padding: 16px; background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md);
-  font-size: 0.85rem; line-height: 1.6;
+  font-size: 0.88rem; line-height: 1.6; color: var(--color-text-secondary);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
 }
-.detail-text :deep(em) { color: var(--color-text-secondary); font-style: italic; }
+.detail-text :deep(em) { color: var(--color-text-tertiary); font-style: italic; }
+.detail-text :deep(strong) { color: var(--color-text-primary); font-weight: 700; }
+
+/* Inline icon styling for card text parser */
+.detail-text :deep(.inline-icon) {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; width: 18px; height: 18px;
+    font-size: 0.65rem; font-weight: 800; font-family: var(--font-display);
+    margin: 0 2px; vertical-align: middle;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+.detail-text :deep(.inline-icon.cost-energy) { background: var(--color-bg-deep); border: 1px solid var(--color-rift-500); color: var(--color-rift-400); }
+.detail-text :deep(.inline-icon.cost-rune) { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+.detail-text :deep(.cost-mind) { box-shadow: 0 0 8px rgba(139, 111, 212, 0.4); }
+.detail-text :deep(.cost-fury) { box-shadow: 0 0 8px rgba(215, 60, 60, 0.4);   }
+.detail-text :deep(.cost-rainbow) { box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); background: linear-gradient(135deg, rgba(215,60,60,0.5), rgba(74,127,255,0.5), rgba(80,184,138,0.5)); border: none;}
 
 .detail-meta-row { font-size: 0.78rem; color: var(--color-text-secondary); }
 .meta-label { font-weight: 600; color: var(--color-text-tertiary); margin-right: 4px; }
