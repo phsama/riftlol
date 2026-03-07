@@ -88,6 +88,7 @@ export const useDecksStore = defineStore('decks', () => {
             energy: card.attributes?.energy ?? null,
             might: card.attributes?.might ?? null,
             description: card.description?.raw || '',
+            artist: card.artist || '',
         }
     }
 

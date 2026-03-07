@@ -16,15 +16,29 @@ function formatFullCard(c) {
     const color = c.domains && c.domains.length ? `[Color: ${c.domains.join(', ')}]` : ''
     const might = c.might != null ? `[Might: ${c.might}]` : ''
 
+    // Extra details the user requested:
+    const rarity = c.rarity ? `[Rarity: ${c.rarity}]` : ''
+    const setInfo = c.setLabel ? `[Set: ${c.setLabel}]` : (c.setId ? `[Set: ${c.setId.toUpperCase()}]` : '')
+    const cn = c.collectorNumber ? `[#${c.collectorNumber}]` : ''
+    const artist = c.artist ? `[Artist: ${c.artist}]` : ''
+
     let text = `${c.quantity}x ${c.cardName}`
+
+    // Line 1: Gameplay Attributes
     const attrs = [energy, type, color, might].filter(Boolean).join(' ')
     if (attrs) text += `\n  ${attrs}`
 
+    // Line 2: Card text / rules
     if (c.description) {
         // Clear newlines from description to keep it compact, or just indent it
         const cleanDesc = c.description.replace(/\n/g, ' ')
         text += `\n  Text: ${cleanDesc}`
     }
+
+    // Line 3: Meta details
+    const meta = [setInfo, cn, rarity, artist].filter(Boolean).join(' ')
+    if (meta) text += `\n  ${meta}`
+
     return text
 }
 
