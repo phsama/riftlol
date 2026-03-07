@@ -304,11 +304,19 @@ const uniqueCards = computed(() => {
   }
   
   // Sort each card's versions so the Standard/Normal is always [0]
+  const baseSets = ['0fe3414b-c530-4a4d-b86c-168b323e8532', '76bc5811-b56c-40ec-9343-c00a0785a9d5'] // Origins, Spiritforged
+  
   return [...seen.values()].map(entry => {
       entry._versions.sort((a, b) => {
+          // 1. Check explicit Alt Art/Promo
           const aAlt = a.tags?.includes('Alternate Art') || a.classification?.rarity === 'Promo' ? 1 : 0
           const bAlt = b.tags?.includes('Alternate Art') || b.classification?.rarity === 'Promo' ? 1 : 0
-          return aAlt - bAlt // Normal (0) before Promo/Alt (1)
+          if (aAlt !== bAlt) return aAlt - bAlt // Normal (0) before Promo/Alt (1)
+          
+          // 2. Fallback check: is it from a standard core set?
+          const aBase = baseSets.includes(a.set?.id) ? 0 : 1
+          const bBase = baseSets.includes(b.set?.id) ? 0 : 1
+          return aBase - bBase
       })
       
       const standard = entry._versions[0]
