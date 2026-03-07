@@ -121,7 +121,7 @@
       <!-- ── Cards grid ── -->
       <div v-else class="cards-grid stagger-enter">
         <div
-          v-for="card in visibleCards"
+          v-for="card in displayCards"
           :key="card.id"
           class="card-tile collection-tile"
           :class="[
@@ -179,7 +179,7 @@
                 </div>
                 <!-- Alt Art Variant -->
                 <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.alt_art_qty > 0}">
-                    <span class="variant-label v-alt">🎨 Esp.</span>
+                    <span class="variant-label v-alt">🎨 AArt</span>
                     <div class="variant-stepper">
                         <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
                         <span class="step-val">{{ collectionStore.items[card.id]?.alt_art_qty || 0 }}</span>
@@ -294,9 +294,11 @@ const uniqueCards = computed(() => {
   const seen = new Map()
   for (const card of filteredCards.value) {
     if (seen.has(card.name)) {
-      seen.get(card.name)._altCount++
+      const entry = seen.get(card.name)
+      entry._altCount++
+      entry._versions.push(card)
     } else {
-      const entry = { ...card, _altCount: 1 }
+      const entry = { ...card, _altCount: 1, _versions: [card] }
       seen.set(card.name, entry)
     }
   }
@@ -312,6 +314,28 @@ const uniqueCardsOwned = computed(() => {
 })
 
 const visibleCards = computed(() => uniqueCards.value.slice(0, visibleCount.value))
+
+// Map visibleCards to display alternative arts if the user owns them
+const displayCards = computed(() => {
+  return visibleCards.value.map(baseCard => {
+    const qty = collectionStore.items[baseCard.id] || {}
+    let activeVersion = baseCard._versions[0]
+    
+    if (qty.signed_qty > 0 && baseCard._versions.length > 2) {
+       // Priority: Signed variant
+       activeVersion = baseCard._versions.find(v => v.tags?.includes('Signature') || v.tags?.includes('Signed')) || baseCard._versions[baseCard._versions.length - 1]
+    } else if (qty.alt_art_qty > 0 && baseCard._versions.length > 1) {
+       // Priority: Alt Art variant
+       activeVersion = baseCard._versions.find(v => v.tags?.includes('Alternate Art') || v.classification?.rarity === 'Promo') || baseCard._versions[1]
+    }
+    
+    return {
+      ...baseCard,
+      media: { ...baseCard.media, image_url: activeVersion.media?.image_url }
+    }
+  })
+})
+
 const hasMore = computed(() => visibleCount.value < uniqueCards.value.length)
 
 const hasActiveFilters = computed(() =>
