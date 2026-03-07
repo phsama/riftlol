@@ -102,7 +102,10 @@
         class="card-tile"
         :class="{ 'card-tile--champion': card.classification?.type === 'Legend' }"
       >
-        <div class="card-image-wrap">
+        <div 
+          class="card-image-wrap"
+          :class="{'card-image-wrap--landscape': card.orientation === 'landscape' || card.classification?.type === 'Battlefield'}"
+        >
           <img
             :src="card.media?.image_url"
             :alt="card.name"
@@ -392,6 +395,10 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   overflow: hidden;
   background: var(--color-bg-deep);
 }
+.card-image-wrap--landscape {
+  aspect-ratio: 1039 / 744;
+}
+
 .alt-arts-badge {
   position: absolute;
   bottom: 4px;
@@ -435,7 +442,13 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   background: var(--color-bg-raised);
   overflow: hidden;
 }
-.card-skeleton-img { width: 100%; aspect-ratio: 744 / 1039; }
+.card-skeleton-img { 
+  width: 100%; 
+  aspect-ratio: 744 / 1039; 
+}
+.card-image-wrap--landscape .card-skeleton-img {
+  aspect-ratio: 1039 / 744;
+}
 
 /* ── Empty state ── */
 .empty-state {

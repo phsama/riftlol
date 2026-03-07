@@ -82,7 +82,13 @@
           class="search-result-item"
           @click="addCard(card)"
         >
-          <img :src="card.media?.image_url" :alt="card.name" class="search-result-img" loading="lazy" />
+          <img 
+             :src="card.media?.image_url" 
+             :alt="card.name" 
+             class="search-result-img" 
+             :class="{'search-result-img--landscape': card.orientation === 'landscape' || card.classification?.type === 'Battlefield'}"
+             loading="lazy" 
+          />
           <div class="search-result-info">
             <span class="search-result-name">{{ card.name }}</span>
             <span class="search-result-meta">
@@ -113,9 +119,11 @@
         </h3>
         <div class="card-entries card-entries--grid">
           <div v-for="entry in mainLegends" :key="entry.cardId" class="card-entry card-entry--legend">
-            <div class="entry-img-link">
+            <div class="entry-img-link" :class="{'entry-img-link--landscape': entry.type === 'Battlefield'}">
               <img :src="entry.imageUrl" :alt="entry.cardName" class="entry-img" loading="lazy" />
-              <div class="entry-hover-preview"><img :src="entry.imageUrl" :alt="entry.cardName" /></div>
+              <div class="entry-hover-preview" :class="{'entry-hover-preview--landscape': entry.type === 'Battlefield'}">
+                <img :src="entry.imageUrl" :alt="entry.cardName" />
+              </div>
             </div>
             <div class="entry-info">
               <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name entry-name--legend">{{ entry.cardName }}</router-link>
@@ -139,9 +147,11 @@
           <span>🛡️</span> Campeão Principal
         </h3>
         <div class="card-entry card-entry--main-champion">
-          <div class="entry-img-link">
+          <div class="entry-img-link" :class="{'entry-img-link--landscape': mainChampionEntry.type === 'Battlefield'}">
             <img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" class="entry-img" loading="lazy" />
-            <div class="entry-hover-preview"><img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" /></div>
+            <div class="entry-hover-preview" :class="{'entry-hover-preview--landscape': mainChampionEntry.type === 'Battlefield'}">
+              <img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" />
+            </div>
           </div>
           <div class="entry-info">
             <router-link :to="{ name: 'card-detail', params: { name: mainChampionEntry.cardName } }" class="entry-name entry-name--champion">{{ mainChampionEntry.cardName }}</router-link>
@@ -161,9 +171,11 @@
       <!-- Other cards (2-col grid) -->
       <div v-if="mainOthers.length" class="card-entries card-entries--grid">
         <div v-for="entry in mainOthers" :key="entry.cardId" class="card-entry" :class="{ 'card-entry--champion-selectable': entry.supertype === 'Champion' }">
-          <div class="entry-img-link">
+          <div class="entry-img-link" :class="{'entry-img-link--landscape': entry.type === 'Battlefield'}">
             <img :src="entry.imageUrl" :alt="entry.cardName" class="entry-img" loading="lazy" />
-            <div class="entry-hover-preview"><img :src="entry.imageUrl" :alt="entry.cardName" /></div>
+            <div class="entry-hover-preview" :class="{'entry-hover-preview--landscape': entry.type === 'Battlefield'}">
+              <img :src="entry.imageUrl" :alt="entry.cardName" />
+            </div>
           </div>
           <div class="entry-info">
             <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name">{{ entry.cardName }}</router-link>
@@ -205,9 +217,11 @@
       </h2>
       <div class="card-entries card-entries--grid">
         <div v-for="entry in deck.sideboard" :key="entry.cardId" class="card-entry" :class="{ 'card-entry--legend': entry.type === 'Legend' }">
-          <div class="entry-img-link">
+          <div class="entry-img-link" :class="{'entry-img-link--landscape': entry.type === 'Battlefield'}">
             <img :src="entry.imageUrl" :alt="entry.cardName" class="entry-img" loading="lazy" />
-            <div class="entry-hover-preview"><img :src="entry.imageUrl" :alt="entry.cardName" /></div>
+            <div class="entry-hover-preview" :class="{'entry-hover-preview--landscape': entry.type === 'Battlefield'}">
+              <img :src="entry.imageUrl" :alt="entry.cardName" />
+            </div>
           </div>
           <div class="entry-info">
             <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name" :class="{ 'entry-name--legend': entry.type === 'Legend' }">{{ entry.cardName }}</router-link>
@@ -497,6 +511,7 @@ async function copyExport() {
 }
 .search-result-item:hover, .search-result-item:active { background: rgba(255,255,255,0.04); }
 .search-result-img { width: 32px; height: 44px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+.search-result-img--landscape { width: 44px; height: 32px; }
 .search-result-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
 .search-result-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .search-result-meta { font-size: 0.68rem; color: var(--color-text-secondary); }
@@ -556,6 +571,7 @@ async function copyExport() {
 
 /* ── Thumbnail with hover preview ── */
 .entry-img-link { flex-shrink: 0; position: relative; }
+.entry-img-link--landscape .entry-img { width: 44px; height: 32px; }
 .entry-img { width: 32px; height: 44px; object-fit: cover; border-radius: 3px; cursor: pointer; }
 .entry-hover-preview {
   display: none; position: absolute; z-index: 100;
