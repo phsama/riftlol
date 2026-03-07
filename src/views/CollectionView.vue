@@ -289,7 +289,7 @@ const filteredCards = computed(() => {
   return result
 })
 
-// Deduplicate by name, keeping first version
+// Deduplicate by name, keeping first version and organizing versions
 const uniqueCards = computed(() => {
   const seen = new Map()
   for (const card of filteredCards.value) {
@@ -302,7 +302,22 @@ const uniqueCards = computed(() => {
       seen.set(card.name, entry)
     }
   }
-  return [...seen.values()]
+  
+  // Sort each card's versions so the Standard/Normal is always [0]
+  return [...seen.values()].map(entry => {
+      entry._versions.sort((a, b) => {
+          const aAlt = a.tags?.includes('Alternate Art') || a.classification?.rarity === 'Promo' ? 1 : 0
+          const bAlt = b.tags?.includes('Alternate Art') || b.classification?.rarity === 'Promo' ? 1 : 0
+          return aAlt - bAlt // Normal (0) before Promo/Alt (1)
+      })
+      
+      const standard = entry._versions[0]
+      return { 
+          ...standard, 
+          _altCount: entry._altCount, 
+          _versions: entry._versions 
+      }
+  })
 })
 
 const uniqueCardsOwned = computed(() => {
