@@ -501,8 +501,12 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
     height: auto;
     display: block;
   }
-  .card-tile:hover .card-hover-preview {
-    display: block;
+  
+  /* Show preview when hovering the image wrapper */
+  .card-image-wrap:hover .card-hover-preview {
+    opacity: 1;
+    pointer-events: auto;
+    animation: preview-in 0.15s ease-out forwards;
   }
   /* Flip to left side when near right edge */
   .card-tile:nth-child(4n) .card-hover-preview,
