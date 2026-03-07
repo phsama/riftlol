@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/riftcodex-api/:path*",
+            "destination": "https://api.riftcodex.com/:path*"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
+}
