@@ -60,7 +60,7 @@ export const useCollectionStore = defineStore('collection', () => {
         }
 
         try {
-            await api.post(`/api/collection/${cardId}`, {
+            await api.post(`/api/collection/${encodeURIComponent(cardId)}`, {
                 [field]: newValue
             })
         } catch (err) {

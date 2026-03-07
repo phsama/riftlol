@@ -143,10 +143,6 @@
               loading="lazy"
             />
             <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
-            <!-- Desktop hover preview -->
-            <div class="card-hover-preview">
-              <img :src="card.media?.image_url" :alt="card.name" />
-            </div>
             
             <div class="collection-overlay-actions">
               <button class="col-add-btn" @click.prevent="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">
@@ -616,28 +612,5 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 @media (min-width: 769px) {
   .collection-title { font-size: 1.8rem; }
   .cards-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-  
-  /* Hover preview */
-  .card-hover-preview {
-    display: block; position: absolute; z-index: 100;
-    top: 50%; transform: translateY(-50%);
-    width: 440px; border-radius: var(--radius-lg); overflow: hidden;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.12);
-    opacity: 0; pointer-events: none;
-    transition: all 0.2s ease-out;
-  }
-  .card-hover-preview img { width: 100%; height: auto; display: block; }
-  
-  /* Show preview when hovering the image wrapper, but behind the quickaction */
-  .card-image-wrap:hover .card-hover-preview {
-    opacity: 1; pointer-events: auto; animation: preview-in 0.15s ease-out forwards;
-  }
-  .card-tile:nth-child(4n) .card-hover-preview,
-  .card-tile:nth-child(5n) .card-hover-preview { left: auto; right: 105%; }
-
-  @keyframes preview-in {
-    from { opacity: 0; transform: translateY(-50%) scale(0.92); }
-    to   { opacity: 1; transform: translateY(-50%) scale(1); }
-  }
 }
 </style>

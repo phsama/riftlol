@@ -17,7 +17,7 @@ async def read_collection(
     repo = CollectionRepository(db)
     return await repo.get_collection(user_id)
 
-@router.post("/{card_id}", response_model=CollectionItemOut)
+@router.post("/{card_id:path}", response_model=CollectionItemOut)
 async def update_collection_item(
     card_id: str,
     item_in: CollectionItemUpdate,
