@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: '/riftcodex-api',
+    baseURL: '/api', // Apontando pro FastAPI local
     timeout: 15000,
 })
 
@@ -41,22 +41,9 @@ export async function getCards() {
     const cached = getCached(cacheKey)
     if (cached) return cached
 
-    // Fetch all pages
-    const firstPage = await cachedGet('/cards', { page: 1, size: 100 })
-    let allItems = [...(firstPage.items || [])]
-    const totalPages = firstPage.pages || 1
-
-    // Fetch remaining pages in parallel
-    if (totalPages > 1) {
-        const promises = []
-        for (let p = 2; p <= totalPages; p++) {
-            promises.push(cachedGet('/cards', { page: p, size: 100 }))
-        }
-        const results = await Promise.all(promises)
-        results.forEach((res) => {
-            if (res.items) allItems = allItems.concat(res.items)
-        })
-    }
+    // Nosso DB interno agora cospe o array inteiro direto em `items` num pull só!
+    const data = await cachedGet('/cards')
+    const allItems = data.items || data || []
 
     setCache(cacheKey, allItems)
     return allItems
