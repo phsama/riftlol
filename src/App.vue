@@ -30,8 +30,8 @@
             </div>
           </template>
           <template v-else>
-            <button class="nav-btn btn-primary" @click="handleLoginGoogle">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            <button class="nav-btn btn-primary" @click="showAuthModal = true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Entrar
             </button>
           </template>
@@ -59,25 +59,73 @@
         <span>Decks</span>
       </router-link>
     </nav>
+    <!-- ── Auth Modal ── -->
+    <div v-if="showAuthModal" class="modal-backdrop" @click.self="showAuthModal = false">
+      <div class="modal auth-modal glass">
+        <h2 class="modal-title">{{ authMode === 'login' ? 'Acessar Conta' : 'Criar Conta' }}</h2>
+        <p v-if="authError" class="auth-error">{{ authError }}</p>
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" v-model="email" class="input" placeholder="seu@email.com" @keyup.enter="handleEmailAuth"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" v-model="password" class="input" placeholder="••••••••" @keyup.enter="handleEmailAuth"/>
+        </div>
+        <button class="btn btn-primary auth-submit" :disabled="authLoading" @click="handleEmailAuth">
+          {{ authLoading ? 'Aguarde...' : (authMode === 'login' ? 'Entrar' : 'Cadastrar') }}
+        </button>
+        <button class="btn btn-ghost auth-switch" @click="authMode = authMode === 'login' ? 'signup' : 'login'">
+          {{ authMode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre' }}
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+
+// Auth modal state
+const showAuthModal = ref(false)
+const email = ref('')
+const password = ref('')
+const authMode = ref('login') // 'login' | 'signup'
+const authLoading = ref(false)
+const authError = ref('')
 
 onMounted(() => {
   authStore.init()
 })
 
-async function handleLoginGoogle() {
+async function handleEmailAuth() {
+  if (!email.value || !password.value) {
+    authError.value = "Preencha e-mail e senha"
+    return
+  }
+  authLoading.value = true
+  authError.value = ''
   try {
-    await authStore.signInWithGoogle()
+    if (authMode.value === 'login') {
+      await authStore.signInWithEmail(email.value, password.value)
+    } else {
+      await authStore.signUp(email.value, password.value)
+    }
+    showAuthModal.value = false
+    email.value = ''
+    password.value = ''
   } catch (err) {
-    console.error("Login Error:", err)
-    alert("Houve um erro ao tentar logar com o Google.")
+    console.error("Auth Error:", err)
+    if (err.message.includes('Invalid login credentials')) {
+      authError.value = "E-mail ou senha incorretos."
+    } else {
+      authError.value = err.message || "Erro de autenticação"
+    }
+  } finally {
+    authLoading.value = false
   }
 }
 </script>
@@ -259,4 +307,20 @@ async function handleLoginGoogle() {
     padding-bottom: 80px; /* space for bottom tabs */
   }
 }
+
+/* ── Auth Modal ── */
+.auth-modal {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+.auth-error {
+  color: #ff5e5e; font-size: 0.85rem; font-weight: 600; text-align: center;
+  background: rgba(255, 94, 94, 0.1); padding: 8px; border-radius: var(--radius-sm);
+}
+.auth-submit { margin-top: 8px; justify-content: center; }
+.auth-switch { font-size: 0.8rem; }
 </style>
