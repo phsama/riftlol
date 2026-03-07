@@ -11,6 +11,19 @@
       <div class="detail-image-wrap">
         <img :src="card.media?.image_url" :alt="card.name" class="detail-image" />
         <div v-if="isChampion" class="champion-badge">⭐ Lenda</div>
+        
+        <!-- Alt arts slider -->
+        <div v-if="cardVersions.length > 1" class="art-slider-controls">
+           <button class="slider-btn" @click="prevArt" :disabled="currentVersionIndex === 0">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+           </button>
+           <div class="slider-dots">
+               <span v-for="(v, idx) in cardVersions" :key="v.id" class="slider-dot" :class="{ 'slider-dot--active': idx === currentVersionIndex }" @click="setArt(idx)"></span>
+           </div>
+           <button class="slider-btn" @click="nextArt" :disabled="currentVersionIndex === cardVersions.length - 1">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+           </button>
+        </div>
       </div>
 
       <!-- Card info -->
@@ -116,11 +129,31 @@ const error = ref(null)
 const selectedDeckId = ref('')
 const showToast = ref(false)
 
+const cardVersions = ref([])
+const currentVersionIndex = ref(0)
+
 const isChampion = computed(() => card.value?.classification?.type === 'Legend')
 const hasAttributes = computed(() => {
   const a = card.value?.attributes
   return a && (a.energy != null || a.might != null || a.power != null)
 })
+
+function prevArt() {
+  if (currentVersionIndex.value > 0) {
+    currentVersionIndex.value--
+    card.value = cardVersions.value[currentVersionIndex.value]
+  }
+}
+function nextArt() {
+  if (currentVersionIndex.value < cardVersions.value.length - 1) {
+    currentVersionIndex.value++
+    card.value = cardVersions.value[currentVersionIndex.value]
+  }
+}
+function setArt(idx) {
+  currentVersionIndex.value = idx
+  card.value = cardVersions.value[idx]
+}
 
 function addToDeck() {
   if (!selectedDeckId.value || !card.value) return
@@ -134,13 +167,24 @@ onMounted(async () => {
   try {
     const cardName = decodeURIComponent(props.name || route.params.name)
     const allCards = await getCards()
-    let found = allCards.find((c) => c.name === cardName)
-    if (!found) {
+    
+    let versions = allCards.filter((c) => c.name === cardName)
+    if (versions.length === 0) {
       const searchResult = await searchCards(cardName)
       const results = Array.isArray(searchResult) ? searchResult : (searchResult?.items || [])
-      found = results.find((c) => c.name === cardName) || results[0]
+      versions = results.filter((c) => c.name === cardName)
+      if (versions.length === 0 && results.length > 0) {
+        versions = [results[0]]
+      }
     }
-    if (found) { card.value = found } else { error.value = 'Carta não encontrada no catálogo.' }
+    
+    if (versions.length > 0) {
+      cardVersions.value = versions
+      currentVersionIndex.value = 0
+      card.value = cardVersions.value[0]
+    } else {
+      error.value = 'Carta não encontrada no catálogo.'
+    }
   } catch (e) {
     error.value = 'Erro ao carregar a carta.'
     console.error(e)
@@ -175,7 +219,7 @@ onMounted(async () => {
   overflow: hidden;
   box-shadow: var(--shadow-lg), var(--shadow-glow-gold);
 }
-.detail-image { width: 100%; height: auto; display: block; }
+.detail-image { width: 100%; height: auto; display: block; border-radius: var(--radius-lg); }
 .champion-badge {
   position: absolute;
   top: 8px;
@@ -189,6 +233,43 @@ onMounted(async () => {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   backdrop-filter: blur(4px);
+}
+
+/* Alt arts slider */
+.art-slider-controls {
+  position: absolute;
+  bottom: 0px; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 12px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.slider-btn {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+.slider-btn:hover:not(:disabled) {
+  background: var(--color-gold-400); color: black; border-color: var(--color-gold-500);
+}
+.slider-btn:disabled {
+  opacity: 0.3; cursor: not-allowed;
+}
+.slider-dots {
+  display: flex; gap: 6px;
+}
+.slider-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer; transition: all 0.2s;
+}
+.slider-dot--active {
+  background: var(--color-gold-400); transform: scale(1.2); box-shadow: 0 0 6px var(--color-gold-500);
 }
 
 .detail-info { display: flex; flex-direction: column; gap: 12px; }

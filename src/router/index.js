@@ -20,6 +20,11 @@ const router = createRouter({
             component: () => import('@/views/DecksView.vue'),
         },
         {
+            path: '/collection',
+            name: 'collection',
+            component: () => import('@/views/CollectionView.vue'),
+        },
+        {
             path: '/deck/:id',
             name: 'deck-editor',
             component: () => import('@/views/DeckEditorView.vue'),

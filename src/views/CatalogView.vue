@@ -38,20 +38,23 @@
         >{{ domain }}</button>
       </div>
 
-      <!-- Dropdowns row -->
-      <div class="filter-selects">
-        <select v-model="selectedType" class="input filter-select" id="filter-type">
-          <option value="">Tipo</option>
-          <option v-for="t in availableTypes" :key="t" :value="t">{{ t }}</option>
-        </select>
-        <select v-model="selectedRarity" class="input filter-select" id="filter-rarity">
-          <option value="">Raridade</option>
-          <option v-for="r in availableRarities" :key="r" :value="r">{{ r }}</option>
-        </select>
-        <select v-model="selectedSet" class="input filter-select" id="filter-set">
-          <option value="">Set</option>
-          <option v-for="s in sets" :key="s.set_id" :value="s.set_id">{{ s.label || s.name }}</option>
-        </select>
+      <!-- Dropdowns row for Multi-select -->
+      <div class="filter-selects" v-if="!loading">
+        <MultiSelectDropdown
+          v-model="selectedTypes"
+          :options="availableTypes"
+          placeholder="Tipos"
+        />
+        <MultiSelectDropdown
+          v-model="selectedRarities"
+          :options="availableRarities"
+          placeholder="Raridades"
+        />
+        <MultiSelectDropdown
+          v-model="selectedSets"
+          :options="sets.map(s => ({ value: s.set_id, label: s.label || s.name }))"
+          placeholder="Sets"
+        />
       </div>
 
       <!-- Energy pills -->
@@ -138,6 +141,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { getCards, getSets } from '@/services/riftcodex'
+import MultiSelectDropdown from '@/components/MultiSelectDropdown.vue'
 
 const BATCH_SIZE = 24
 const allCards = ref([])
@@ -150,9 +154,9 @@ let observer = null
 
 const searchQuery = ref('')
 const selectedDomains = ref([])
-const selectedType = ref('')
-const selectedRarity = ref('')
-const selectedSet = ref('')
+const selectedTypes = ref([])
+const selectedRarities = ref([])
+const selectedSets = ref([])
 const selectedEnergy = ref(null)
 
 const availableDomains = ['Body', 'Calm', 'Chaos', 'Colorless', 'Fury', 'Mind', 'Order']
@@ -191,9 +195,9 @@ const filteredCards = computed(() => {
   if (selectedDomains.value.length > 0) {
     result = result.filter((c) => c.classification?.domain?.some((d) => selectedDomains.value.includes(d)))
   }
-  if (selectedType.value) result = result.filter((c) => c.classification?.type === selectedType.value)
-  if (selectedRarity.value) result = result.filter((c) => c.classification?.rarity === selectedRarity.value)
-  if (selectedSet.value) result = result.filter((c) => c.set?.id === selectedSet.value)
+  if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
+  if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
+  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set?.id))
   if (selectedEnergy.value !== null) {
     result = selectedEnergy.value === 6
       ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)
@@ -220,11 +224,11 @@ const visibleCards = computed(() => uniqueCards.value.slice(0, visibleCount.valu
 const hasMore = computed(() => visibleCount.value < uniqueCards.value.length)
 
 const hasActiveFilters = computed(() =>
-  searchQuery.value.trim() || selectedDomains.value.length || selectedType.value ||
-  selectedRarity.value || selectedSet.value || selectedEnergy.value !== null
+  searchQuery.value.trim() || selectedDomains.value.length > 0 || selectedTypes.value.length > 0 ||
+  selectedRarities.value.length > 0 || selectedSets.value.length > 0 || selectedEnergy.value !== null
 )
 
-watch([searchQuery, selectedDomains, selectedType, selectedRarity, selectedSet, selectedEnergy], () => {
+watch([searchQuery, selectedDomains, selectedTypes, selectedRarities, selectedSets, selectedEnergy], () => {
   visibleCount.value = BATCH_SIZE
   nextTick(setupObserver)
 }, { deep: true })
@@ -233,12 +237,13 @@ function toggleDomain(d) {
   const i = selectedDomains.value.indexOf(d)
   i === -1 ? selectedDomains.value.push(d) : selectedDomains.value.splice(i, 1)
 }
+
 function clearFilters() {
   searchQuery.value = ''
   selectedDomains.value = []
-  selectedType.value = ''
-  selectedRarity.value = ''
-  selectedSet.value = ''
+  selectedTypes.value = []
+  selectedRarities.value = []
+  selectedSets.value = []
   selectedEnergy.value = null
 }
 
@@ -352,12 +357,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 .filter-selects {
   display: flex;
   gap: 6px;
-}
-.filter-select {
-  flex: 1;
-  padding: 6px 8px;
-  font-size: 0.78rem;
-  min-width: 0;
+  flex-wrap: wrap; /* allows multiple dropdowns to fit */
 }
 
 .clear-btn { align-self: flex-start; }
@@ -375,10 +375,10 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   border-radius: var(--radius-md);
   background: var(--color-bg-raised);
   border: 1px solid var(--color-border-subtle);
-  overflow: hidden;
   text-decoration: none;
   color: inherit;
   transition: all 0.2s ease;
+  position: relative;
 }
 .card-tile:active {
   transform: scale(0.97);
@@ -392,8 +392,8 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   position: relative;
   width: 100%;
   aspect-ratio: 744 / 1039;
-  overflow: hidden;
   background: var(--color-bg-deep);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 .card-image-wrap--landscape {
   aspect-ratio: 1039 / 744;
@@ -416,6 +416,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 
 .card-info { padding: 6px 8px 8px; }
@@ -440,11 +441,11 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 .card-skeleton {
   border-radius: var(--radius-md);
   background: var(--color-bg-raised);
-  overflow: hidden;
 }
 .card-skeleton-img { 
   width: 100%; 
   aspect-ratio: 744 / 1039; 
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 .card-image-wrap--landscape .card-skeleton-img {
   aspect-ratio: 1039 / 744;

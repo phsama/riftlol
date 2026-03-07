@@ -1,0 +1,643 @@
+<template>
+  <div class="collection fade-in">
+    <!-- Unauthenticated state -->
+    <div v-if="authStore.isInitialized && !authStore.user" class="empty-state login-prompt">
+      <div style="font-size: 2.5rem; color: var(--color-text-tertiary); margin-bottom: 8px;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3 class="empty-title">Faça login para ver seu álbum</h3>
+      <p class="empty-text">Acompanhe sua coleção, acompanhe variantes (Foil, Assinada) e guarde tudo na nuvem.</p>
+      <button class="btn btn-primary" style="margin-top: 12px;" @click="authStore.openLogin('login')">Entrar agora</button>
+    </div>
+
+    <div v-else>
+      <!-- ── Header ── -->
+      <header class="collection-header">
+        <div>
+          <h1 class="collection-title">Minha Coleção</h1>
+          <p class="collection-subtitle" v-if="!loading && allCards.length">
+            Progresso: {{ uniqueCardsOwned }} / {{ uniqueCards.length }} cartas únicas
+          </p>
+        </div>
+      </header>
+
+      <!-- Search (always visible) -->
+      <div class="collection-search">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="input search-input"
+          placeholder="Buscar no álbum..."
+        />
+        <button v-if="searchQuery" class="search-clear btn-ghost btn-icon" @click="searchQuery = ''">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Filter bar (horizontal, scrollable on mobile) -->
+      <div class="filter-bar">
+        <!-- Domain pills -->
+        <div class="filter-scroll">
+          <button
+            v-for="domain in availableDomains"
+            :key="domain"
+            class="domain-badge filter-pill"
+            :class="[`domain-${domain.toLowerCase()}`, { 'filter-pill--active': selectedDomains.includes(domain) }]"
+            @click="toggleDomain(domain)"
+          >{{ domain }}</button>
+        </div>
+
+        <!-- Dropdowns row for Multi-select -->
+        <div class="filter-selects" v-if="!loading">
+          <MultiSelectDropdown
+            v-model="selectedTypes"
+            :options="availableTypes"
+            placeholder="Tipos"
+          />
+          <MultiSelectDropdown
+            v-model="selectedRarities"
+            :options="availableRarities"
+            placeholder="Raridades"
+          />
+          <MultiSelectDropdown
+            v-model="selectedSets"
+            :options="sets.map(s => ({ value: s.set_id, label: s.label || s.name }))"
+            placeholder="Sets"
+          />
+        </div>
+
+        <!-- Energy pills -->
+        <div class="filter-scroll">
+          <button
+            v-for="e in energyOptions"
+            :key="e.value"
+            class="filter-pill filter-pill-energy"
+            :class="{ 'filter-pill--active': selectedEnergy === e.value }"
+            @click="selectedEnergy = selectedEnergy === e.value ? null : e.value"
+          >⚡{{ e.label }}</button>
+        </div>
+        
+        <!-- Only Owned toggle -->
+        <div class="filter-scroll">
+           <button
+            class="filter-pill filter-pill-owned"
+            :class="{ 'filter-pill--active': showOnlyOwned }"
+            @click="showOnlyOwned = !showOnlyOwned"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>
+            Apenas Possuídas
+          </button>
+        </div>
+
+        <button v-if="hasActiveFilters" class="btn btn-ghost btn-sm clear-btn" @click="clearFilters">✕ Limpar</button>
+      </div>
+
+      <!-- ── Loading ── -->
+      <div v-if="loading || collectionStore.isLoading" class="cards-grid">
+        <div v-for="i in 12" :key="i" class="card-skeleton">
+          <div class="skeleton card-skeleton-img"></div>
+          <div class="skeleton" style="width: 70%; height: 12px; margin: 8px 8px 0;"></div>
+          <div class="skeleton" style="width: 40%; height: 10px; margin: 4px 8px 8px;"></div>
+        </div>
+      </div>
+
+      <!-- ── Error ── -->
+      <div v-else-if="error" class="empty-state fade-in">
+        <div class="empty-icon">⚠️</div>
+        <h3 class="empty-title">Algo deu errado</h3>
+        <p class="empty-text">{{ error }}</p>
+        <button class="btn btn-primary" @click="fetchAllData">Tentar novamente</button>
+      </div>
+
+      <!-- ── Empty ── -->
+      <div v-else-if="filteredCards.length === 0" class="empty-state fade-in">
+        <div class="empty-icon">🔍</div>
+        <h3 class="empty-title">Nenhuma carta encontrada</h3>
+        <p class="empty-text">Ajuste os filtros ou busque outro nome.</p>
+        <button v-if="hasActiveFilters" class="btn btn-secondary btn-sm" @click="clearFilters">Limpar filtros</button>
+      </div>
+
+      <!-- ── Cards grid ── -->
+      <div v-else class="cards-grid stagger-enter">
+        <div
+          v-for="card in visibleCards"
+          :key="card.id"
+          class="card-tile collection-tile"
+          :class="[
+            { 'card-tile--champion': card.classification?.type === 'Legend' },
+            { 'collection-unowned': collectionStore.getCardTotal(card.id) === 0 }
+          ]"
+        >
+          <div 
+            class="card-image-wrap"
+            :class="[
+              {'card-image-wrap--landscape': card.orientation === 'landscape' || card.classification?.type === 'Battlefield'},
+              {'foil-glow': collectionStore.items[card.id]?.foil_qty > 0}
+            ]"
+          >
+            <img
+              :src="card.media?.image_url"
+              :alt="card.name"
+              class="card-image"
+              loading="lazy"
+            />
+            <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
+            <!-- Desktop hover preview -->
+            <div class="card-hover-preview">
+              <img :src="card.media?.image_url" :alt="card.name" />
+            </div>
+            
+            <div class="collection-overlay-actions">
+              <button class="col-add-btn" @click.prevent="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="card-info">
+            <h3 class="card-name">{{ card.name }}</h3>
+            <div class="card-meta">
+              <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
+              <span v-if="card.attributes?.energy != null" class="card-energy">⚡{{ card.attributes.energy }}</span>
+            </div>
+            
+            <!-- Collection controls -->
+            <div class="collection-controls">
+                <!-- Base Variant -->
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.normal_qty > 0}">
+                    <span class="variant-label">Normal</span>
+                    <div class="variant-stepper">
+                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
+                        <span class="step-val">{{ collectionStore.items[card.id]?.normal_qty || 0 }}</span>
+                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
+                    </div>
+                </div>
+                <!-- Foil Variant -->
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.foil_qty > 0}">
+                    <span class="variant-label v-foil">⭐ Foil</span>
+                    <div class="variant-stepper">
+                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
+                        <span class="step-val">{{ collectionStore.items[card.id]?.foil_qty || 0 }}</span>
+                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
+                    </div>
+                </div>
+                <!-- Alt Art Variant -->
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.alt_art_qty > 0}">
+                    <span class="variant-label v-alt">🎨 Esp.</span>
+                    <div class="variant-stepper">
+                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
+                        <span class="step-val">{{ collectionStore.items[card.id]?.alt_art_qty || 0 }}</span>
+                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
+                    </div>
+                </div>
+                <!-- Signed Variant -->
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.signed_qty > 0}">
+                    <span class="variant-label v-sign">✍️ Sign</span>
+                    <div class="variant-stepper">
+                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_qty', -1)">−</button>
+                        <span class="step-val">{{ collectionStore.items[card.id]?.signed_qty || 0 }}</span>
+                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'signed_qty', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Infinite scroll sentinel ── -->
+      <div v-if="hasMore" ref="sentinel" class="loading-more">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { getCards, getSets } from '@/services/riftcodex'
+import { useAuthStore } from '@/stores/auth'
+import { useCollectionStore } from '@/stores/collection'
+import MultiSelectDropdown from '@/components/MultiSelectDropdown.vue'
+
+const authStore = useAuthStore()
+const collectionStore = useCollectionStore()
+
+const BATCH_SIZE = 24
+const allCards = ref([])
+const sets = ref([])
+const loading = ref(true)
+const error = ref(null)
+const visibleCount = ref(BATCH_SIZE)
+const sentinel = ref(null)
+let observer = null
+
+const searchQuery = ref('')
+const selectedDomains = ref([])
+const selectedTypes = ref([])
+const selectedRarities = ref([])
+const selectedSets = ref([])
+const selectedEnergy = ref(null)
+const showOnlyOwned = ref(false)
+
+const availableDomains = ['Body', 'Calm', 'Chaos', 'Colorless', 'Fury', 'Mind', 'Order']
+
+const availableTypes = computed(() => {
+  const t = new Set()
+  allCards.value.forEach((c) => { if (c.classification?.type) t.add(c.classification.type) })
+  return [...t].sort()
+})
+const availableRarities = computed(() => {
+  const r = new Set()
+  allCards.value.forEach((c) => { if (c.classification?.rarity) r.add(c.classification.rarity) })
+  return [...r].sort()
+})
+
+const energyOptions = [
+  { value: 0, label: '0' }, { value: 1, label: '1' }, { value: 2, label: '2' },
+  { value: 3, label: '3' }, { value: 4, label: '4' }, { value: 5, label: '5' }, { value: 6, label: '6+' },
+]
+
+const filteredCards = computed(() => {
+  let result = allCards.value
+  
+  if (showOnlyOwned.value) {
+      result = result.filter(c => collectionStore.getCardTotal(c.id) > 0)
+  }
+  
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase()
+    result = result.filter((c) => {
+      return c.name.toLowerCase().includes(q) ||
+             c.text?.raw?.toLowerCase().includes(q) ||
+             c.text?.rich?.toLowerCase().includes(q) ||
+             c.classification?.supertype?.toLowerCase().includes(q) ||
+             c.classification?.subtype?.toLowerCase().includes(q) ||
+             c.tags?.some((t) => t.toLowerCase().includes(q))
+    })
+  }
+  if (selectedDomains.value.length > 0) {
+    result = result.filter((c) => c.classification?.domain?.some((d) => selectedDomains.value.includes(d)))
+  }
+  if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
+  if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
+  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set?.id))
+  if (selectedEnergy.value !== null) {
+    result = selectedEnergy.value === 6
+      ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)
+      : result.filter((c) => c.attributes?.energy === selectedEnergy.value)
+  }
+  
+  // Sort alphabetically typically for Album
+  result.sort((a,b) => a.name.localeCompare(b.name))
+  return result
+})
+
+// Deduplicate by name, keeping first version
+const uniqueCards = computed(() => {
+  const seen = new Map()
+  for (const card of filteredCards.value) {
+    if (seen.has(card.name)) {
+      seen.get(card.name)._altCount++
+    } else {
+      const entry = { ...card, _altCount: 1 }
+      seen.set(card.name, entry)
+    }
+  }
+  return [...seen.values()]
+})
+
+const uniqueCardsOwned = computed(() => {
+    let count = 0;
+    uniqueCards.value.forEach(c => {
+        if (collectionStore.getCardTotal(c.id) > 0) count++;
+    })
+    return count;
+})
+
+const visibleCards = computed(() => uniqueCards.value.slice(0, visibleCount.value))
+const hasMore = computed(() => visibleCount.value < uniqueCards.value.length)
+
+const hasActiveFilters = computed(() =>
+  searchQuery.value.trim() || selectedDomains.value.length > 0 || selectedTypes.value.length > 0 ||
+  selectedRarities.value.length > 0 || selectedSets.value.length > 0 || selectedEnergy.value !== null ||
+  showOnlyOwned.value
+)
+
+watch([searchQuery, selectedDomains, selectedTypes, selectedRarities, selectedSets, selectedEnergy, showOnlyOwned], () => {
+  visibleCount.value = BATCH_SIZE
+  nextTick(setupObserver)
+}, { deep: true })
+
+// Fetch user collection on Auth change or mount
+watch(() => authStore.user, (user) => {
+    if (user && !collectionStore.initialized) {
+        collectionStore.loadCollection()
+    }
+}, { immediate: true })
+
+function toggleDomain(d) {
+  const i = selectedDomains.value.indexOf(d)
+  i === -1 ? selectedDomains.value.push(d) : selectedDomains.value.splice(i, 1)
+}
+
+function clearFilters() {
+  searchQuery.value = ''
+  selectedDomains.value = []
+  selectedTypes.value = []
+  selectedRarities.value = []
+  selectedSets.value = []
+  selectedEnergy.value = null
+  showOnlyOwned.value = false
+}
+
+function setupObserver() {
+  if (observer) observer.disconnect()
+  if (!sentinel.value) return
+  observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && hasMore.value) {
+      visibleCount.value += BATCH_SIZE
+      nextTick(setupObserver)
+    }
+  }, { rootMargin: '200px' })
+  observer.observe(sentinel.value)
+}
+
+async function fetchAllData() {
+  loading.value = true
+  error.value = null
+  try {
+    const [c, s] = await Promise.all([getCards(), getSets()])
+    allCards.value = Array.isArray(c) ? c : []
+    sets.value = Array.isArray(s) ? s : []
+    await nextTick()
+    setupObserver()
+  } catch (e) {
+    error.value = 'Não foi possível carregar as cartas. Verifique sua conexão.'
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchAllData)
+onBeforeUnmount(() => { if (observer) observer.disconnect() })
+</script>
+
+<style scoped>
+.collection { display: flex; flex-direction: column; gap: 12px; }
+
+/* ── Header ── */
+.collection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.collection-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-gold-400));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.collection-subtitle { color: var(--color-text-secondary); font-size: 0.78rem; margin-top: 2px; }
+
+/* ── Empty auth state ── */
+.login-prompt { padding: 60px 20px; text-align: center; display:flex; flex-direction:column; align-items:center; }
+
+/* ── Search & Filters ── */
+.collection-search { position: relative; }
+.search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--color-text-tertiary); pointer-events: none;
+}
+.search-input { padding-left: 38px; padding-right: 36px; }
+.search-clear { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+
+.filter-bar { display: flex; flex-direction: column; gap: 8px; }
+.filter-scroll {
+  display: flex; gap: 6px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.filter-scroll::-webkit-scrollbar { display: none; }
+
+.filter-pill {
+  cursor: pointer; transition: all 0.2s ease;
+  opacity: 0.55; white-space: nowrap; flex-shrink: 0;
+}
+.filter-pill:hover { opacity: 0.8; }
+.filter-pill--active { opacity: 1 !important; box-shadow: 0 0 0 1px currentColor; }
+
+.filter-pill-owned {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 4px 12px; border-radius: var(--radius-full);
+  font-size: 0.72rem; font-weight: 700;
+  background: var(--color-bg-surface); color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-subtle);
+}
+.filter-pill-owned.filter-pill--active {
+  background: rgba(80,184,138,0.15); color: var(--color-domain-order); border-color: rgba(80,184,138,0.4);
+}
+
+.filter-pill-energy {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 4px 10px; border-radius: var(--radius-full);
+  font-size: 0.72rem; font-weight: 700;
+  background: var(--color-bg-surface); color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-subtle);
+}
+.filter-pill-energy.filter-pill--active {
+  background: rgba(74, 127, 255, 0.15); color: var(--color-rift-400); border-color: var(--color-rift-500);
+}
+
+.filter-selects {
+  display: flex; gap: 6px; flex-wrap: wrap; /* allows multiple dropdowns to fit */
+}
+
+.clear-btn { align-self: flex-start; }
+
+/* ── Cards grid ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.card-tile {
+  display: flex; flex-direction: column;
+  border-radius: var(--radius-md); background: var(--color-bg-raised);
+  border: 1px solid var(--color-border-subtle);
+  transition: all 0.2s ease; position: relative;
+}
+.card-tile--champion { border-color: rgba(201, 168, 76, 0.3); }
+
+/* Ownership grayscale toggle */
+.collection-unowned {
+    opacity: 0.9;
+}
+.collection-unowned .card-image {
+    filter: grayscale(100%) opacity(0.4);
+}
+.collection-unowned .card-hover-preview img {
+    filter: grayscale(100%) opacity(0.8);
+}
+.collection-unowned .collection-controls {
+    opacity: 0.5;
+}
+
+.card-image-wrap {
+  position: relative; width: 100%; aspect-ratio: 744 / 1039;
+  background: var(--color-bg-deep); border-radius: var(--radius-md) var(--radius-md) 0 0;
+  overflow: hidden;
+}
+.card-image-wrap--landscape { aspect-ratio: 1039 / 744; }
+
+/* Foil Glow Effect */
+.foil-glow::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: linear-gradient(
+    115deg, 
+    transparent 20%, 
+    rgba(255, 255, 255, 0.7) 30%, 
+    rgba(255, 215, 0, 0.4) 45%, 
+    rgba(255, 50, 255, 0.4) 55%, 
+    rgba(100, 200, 255, 0.4) 70%, 
+    transparent 80%
+  );
+  mix-blend-mode: color-dodge;
+  opacity: 0.75;
+  background-size: 200% auto;
+  pointer-events: none;
+  z-index: 5;
+  animation: foil-shine 3s linear infinite;
+}
+
+@keyframes foil-shine {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.alt-arts-badge {
+  position: absolute; bottom: 4px; right: 4px; padding: 2px 6px;
+  border-radius: var(--radius-full); background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  font-size: 0.55rem; font-weight: 600; color: var(--color-gold-400); white-space: nowrap;
+  z-index: 10;
+}
+.card-image {
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  transition: filter 0.3s;
+}
+
+/* Quick add overlay */
+.collection-overlay-actions {
+    position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;
+    background: rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.2s;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    z-index: 10;
+}
+.card-image-wrap:hover .collection-overlay-actions {
+    opacity: 1;
+}
+.col-add-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--color-rift-500); color: white; border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transform: scale(0.9); transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(74, 127, 255, 0.4);
+}
+.col-add-btn:hover { transform: scale(1.05); background: var(--color-rift-400); }
+
+.card-info { padding: 8px 10px 10px; display:flex; flex-direction:column; flex:1; }
+.card-name { font-size: 0.8rem; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-meta { display: flex; align-items: center; gap: 4px; margin-top: 3px; margin-bottom: 12px; }
+.card-meta .rarity-badge { font-size: 0.55rem; padding: 1px 5px; }
+.card-energy { font-size: 0.65rem; font-weight: 600; color: var(--color-rift-400); }
+
+/* Control panel */
+.collection-controls {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-top: auto; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);
+    transition: opacity 0.3s;
+}
+.variant-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 3px 6px; border-radius: 4px; background: rgba(0,0,0,0.1);
+    transition: background 0.2s;
+}
+.variant-row--active {
+    background: rgba(255,255,255,0.06);
+}
+.variant-label { font-size: 0.6rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; }
+.variant-row--active .variant-label { color: var(--color-text-primary); }
+.variant-row--active .v-foil { color: var(--color-gold-400) !important; text-shadow: 0 0 6px rgba(201,168,76,0.3);}
+.variant-row--active .v-alt { color: #d67cf2 !important; }
+.variant-row--active .v-sign { color: #50b88a !important; }
+
+.variant-stepper { display: flex; align-items: center; gap: 6px; }
+.step-val { font-family: var(--font-display); font-size: 0.75rem; font-weight: 700; width: 14px; text-align: center; }
+.variant-row--active .step-val { color: var(--color-text-primary); }
+.step-btn {
+    width: 20px; height: 20px; border:none; border-radius:3px;
+    background: var(--color-bg-surface); color: var(--color-text-secondary);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-family: var(--font-body);
+    cursor:pointer; transition:all 0.15s;
+}
+.step-btn:hover { background: var(--color-border-subtle); color: var(--color-text-primary); }
+.step-add { color: var(--color-text-primary); }
+.step-add:hover { background: rgba(74, 127, 255, 0.2); color: var(--color-rift-400); }
+
+/* ── Skeleton ── */
+.card-skeleton { border-radius: var(--radius-md); background: var(--color-bg-raised); }
+.card-skeleton-img { width: 100%; aspect-ratio: 744 / 1039; border-radius: var(--radius-md) var(--radius-md) 0 0;}
+
+/* ── Empty state ── */
+.empty-state { display: flex; flex-direction: column; align-items: center; padding: 48px 20px; text-align: center; gap: 10px; }
+.empty-icon { font-size: 2.5rem; }
+.empty-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+.empty-text { color: var(--color-text-secondary); font-size: 0.85rem; max-width: 320px; }
+
+/* ── Loading more (infinite scroll) ── */
+.loading-more { display: flex; align-items: center; justify-content: center; padding: 24px 0; }
+.loading-dots { display: flex; gap: 6px; }
+.loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--color-text-tertiary); animation: dot-pulse 1.2s ease-in-out infinite; }
+.loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot-pulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1.1); } }
+
+/* ── Desktop enhancements ── */
+@media (min-width: 769px) {
+  .collection-title { font-size: 1.8rem; }
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  
+  /* Hover preview */
+  .card-hover-preview {
+    display: block; position: absolute; z-index: 100;
+    top: 50%; transform: translateY(-50%);
+    width: 440px; border-radius: var(--radius-lg); overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.12);
+    opacity: 0; pointer-events: none;
+    transition: all 0.2s ease-out;
+  }
+  .card-hover-preview img { width: 100%; height: auto; display: block; }
+  
+  /* Show preview when hovering the image wrapper, but behind the quickaction */
+  .card-image-wrap:hover .card-hover-preview {
+    opacity: 1; pointer-events: auto; animation: preview-in 0.15s ease-out forwards;
+  }
+  .card-tile:nth-child(4n) .card-hover-preview,
+  .card-tile:nth-child(5n) .card-hover-preview { left: auto; right: 105%; }
+
+  @keyframes preview-in {
+    from { opacity: 0; transform: translateY(-50%) scale(0.92); }
+    to   { opacity: 1; transform: translateY(-50%) scale(1); }
+  }
+}
+</style>
