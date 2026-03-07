@@ -1,0 +1,48 @@
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { supabase } from '@/services/supabase'
+
+export const useAuthStore = defineStore('auth', () => {
+    const user = ref(null)
+    const session = ref(null)
+    const isInitialized = ref(false)
+
+    async function init() {
+        const { data } = await supabase.auth.getSession()
+        session.value = data.session
+        user.value = data.session?.user || null
+        isInitialized.value = true
+
+        supabase.auth.onAuthStateChange((_event, newSession) => {
+            session.value = newSession
+            user.value = newSession?.user || null
+        })
+    }
+
+    async function signInWithGoogle() {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin,
+            }
+        })
+        if (error) throw error
+        return data
+    }
+
+    async function signOut() {
+        const { error } = await supabase.auth.signOut()
+        if (error) throw error
+        user.value = null
+        session.value = null
+    }
+
+    return {
+        user,
+        session,
+        isInitialized,
+        init,
+        signInWithGoogle,
+        signOut
+    }
+})

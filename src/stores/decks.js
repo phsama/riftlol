@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
+import { api } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
+import debounce from 'lodash-es/debounce'
 
 const STORAGE_KEY = 'riftbound-decks'
 
@@ -21,14 +24,81 @@ function generateId() {
 }
 
 export const useDecksStore = defineStore('decks', () => {
-    const decks = ref(loadFromStorage())
+    const decks = ref([])
+    const authStore = useAuthStore()
+    const loading = ref(false)
 
-    // Auto-save on every change
-    watch(decks, (val) => saveToStorage(val), { deep: true })
+    // Sync down from API
+    async function fetchDecks() {
+        if (!authStore.user) {
+            decks.value = loadFromStorage()
+            return
+        }
+        loading.value = true
+        try {
+            const { data } = await api.get('/decks')
+            // O backend retorna DeckOut, vamos mapear para como o app espera
+            decks.value = data.map(d => ({
+                id: d.id,
+                name: d.name,
+                mainChampionId: d.main_champion_id,
+                createdAt: d.created_at,
+                updatedAt: d.updated_at,
+                cards: d.cards.filter(c => !c.is_sideboard).map(c => ({
+                    // Pra simplificar no frontend mantemos a mesclagem com a _buildCardEntry (quando carrega precisaria juntar c os metadados do riftcodex se quisermos desenhar td,
+                    // mas podemos só carregar pq c.card_id tem a PK lá.
+                    cardId: c.card_id,
+                    quantity: c.quantity,
+                    // TODO: Na UI precisamos da carta cheia (API /cards) ou deixar o ComponentView buscar via ID nas cartas globais...
+                })),
+                sideboard: d.cards.filter(c => c.is_sideboard).map(c => ({
+                    cardId: c.card_id,
+                    quantity: c.quantity
+                }))
+            }))
+        } catch (e) {
+            console.error('Failed to fetch decks from API', e)
+            decks.value = loadFromStorage() // fallback
+        } finally {
+            loading.value = false
+        }
+    }
 
-    function createDeck(name) {
+    // Auto-save debounced handler for API
+    const saveToApiDebounced = debounce(async (deck) => {
+        if (!authStore.user) return
+        try {
+            const payload = {
+                name: deck.name,
+                main_champion_id: deck.mainChampionId,
+                cards: [
+                    ...deck.cards.map(c => ({ card_id: c.cardId, quantity: c.quantity, is_sideboard: false })),
+                    ...(deck.sideboard || []).map(c => ({ card_id: c.cardId, quantity: c.quantity, is_sideboard: true }))
+                ]
+            }
+            await api.put(`/decks/${deck.id}`, payload)
+        } catch (e) {
+            console.error('Erro salvando deck na API', e)
+        }
+    }, 1000)
+
+    // Global save handler
+    function _handleDeckChange(deck) {
+        deck.updatedAt = new Date().toISOString()
+        saveToStorage(decks.value) // local fallback
+        if (authStore.user) {
+            saveToApiDebounced(deck)
+        }
+    }
+
+    watch(() => authStore.user, () => {
+        fetchDecks()
+    }, { immediate: true })
+
+    async function createDeck(name) {
+        const deckId = generateId()
         const deck = {
-            id: generateId(),
+            id: deckId,
             name,
             cards: [],
             sideboard: [],
@@ -37,6 +107,14 @@ export const useDecksStore = defineStore('decks', () => {
             updatedAt: new Date().toISOString(),
         }
         decks.value.push(deck)
+        saveToStorage(decks.value)
+        if (authStore.user) {
+            try {
+                // Post API expects different structure (cards: []) e vai retornar uuid
+                const { data } = await api.post('/decks/', { name, cards: [] })
+                deck.id = data.id // Atualiza o ID fake pelo do DB
+            } catch (e) { console.error('Error creating API deck', e) }
+        }
         return deck
     }
 
@@ -46,28 +124,29 @@ export const useDecksStore = defineStore('decks', () => {
 
     function deleteDeck(id) {
         const idx = decks.value.findIndex((d) => d.id === id)
-        if (idx !== -1) decks.value.splice(idx, 1)
+        if (idx !== -1) {
+            decks.value.splice(idx, 1)
+            saveToStorage(decks.value)
+            if (authStore.user) api.delete(`/decks/${id}`).catch(console.error)
+        }
     }
 
     function renameDeck(id, newName) {
         const deck = getDeck(id)
         if (deck) {
             deck.name = newName
-            deck.updatedAt = new Date().toISOString()
+            _handleDeckChange(deck)
         }
     }
 
-    function duplicateDeck(id) {
+    async function duplicateDeck(id) {
         const original = getDeck(id)
         if (!original) return null
-        const copy = {
-            ...JSON.parse(JSON.stringify(original)),
-            id: generateId(),
-            name: `${original.name} (cópia)`,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        }
-        decks.value.push(copy)
+        const copy = await createDeck(`${original.name} (cópia)`)
+        copy.cards = JSON.parse(JSON.stringify(original.cards))
+        copy.sideboard = JSON.parse(JSON.stringify(original.sideboard || []))
+        copy.mainChampionId = original.mainChampionId
+        _handleDeckChange(copy)
         return copy
     }
 
@@ -107,7 +186,7 @@ export const useDecksStore = defineStore('decks', () => {
             const entry = _buildCardEntry(card)
             list.push(entry)
         }
-        deck.updatedAt = new Date().toISOString()
+        _handleDeckChange(deck)
     }
 
     function removeCard(deckId, cardId, isSideboard = false) {
@@ -123,7 +202,7 @@ export const useDecksStore = defineStore('decks', () => {
             } else {
                 list.splice(idx, 1)
             }
-            deck.updatedAt = new Date().toISOString()
+            _handleDeckChange(deck)
         }
     }
 
@@ -141,7 +220,7 @@ export const useDecksStore = defineStore('decks', () => {
         const card = list.find((c) => c.cardId === cardId)
         if (card) {
             card.quantity = qty
-            deck.updatedAt = new Date().toISOString()
+            _handleDeckChange(deck)
         }
     }
 
@@ -234,7 +313,7 @@ export const useDecksStore = defineStore('decks', () => {
             }
         }
 
-        deck.updatedAt = new Date().toISOString()
+        _handleDeckChange(deck)
         return { matched: matchCount, unmatched: unmatchedNames }
     }
 
@@ -265,12 +344,14 @@ export const useDecksStore = defineStore('decks', () => {
         const deck = getDeck(deckId)
         if (deck) {
             deck.mainChampionId = deck.mainChampionId === cardId ? null : cardId
-            deck.updatedAt = new Date().toISOString()
+            _handleDeckChange(deck)
         }
     }
 
     return {
         decks,
+        loading,
+        fetchDecks,
         createDeck,
         getDeck,
         deleteDeck,
