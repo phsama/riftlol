@@ -17,7 +17,7 @@
         v-model="searchQuery"
         type="text"
         class="input search-input"
-        placeholder="Buscar por nome..."
+        placeholder="Buscar por nome, texto, mecânica..."
         id="catalog-search"
       />
       <button v-if="searchQuery" class="search-clear btn-ghost btn-icon" @click="searchQuery = ''">
@@ -176,6 +176,8 @@ const filteredCards = computed(() => {
     const q = searchQuery.value.trim().toLowerCase()
     result = result.filter((c) => {
       return c.name.toLowerCase().includes(q) ||
+             c.text?.raw?.toLowerCase().includes(q) ||
+             c.text?.rich?.toLowerCase().includes(q) ||
              c.description?.raw?.toLowerCase().includes(q) ||
              c.description?.rich?.toLowerCase().includes(q) ||
              c.classification?.supertype?.toLowerCase().includes(q) ||

@@ -68,8 +68,9 @@
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input
           v-model="searchQuery"
-          class="input search-input"
-          placeholder="Buscar carta para adicionar..."
+          type="text"
+          class="input input-sm search-input"
+          placeholder="Adicionar (buscar por nome, mecânica...)"
           id="editor-card-search"
           @focus="showSearchResults = true"
         />
@@ -367,6 +368,8 @@ const searchResults = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
   return allCards.value.filter((c) => {
     return c.name.toLowerCase().includes(q) ||
+           c.text?.raw?.toLowerCase().includes(q) ||
+           c.text?.rich?.toLowerCase().includes(q) ||
            c.description?.raw?.toLowerCase().includes(q) ||
            c.description?.rich?.toLowerCase().includes(q) ||
            c.classification?.supertype?.toLowerCase().includes(q) ||
