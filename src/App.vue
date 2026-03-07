@@ -30,7 +30,7 @@
             </div>
           </template>
           <template v-else>
-            <button class="nav-btn btn-primary" @click="showAuthModal = true">
+            <button class="nav-btn btn-primary" @click="authStore.openLogin('login')">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Entrar
             </button>
@@ -60,9 +60,9 @@
       </router-link>
     </nav>
     <!-- ── Auth Modal ── -->
-    <div v-if="showAuthModal" class="modal-backdrop" @click.self="showAuthModal = false">
+    <div v-if="authStore.showAuthModal" class="modal-backdrop" @click.self="authStore.showAuthModal = false">
       <div class="modal auth-modal glass">
-        <h2 class="modal-title">{{ authMode === 'login' ? 'Acessar Conta' : 'Criar Conta' }}</h2>
+        <h2 class="modal-title">{{ authStore.authMode === 'login' ? 'Acessar Conta' : 'Criar Conta' }}</h2>
         <p v-if="authError" class="auth-error">{{ authError }}</p>
         <div class="form-group">
           <label class="form-label">E-mail</label>
@@ -73,10 +73,10 @@
           <input type="password" v-model="password" class="input" placeholder="••••••••" @keyup.enter="handleEmailAuth"/>
         </div>
         <button class="btn btn-primary auth-submit" :disabled="authLoading" @click="handleEmailAuth">
-          {{ authLoading ? 'Aguarde...' : (authMode === 'login' ? 'Entrar' : 'Cadastrar') }}
+          {{ authLoading ? 'Aguarde...' : (authStore.authMode === 'login' ? 'Entrar' : 'Cadastrar') }}
         </button>
-        <button class="btn btn-ghost auth-switch" @click="authMode = authMode === 'login' ? 'signup' : 'login'">
-          {{ authMode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre' }}
+        <button class="btn btn-ghost auth-switch" @click="authStore.authMode = authStore.authMode === 'login' ? 'signup' : 'login'">
+          {{ authStore.authMode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre' }}
         </button>
       </div>
     </div>
@@ -89,11 +89,9 @@ import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-// Auth modal state
-const showAuthModal = ref(false)
+// Auth modal state for inputs
 const email = ref('')
 const password = ref('')
-const authMode = ref('login') // 'login' | 'signup'
 const authLoading = ref(false)
 const authError = ref('')
 
@@ -109,12 +107,12 @@ async function handleEmailAuth() {
   authLoading.value = true
   authError.value = ''
   try {
-    if (authMode.value === 'login') {
+    if (authStore.authMode === 'login') {
       await authStore.signInWithEmail(email.value, password.value)
     } else {
       await authStore.signUp(email.value, password.value)
     }
-    showAuthModal.value = false
+    authStore.showAuthModal = false
     email.value = ''
     password.value = ''
   } catch (err) {

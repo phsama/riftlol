@@ -7,14 +7,24 @@
           {{ decksStore.decks.length }} deck{{ decksStore.decks.length !== 1 ? 's' : '' }}
         </p>
       </div>
-      <button class="btn btn-primary btn-sm" @click="openCreateModal">
+      <button v-if="authStore.user" class="btn btn-primary btn-sm" @click="openCreateModal">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Criar deck
       </button>
     </header>
 
+    <!-- Unauthenticated state -->
+    <div v-if="authStore.isInitialized && !authStore.user" class="empty-state login-prompt">
+      <div class="empty-cards-stack" style="display:flex; align-items:center; justify-content:center;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-text-tertiary);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3 class="empty-title">Faça login para gerenciar decks</h3>
+      <p class="empty-text">Seus decks são salvos de forma segura e sincronizados na sua conta de forma automática.</p>
+      <button class="btn btn-primary" @click="authStore.openLogin('login')">Entrar agora</button>
+    </div>
+
     <!-- Empty state -->
-    <div v-if="!decksStore.decks.length" class="empty-state">
+    <div v-else-if="!decksStore.decks.length" class="empty-state">
       <div class="empty-cards-stack">
         <div class="empty-card-1"></div>
         <div class="empty-card-2"></div>
@@ -109,8 +119,10 @@
 import { ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDecksStore } from '@/stores/decks'
+import { useAuthStore } from '@/stores/auth'
 
 const decksStore = useDecksStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 const showCreateModal = ref(false)

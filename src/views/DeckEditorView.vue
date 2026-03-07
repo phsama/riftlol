@@ -307,6 +307,15 @@ Sideboard:
     <div v-if="showToast" class="toast toast-success">{{ toastMessage }}</div>
   </div>
 
+  <!-- Not Logged In -->
+  <div v-else-if="authStore.isInitialized && !authStore.user" class="empty-state fade-in login-prompt" style="padding: 60px 20px; text-align: center; display:flex; flex-direction:column; align-items:center;">
+    <div style="font-size: 2.5rem; color: var(--color-text-tertiary); margin-bottom: 8px;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h3 class="empty-title">Faça login para gerenciar decks</h3>
+    <button class="btn btn-primary" style="margin-top: 12px;" @click="authStore.openLogin('login')">Entrar agora</button>
+  </div>
+
   <!-- Not found -->
   <div v-else class="empty-state fade-in" style="padding: 60px 20px; text-align: center;">
     <div style="font-size: 2.5rem;">🔍</div>
@@ -318,11 +327,13 @@ Sideboard:
 <script setup>
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useDecksStore } from '@/stores/decks'
+import { useAuthStore } from '@/stores/auth'
 import { getCards } from '@/services/riftcodex'
 import { EXPORT_FORMATS, copyToClipboard } from '@/composables/useDeckExport'
 
 const props = defineProps({ id: String })
 const decksStore = useDecksStore()
+const authStore = useAuthStore()
 
 const deck = computed(() => decksStore.getDeck(props.id))
 

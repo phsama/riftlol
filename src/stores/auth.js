@@ -6,6 +6,13 @@ export const useAuthStore = defineStore('auth', () => {
     const user = ref(null)
     const session = ref(null)
     const isInitialized = ref(false)
+    const showAuthModal = ref(false)
+    const authMode = ref('login')
+
+    function openLogin(mode = 'login') {
+        authMode.value = mode
+        showAuthModal.value = true
+    }
 
     async function init() {
         const { data } = await supabase.auth.getSession()
@@ -59,7 +66,10 @@ export const useAuthStore = defineStore('auth', () => {
         user,
         session,
         isInitialized,
+        showAuthModal,
+        authMode,
         init,
+        openLogin,
         signInWithEmail,
         signUp,
         signInWithGoogle,
