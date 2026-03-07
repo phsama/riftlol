@@ -112,58 +112,60 @@
         <span class="section-count">{{ totalCards }}</span>
       </h2>
 
-      <!-- Lendas (type=Legend) -->
-      <div v-if="mainLegends.length" class="legend-group">
-        <h3 class="group-label group-label--legend">
-          <span>⭐</span> Lendas
-        </h3>
-        <div class="card-entries card-entries--grid">
-          <div v-for="entry in mainLegends" :key="entry.cardId" class="card-entry card-entry--legend">
-            <div class="entry-img-link" :class="{'entry-img-link--landscape': entry.type === 'Battlefield'}">
-              <img :src="entry.imageUrl" :alt="entry.cardName" class="entry-img" loading="lazy" />
-              <div class="entry-hover-preview" :class="{'entry-hover-preview--landscape': entry.type === 'Battlefield'}">
-                <img :src="entry.imageUrl" :alt="entry.cardName" />
+      <div class="deck-heroes-row" v-if="mainLegends.length || mainChampionEntry">
+        <!-- Lendas (type=Legend) -->
+        <div v-if="mainLegends.length" class="hero-col legend-group">
+          <h3 class="group-label group-label--legend">
+            <span>⭐</span> Lendas
+          </h3>
+          <div class="card-entries card-entries--grid">
+            <div v-for="entry in mainLegends" :key="entry.cardId" class="card-entry card-entry--legend">
+              <div class="entry-img-link" :class="{'entry-img-link--landscape': entry.type === 'Battlefield'}">
+                <img :src="entry.imageUrl" :alt="entry.cardName" class="entry-img" loading="lazy" />
+                <div class="entry-hover-preview" :class="{'entry-hover-preview--landscape': entry.type === 'Battlefield'}">
+                  <img :src="entry.imageUrl" :alt="entry.cardName" />
+                </div>
               </div>
-            </div>
-            <div class="entry-info">
-              <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name entry-name--legend">{{ entry.cardName }}</router-link>
-              <div class="entry-meta">
-                <span class="rarity-badge" :class="`rarity-${entry.rarity.toLowerCase()}`">{{ entry.rarity }}</span>
-                <span v-if="entry.energy != null" class="entry-energy">⚡{{ entry.energy }}</span>
+              <div class="entry-info">
+                <router-link :to="{ name: 'card-detail', params: { name: entry.cardName } }" class="entry-name entry-name--legend">{{ entry.cardName }}</router-link>
+                <div class="entry-meta">
+                  <span class="rarity-badge" :class="`rarity-${entry.rarity.toLowerCase()}`">{{ entry.rarity }}</span>
+                  <span v-if="entry.energy != null" class="entry-energy">⚡{{ entry.energy }}</span>
+                </div>
               </div>
-            </div>
-            <div class="entry-qty">
-              <button class="qty-btn" @click="decksStore.removeCard(deck.id, entry.cardId)">−</button>
-              <span class="qty-value">{{ entry.quantity }}</span>
-              <button class="qty-btn" @click="decksStore.setCardQuantity(deck.id, entry.cardId, entry.quantity + 1)">+</button>
+              <div class="entry-qty">
+                <button class="qty-btn" @click="decksStore.removeCard(deck.id, entry.cardId)">−</button>
+                <span class="qty-value">{{ entry.quantity }}</span>
+                <button class="qty-btn" @click="decksStore.setCardQuantity(deck.id, entry.cardId, entry.quantity + 1)">+</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Main Champion (user-selected) -->
-      <div v-if="mainChampionEntry" class="champion-hero-group">
-        <h3 class="group-label group-label--champion">
-          <span>🛡️</span> Campeão Principal
-        </h3>
-        <div class="card-entry card-entry--main-champion">
-          <div class="entry-img-link" :class="{'entry-img-link--landscape': mainChampionEntry.type === 'Battlefield'}">
-            <img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" class="entry-img" loading="lazy" />
-            <div class="entry-hover-preview" :class="{'entry-hover-preview--landscape': mainChampionEntry.type === 'Battlefield'}">
-              <img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" />
+        <!-- Main Champion (user-selected) -->
+        <div v-if="mainChampionEntry" class="hero-col champion-hero-group">
+          <h3 class="group-label group-label--champion">
+            <span>🛡️</span> Campeão Principal
+          </h3>
+          <div class="card-entry card-entry--main-champion">
+            <div class="entry-img-link" :class="{'entry-img-link--landscape': mainChampionEntry.type === 'Battlefield'}">
+              <img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" class="entry-img" loading="lazy" />
+              <div class="entry-hover-preview" :class="{'entry-hover-preview--landscape': mainChampionEntry.type === 'Battlefield'}">
+                <img :src="mainChampionEntry.imageUrl" :alt="mainChampionEntry.cardName" />
+              </div>
             </div>
-          </div>
-          <div class="entry-info">
-            <router-link :to="{ name: 'card-detail', params: { name: mainChampionEntry.cardName } }" class="entry-name entry-name--champion">{{ mainChampionEntry.cardName }}</router-link>
-            <div class="entry-meta">
-              <span class="rarity-badge" :class="`rarity-${mainChampionEntry.rarity.toLowerCase()}`">{{ mainChampionEntry.rarity }}</span>
-              <span v-if="mainChampionEntry.energy != null" class="entry-energy">⚡{{ mainChampionEntry.energy }}</span>
+            <div class="entry-info">
+              <router-link :to="{ name: 'card-detail', params: { name: mainChampionEntry.cardName } }" class="entry-name entry-name--champion">{{ mainChampionEntry.cardName }}</router-link>
+              <div class="entry-meta">
+                <span class="rarity-badge" :class="`rarity-${mainChampionEntry.rarity.toLowerCase()}`">{{ mainChampionEntry.rarity }}</span>
+                <span v-if="mainChampionEntry.energy != null" class="entry-energy">⚡{{ mainChampionEntry.energy }}</span>
+              </div>
             </div>
-          </div>
-          <div class="entry-qty">
-            <button class="qty-btn" @click="decksStore.removeCard(deck.id, mainChampionEntry.cardId)">−</button>
-            <span class="qty-value">{{ mainChampionEntry.quantity }}</span>
-            <button class="qty-btn" @click="decksStore.setCardQuantity(deck.id, mainChampionEntry.cardId, mainChampionEntry.quantity + 1)">+</button>
+            <div class="entry-qty">
+              <button class="qty-btn" @click="decksStore.removeCard(deck.id, mainChampionEntry.cardId)">−</button>
+              <span class="qty-value">{{ mainChampionEntry.quantity }}</span>
+              <button class="qty-btn" @click="decksStore.setCardQuantity(deck.id, mainChampionEntry.cardId, mainChampionEntry.quantity + 1)">+</button>
+            </div>
           </div>
         </div>
       </div>
@@ -547,7 +549,10 @@ async function copyExport() {
 }
 
 /* Group labels */
-.legend-group, .champion-hero-group { margin-bottom: 10px; }
+.deck-heroes-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+@media (min-width: 769px) { .deck-heroes-row { flex-direction: row; gap: 16px; margin-bottom: 16px; } }
+.hero-col { flex: 1; min-width: 0; }
+.legend-group, .champion-hero-group { margin-bottom: 0; }
 .group-label {
   display: flex; align-items: center; gap: 4px;
   font-size: 0.72rem; font-weight: 700;
@@ -699,6 +704,6 @@ async function copyExport() {
   .entry-img { width: 36px; height: 50px; }
 
   /* Hover preview only on desktop */
-  .entry-img-link:hover .entry-hover-preview { display: block; }
+  .entry-img-link:hover .entry-hover-preview { display: block; opacity: 1; pointer-events: auto; }
 }
 </style>
