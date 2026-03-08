@@ -1,17 +1,11 @@
-# CHANGELOG - Riftbound Deck Manager
-
-## [2026-03-07] - Sincronização de Capas & Busca por Foto
+## [2026-03-08] - Evolução do Scanner & Correções de UX 🚀
 
 ### 🟢 O que entregamos hoje:
-- **Capas de Cartas Padronizadas**: Agora, o Catálogo, a Coleção e os Detalhes mostram sempre a versão "Normal" da arte por padrão. Resolvemos o problema em que artes especiais (Showcase/Headphones) apareciam como capa indevidamente.
-- **Scanner de Cartas Físicas (Beta)**: Lançamos o novo recurso "Scan", que permite usar a câmera do celular/dispositivo para esfaquear uma carta física e ser direcionado automaticamente para os detalhes dela dentro do app. Ideal para quem quer adicionar cartas à coleção rapidamente.
-- **Variantes de Coleção Corrigidas**: Os botões de **Alt Art** (Arte Alternativa) e **Sign** (Assinada) agora aparecem e funcionam corretamente no seu álbum, habilitando-se conforme a disponibilidade real de cada carta.
+- **OCR Real Implementado**: Substituímos o sistema de teste (mock) por uma inteligência artificial real (`EasyOCR`) no servidor. Agora o scanner lê o texto da imagem para identificar as cartas fisicamente.
+- **Suporte a Nomes Complexos**: Corrigimos um erro crítico onde cartas com apóstrofos (ex: **Warmog's Armor**) resultavam em telas em branco. Agora, qualquer carta do jogo abre corretamente no detalhe.
+- **Normalização de Busca**: O scanner ficou mais resiliente a variações de caracteres especiais, facilitando o reconhecimento em diferentes condições de luz.
 
 ### 🟣 Impacto no Negócio:
-- Melhora significativa na percepção de qualidade do produto (UX visual consistente).
-- Redução de fricção na entrada de dados via scanner.
-- Suporte completo para colecionadores de variantes raras.
-
-### 🛡️ Próximos Passos:
-- Refinar a precisão do scanner em condições de luz baixa.
-- Implementar scan em lote (múltiplas cartas de uma vez).
+- Scanner funcional para todas as cartas (não apenas para testes).
+- Eliminação de crashes visuais em cartas de equipamento.
+- UX mais fluida e profissional.

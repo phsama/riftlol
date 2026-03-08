@@ -26,9 +26,15 @@ async def scan_card(
     db: AsyncSession = Depends(get_db)
 ):
     global reader
-    if reader is None:
-        # gpu=False to ensure it works in CPU environments
-        reader = easyocr.Reader(['en'], gpu=False)
+    try:
+        if reader is None:
+            print("Iniciando EasyOCR Reader (CPU mode)...")
+            # gpu=False to ensure it works in CPU environments
+            reader = easyocr.Reader(['en'], gpu=False)
+            print("EasyOCR Reader iniciado com sucesso.")
+    except Exception as e:
+        print(f"Erro ao inicializar EasyOCR: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro de inicialização: {str(e)}")
 
     image_b64 = image_data.get("image")
     if not image_b64:
@@ -44,6 +50,18 @@ async def scan_card(
         # Convert to OpenCV format for EasyOCR
         nparr = np.frombuffer(img_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # 2. RUN OCR
+        # We look for the main text blocks (Title is usually near the top/middle)
+        print("Executando OCR na imagem...")
+        results = reader.readtext(img)
+        print(f"OCR Finalizado. Resultados: {len(results)} blocos encontrados.")
+        
+        # Join detected text to search strings
+        all_text = " ".join([res[1] for res in results])
+        detected_lines = [res[1] for res in results if len(res[1]) > 3]
+        
+        print(f"Texto Detectado: {all_text}")
         
         # 3. SEARCH DATABASE
         # We try to find a card name that appears in the detected lines
