@@ -1,7 +1,8 @@
 import axios from 'axios'
+import { api as localApi } from '@/services/api'
 
 const api = axios.create({
-    baseURL: '/api', // Apontando pro FastAPI local
+    baseURL: '/riftcodex-api',
     timeout: 15000,
 })
 
@@ -42,8 +43,8 @@ export async function getCards() {
     if (cached) return cached
 
     // Nosso DB interno agora cospe o array inteiro direto em `items` num pull só!
-    const data = await cachedGet('/cards')
-    const allItems = data.items || data || []
+    const { data } = await localApi.get('/api/cards')
+    const allItems = data?.items || data || []
 
     setCache(cacheKey, allItems)
     return allItems

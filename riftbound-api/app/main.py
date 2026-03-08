@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.endpoints import decks
 from app.api.endpoints import collection
 from app.api.endpoints import cards
+from app.api.endpoints import scan
 
 app = FastAPI(title="Riftbound API")
 
@@ -17,6 +18,7 @@ app.add_middleware(
 app.include_router(decks.router, prefix="/api")
 app.include_router(collection.router, prefix="/api")
 app.include_router(cards.router, prefix="/api/cards")
+app.include_router(scan.router, prefix="/api")
 
 @app.get("/health")
 def health_check():

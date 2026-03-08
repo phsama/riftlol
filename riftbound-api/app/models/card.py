@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 import datetime
-from app.db.session import Base
+from app.models.deck import Base
 
 class CardCache(Base):
     __tablename__ = "cards"

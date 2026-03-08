@@ -211,6 +211,39 @@ onMounted(async () => {
     }
     
     if (versions.length > 0) {
+      // Sort versions: Normal/Standard first, then others
+      versions.sort((a, b) => {
+          // 1. Check for "Showcase" or "Alternate Art" or "Promo" flags in classification or tags
+          const aIsAlt = (
+            a.metadata?.alternate_art || 
+            a.classification?.rarity === 'Promo' || 
+            a.classification?.rarity === 'Showcase' ||
+            a.tags?.some(t => {
+                const tl = t.toLowerCase();
+                return tl.includes('art') || tl.includes('showcase') || tl.includes('promo');
+            })
+          ) ? 1 : 0;
+          
+          const bIsAlt = (
+            b.metadata?.alternate_art || 
+            b.classification?.rarity === 'Promo' || 
+            b.classification?.rarity === 'Showcase' ||
+            b.tags?.some(t => {
+                const tl = t.toLowerCase();
+                return tl.includes('art') || tl.includes('showcase') || tl.includes('promo');
+            })
+          ) ? 1 : 0;
+          
+          if (aIsAlt !== bIsAlt) return aIsAlt - bIsAlt; // Normal (0) before Alt (1)
+          
+          // 2. Secondary: compare collector_number strings (numeric part)
+          const aNum = parseInt(a.collector_number) || 999;
+          const bNum = parseInt(b.collector_number) || 999;
+          if (aNum !== bNum) return aNum - bNum;
+          
+          return (a.public_code || a.id).localeCompare(b.public_code || b.id);
+      })
+      
       cardVersions.value = versions
       currentVersionIndex.value = 0
       card.value = cardVersions.value[0]

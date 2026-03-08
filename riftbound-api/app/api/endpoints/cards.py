@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, text
 from typing import Any
 import httpx
-
-from app.db.session import get_db
-from app.models.card import CardCache
+from fastapi.responses import Response
 from app.core.security import get_current_user
+from app.core.database import get_db
+from app.models.card import CardCache
 
 router = APIRouter()
 
@@ -18,7 +18,7 @@ async def sync_cards_from_riftcodex(
     Consome todas as páginas do RiftCodex e faz Upsert no banco de dados local.
     """
     # 1. Busca carta externa
-    url = "https://api.riftcodex.com/v1/cards"
+    url = "https://api.riftcodex.com/cards"
     all_cards = []
     
     async with httpx.AsyncClient(timeout=60.0) as client:
@@ -73,19 +73,19 @@ async def sync_cards_from_riftcodex(
                 break
 
     return {"message": f"Sincronizados {total_synced} cards com sucesso."}
-    
-    return {"message": f"Sincronizados {len(all_cards)} cards com sucesso."}
 
 
-@router.get("", response_model=Any)
+@router.get("", response_class=Response)
 async def get_cached_cards(
     db: AsyncSession = Depends(get_db)
-) -> Any:
+):
     """
     Retorna todas as cartas salvos em Cache.
     A UI espera um array `[...]` ou `{ items: [...] }`
+    Utiliza json_agg para delegar a serialização direto pro PostgreSQL (X vezes + rápido)
     """
-    result = await db.execute(select(CardCache.data))
-    cards_data = result.scalars().all()
+    query = text("SELECT json_build_object('items', COALESCE(json_agg(data), '[]'::json))::text FROM cards")
+    result = await db.execute(query)
+    raw_json = result.scalar()
     
-    return {"items": cards_data}
+    return Response(content=raw_json, media_type="application/json")

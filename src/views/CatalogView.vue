@@ -211,13 +211,57 @@ const uniqueCards = computed(() => {
   const seen = new Map()
   for (const card of filteredCards.value) {
     if (seen.has(card.name)) {
-      seen.get(card.name)._altCount++
+      const entry = seen.get(card.name)
+      entry._altCount++
+      entry._versions.push(card)
     } else {
-      const entry = { ...card, _altCount: 1 }
+      const entry = { ...card, _altCount: 1, _versions: [card] }
       seen.set(card.name, entry)
     }
   }
-  return [...seen.values()]
+  
+  return [...seen.values()].map(entry => {
+    // Sort versions: Normal/Standard first, then others
+    entry._versions.sort((a, b) => {
+      // 1. Check for "Showcase" or "Alternate Art" or "Promo" flags in classification or tags
+      const aIsAlt = (
+        a.metadata?.alternate_art || 
+        a.classification?.rarity === 'Promo' || 
+        a.classification?.rarity === 'Showcase' ||
+        a.tags?.some(t => {
+          const tl = t.toLowerCase();
+          return tl.includes('art') || tl.includes('showcase') || tl.includes('promo');
+        })
+      ) ? 1 : 0;
+      
+      const bIsAlt = (
+        b.metadata?.alternate_art || 
+        b.classification?.rarity === 'Promo' || 
+        b.classification?.rarity === 'Showcase' ||
+        b.tags?.some(t => {
+          const tl = t.toLowerCase();
+          return tl.includes('art') || tl.includes('showcase') || tl.includes('promo');
+        })
+      ) ? 1 : 0;
+      
+      if (aIsAlt !== bIsAlt) return aIsAlt - bIsAlt; // Normal (0) before Alt (1)
+      
+      // 2. Secondary: compare collector_number strings (numeric part)
+      const aNum = parseInt(a.collector_number) || 999;
+      const bNum = parseInt(b.collector_number) || 999;
+      if (aNum !== bNum) return aNum - bNum;
+      
+      return (a.public_code || a.id).localeCompare(b.public_code || b.id);
+    })
+    
+    // Use the first sorted version (Normal) as the representative card for the catalog
+    const standard = entry._versions[0]
+    return { 
+      ...standard, 
+      _altCount: entry._altCount,
+      _versions: entry._versions
+    }
+  })
 })
 
 const visibleCards = computed(() => uniqueCards.value.slice(0, visibleCount.value))

@@ -30,6 +30,11 @@ const router = createRouter({
             component: () => import('@/views/DeckEditorView.vue'),
             props: true,
         },
+        {
+            path: '/scan',
+            name: 'scanner',
+            component: () => import('@/views/ScannerView.vue'),
+        },
     ],
     scrollBehavior() {
         return { top: 0 }

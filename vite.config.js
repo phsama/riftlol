@@ -17,8 +17,11 @@ export default defineConfig({
       '/riftcodex-api': {
         target: 'https://api.riftcodex.com',
         changeOrigin: true,
-        secure: true,
         rewrite: (path) => path.replace(/^\/riftcodex-api/, ''),
+      },
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
       },
     },
   },

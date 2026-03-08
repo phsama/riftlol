@@ -178,21 +178,21 @@
                     </div>
                 </div>
                 <!-- Alt Art Variant -->
-                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.alt_art_qty > 0}">
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.alt_art_qty > 0, 'variant-row--disabled': !hasAltArt(card)}">
                     <span class="variant-label v-alt">🎨 AArt</span>
                     <div class="variant-stepper">
-                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
+                        <button class="step-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
                         <span class="step-val">{{ collectionStore.items[card.id]?.alt_art_qty || 0 }}</span>
-                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
+                        <button class="step-btn step-add" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
                     </div>
                 </div>
                 <!-- Signed Variant -->
-                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.signed_qty > 0}">
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.signed_qty > 0, 'variant-row--disabled': !hasSigned(card)}">
                     <span class="variant-label v-sign">✍️ Sign</span>
                     <div class="variant-stepper">
-                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_qty', -1)">−</button>
+                        <button class="step-btn" :disabled="!hasSigned(card)" @click="collectionStore.updateItemQty(card.id, 'signed_qty', -1)">−</button>
                         <span class="step-val">{{ collectionStore.items[card.id]?.signed_qty || 0 }}</span>
-                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'signed_qty', 1)">+</button>
+                        <button class="step-btn step-add" :disabled="!hasSigned(card)" @click="collectionStore.updateItemQty(card.id, 'signed_qty', 1)">+</button>
                     </div>
                 </div>
             </div>
@@ -303,20 +303,39 @@ const uniqueCards = computed(() => {
     }
   }
   
-  // Sort each card's versions so the Standard/Normal is always [0]
-  const baseSets = ['0fe3414b-c530-4a4d-b86c-168b323e8532', '76bc5811-b56c-40ec-9343-c00a0785a9d5'] // Origins, Spiritforged
-  
   return [...seen.values()].map(entry => {
+      // Sort versions: Normal/Standard first, then others
       entry._versions.sort((a, b) => {
-          // 1. Check explicit Alt Art/Promo
-          const aAlt = a.tags?.includes('Alternate Art') || a.classification?.rarity === 'Promo' ? 1 : 0
-          const bAlt = b.tags?.includes('Alternate Art') || b.classification?.rarity === 'Promo' ? 1 : 0
-          if (aAlt !== bAlt) return aAlt - bAlt // Normal (0) before Promo/Alt (1)
+          // 1. Check for "Showcase" or "Alternate Art" or "Promo" flags in classification or tags
+          const aIsAlt = (
+            a.metadata?.alternate_art || 
+            a.classification?.rarity === 'Promo' || 
+            a.classification?.rarity === 'Showcase' ||
+            a.tags?.some(t => {
+                const tl = t.toLowerCase();
+                return tl.includes('art') || tl.includes('showcase') || tl.includes('promo');
+            })
+          ) ? 1 : 0;
           
-          // 2. Fallback check: is it from a standard core set?
-          const aBase = baseSets.includes(a.set?.id) ? 0 : 1
-          const bBase = baseSets.includes(b.set?.id) ? 0 : 1
-          return aBase - bBase
+          const bIsAlt = (
+            b.metadata?.alternate_art || 
+            b.classification?.rarity === 'Promo' || 
+            b.classification?.rarity === 'Showcase' ||
+            b.tags?.some(t => {
+                const tl = t.toLowerCase();
+                return tl.includes('art') || tl.includes('showcase') || tl.includes('promo');
+            })
+          ) ? 1 : 0;
+          
+          if (aIsAlt !== bIsAlt) return aIsAlt - bIsAlt; // Normal (0) comes before Alt (1)
+          
+          // 2. Secondary: compare collector_number strings (numeric part)
+          const aNum = parseInt(a.collector_number) || 999;
+          const bNum = parseInt(b.collector_number) || 999;
+          if (aNum !== bNum) return aNum - bNum;
+          
+          // 3. Fallback: alphanumerical sort on public_code or id
+          return (a.public_code || a.id).localeCompare(b.public_code || b.id);
       })
       
       const standard = entry._versions[0]
@@ -338,18 +357,31 @@ const uniqueCardsOwned = computed(() => {
 
 const visibleCards = computed(() => uniqueCards.value.slice(0, visibleCount.value))
 
+// Helpers to know if variants exist
+const hasAltArt = (card) => card._versions.length > 1
+
+const hasSigned = (card) => {
+    return card._versions.some(v => 
+        (v.tags && v.tags.some(t => t.toLowerCase().includes('sign'))) || 
+        v.metadata?.signature === true
+    )
+}
+
 // Map visibleCards to display alternative arts if the user owns them
 const displayCards = computed(() => {
   return visibleCards.value.map(baseCard => {
     const qty = collectionStore.items[baseCard.id] || {}
-    let activeVersion = baseCard._versions[0]
+    let activeVersion = baseCard._versions[0] // Default to Normal (index 0 after sort)
     
-    if (qty.signed_qty > 0 && baseCard._versions.length > 2) {
-       // Priority: Signed variant
-       activeVersion = baseCard._versions.find(v => v.tags?.includes('Signature') || v.tags?.includes('Signed')) || baseCard._versions[baseCard._versions.length - 1]
-    } else if (qty.alt_art_qty > 0 && baseCard._versions.length > 1) {
-       // Priority: Alt Art variant
-       activeVersion = baseCard._versions.find(v => v.tags?.includes('Alternate Art') || v.classification?.rarity === 'Promo') || baseCard._versions[1]
+    // IF user has Signed copies, show the signed version if it exists
+    if (qty.signed_qty > 0) {
+       const signed = baseCard._versions.find(v => (v.tags?.some(t => t.toLowerCase().includes('sign'))) || v.metadata?.signature === true)
+       if (signed) activeVersion = signed
+    } 
+    // ELSE IF user has Alt Art copies, show the first Alt Art version (index 1+)
+    else if (qty.alt_art_qty > 0 && baseCard._versions.length > 1) {
+       const altArt = baseCard._versions.find((v, idx) => idx > 0)
+       if (altArt) activeVersion = altArt
     }
     
     return {
@@ -617,6 +649,11 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 }
 .variant-row--active {
     background: rgba(255,255,255,0.06);
+}
+.variant-row--disabled {
+    opacity: 0.25;
+    pointer-events: none;
+    filter: grayscale(100%);
 }
 .variant-label { font-size: 0.6rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; }
 .variant-row--active .variant-label { color: var(--color-text-primary); }
