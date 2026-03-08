@@ -197,14 +197,24 @@ function addToDeck() {
 onMounted(async () => {
   loading.value = true
   try {
-    const cardName = decodeURIComponent(props.name || route.params.name)
+    const cardName = decodeURIComponent(props.name || route.params.name).trim()
+    console.log("Loading card:", cardName)
     const allCards = await getCards()
     
-    let versions = allCards.filter((c) => c.name === cardName)
+    // Use a more relaxed name matching to handle potential encoding/apostrophe issues
+    const normalizedTarget = cardName.toLowerCase().replace(/['’]/g, "'")
+    let versions = allCards.filter((c) => {
+      const normalizedCardName = c.name.toLowerCase().replace(/['’]/g, "'")
+      return normalizedCardName === normalizedTarget
+    })
+
     if (versions.length === 0) {
       const searchResult = await searchCards(cardName)
       const results = Array.isArray(searchResult) ? searchResult : (searchResult?.items || [])
-      versions = results.filter((c) => c.name === cardName)
+      versions = results.filter((c) => {
+        const normalizedCardName = c.name.toLowerCase().replace(/['’]/g, "'")
+        return normalizedCardName === normalizedTarget
+      })
       if (versions.length === 0 && results.length > 0) {
         versions = [results[0]]
       }
