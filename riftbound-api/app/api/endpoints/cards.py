@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from sqlalchemy import select, text
 from typing import Any
 import httpx
@@ -11,8 +11,8 @@ from app.models.card import CardCache
 router = APIRouter()
 
 @router.post("/sync", status_code=status.HTTP_200_OK)
-async def sync_cards_from_riftcodex(
-    db: AsyncSession = Depends(get_db)
+def sync_cards_from_riftcodex(
+    db: Session = Depends(get_db)
 ) -> Any:
     """
     Consome todas as páginas do RiftCodex e faz Upsert no banco de dados local.
@@ -21,14 +21,14 @@ async def sync_cards_from_riftcodex(
     url = "https://api.riftcodex.com/cards"
     all_cards = []
     
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    with httpx.Client(timeout=60.0) as client:
         page = 1
         total_synced = 0
         
         while True:
             try:
                 print(f"Buscando pagina {page} do RiftCodex...")
-                response = await client.get(f"{url}?page={page}&size=100")
+                response = client.get(f"{url}?page={page}&size=100")
                 if response.status_code != 200:
                     print(f"Aviso: Erro {response.status_code} na pagina {page}")
                     break
@@ -44,7 +44,7 @@ async def sync_cards_from_riftcodex(
                     card_name = card_data.get("name")
                     set_id = card_data.get("set", {}).get("id")
                     
-                    result = await db.execute(select(CardCache).filter(CardCache.id == card_id))
+                    result = db.execute(select(CardCache).filter(CardCache.id == card_id))
                     existing_card = result.scalars().first()
                     
                     if existing_card:
@@ -60,7 +60,7 @@ async def sync_cards_from_riftcodex(
                         )
                         db.add(new_card)
                         
-                await db.commit()
+                db.commit()
                 total_synced += len(items)
                 print(f"Pagina {page} persistida. Total ate agora: {total_synced}")
                 
@@ -76,8 +76,8 @@ async def sync_cards_from_riftcodex(
 
 
 @router.get("", response_class=Response)
-async def get_cached_cards(
-    db: AsyncSession = Depends(get_db)
+def get_cached_cards(
+    db: Session = Depends(get_db)
 ):
     """
     Retorna todas as cartas salvos em Cache.
@@ -85,7 +85,7 @@ async def get_cached_cards(
     Utiliza json_agg para delegar a serialização direto pro PostgreSQL (X vezes + rápido)
     """
     query = text("SELECT json_build_object('items', COALESCE(json_agg(data), '[]'::json))::text FROM cards")
-    result = await db.execute(query)
+    result = db.execute(query)
     raw_json = result.scalar()
     
     return Response(content=raw_json, media_type="application/json")
