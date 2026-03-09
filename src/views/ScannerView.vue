@@ -68,6 +68,7 @@
     <!-- Debug Area -->
     <div v-if="debugInfo" class="debug-panel fade-in" style="background:#111; color:#0f0; padding:12px; font-family:monospace; font-size:11px; border-radius:8px; border: 1px solid #333; margin-top:16px; word-break: break-all; white-space: pre-wrap;">
       <div style="font-weight:bold; margin-bottom:8px; color:white;">OCR Debug Log:</div>
+      <img v-if="debugImageUrl" :src="debugImageUrl" style="width: 100%; max-height: 200px; object-fit: contain; margin-bottom: 12px; border: 1px dashed #555;" alt="Canvas OCR Feed" />
       <div>{{ debugInfo }}</div>
       <button @click="debugInfo = null" class="btn btn-ghost btn-sm" style="margin-top:12px; border: 1px solid #444; width: 100%;">Fechar Debug</button>
     </div>
@@ -87,6 +88,7 @@ const isCameraOpen = ref(false)
 const processing = ref(false)
 const resultCard = ref(null)
 const debugInfo = ref(null)
+const debugImageUrl = ref(null)
 const stream = ref(null)
 const facingMode = ref('environment') // Default to back camera
 
@@ -126,16 +128,23 @@ async function capturePhoto() {
   const context = canvas.value.getContext('2d')
   
   // Scale up the canvas 2.5x to give Tesseract a much higher resolution image to parse
-  // Mobile cameras preview at low res, text gets muddy. Upscaling forces a larger bitmap.
   const SCALE = 2.5; 
   canvas.value.width = video.value.videoWidth * SCALE
   canvas.value.height = video.value.videoHeight * SCALE
   
   // Disable smoothing for OCR to keep edges sharp
   context.imageSmoothingEnabled = false;
+  
+  // Apply harsh binarization-like filters to make white-on-yellow contrast readable
+  context.filter = 'grayscale(100%) contrast(350%) brightness(85%)';
+  
   context.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height)
+  
+  // Reset filter
+  context.filter = 'none';
 
   const imageData = canvas.value.toDataURL('image/jpeg', 0.9)
+  debugImageUrl.value = imageData;
   
   try {
     // 1. Run local OCR with Tesseract
