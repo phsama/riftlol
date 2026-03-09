@@ -128,32 +128,47 @@ async function capturePhoto() {
     const { data: { text } } = await worker.recognize(imageData)
     await worker.terminate()
     
-    console.log("OCR Detected Text:", text)
+    console.log("OCR Raw Text:", text)
     
     // 2. Local search against cached cards
     const allCards = await riftcodexService.getCards()
+    const stringSimilarity = (await import('string-similarity')).default;
     
     // Clean and split lines
     const lines = text.split('\n')
       .map(l => l.trim().toLowerCase().replace("’", "'").replace("`", "'"))
       .filter(l => l.length >= 3)
       
-    let match = null
+    let bestMatch = null;
+    let highestScore = 0;
     
-    // Prioritize exact or partial matches within lines
-    for (const line of lines) {
-      match = allCards.find(c => {
-        const cardNameClean = c.name.toLowerCase().replace("’", "'").replace("`", "'")
-        // Check if the card name is contained in the OCR line, or vice versa
-        return line.includes(cardNameClean) || cardNameClean === line
-      })
-      if (match) break
+    // Evaluate every card against every OCR line using fuzzy matching
+    for (const card of allCards) {
+      const cardNameClean = card.name.toLowerCase().replace("’", "'").replace("`", "'")
+      
+      for (const line of lines) {
+        // Find best partial match if line has more words, else direct similarity
+        let score = 0;
+        if (line.includes(cardNameClean)) {
+            score = 1.0; // exact substring match
+        } else {
+            score = stringSimilarity.compareTwoStrings(cardNameClean, line);
+        }
+        
+        if (score > highestScore) {
+            highestScore = score;
+            bestMatch = card;
+        }
+      }
     }
     
-    if (match) {
-      resultCard.value = match
+    console.log(`Best OCR Match: ${bestMatch?.name} (Score: ${highestScore.toFixed(2)})`)
+    
+    // Threshold of 0.55 handles issues like "Flora" instead of "Fiora"
+    if (bestMatch && highestScore > 0.55) {
+      resultCard.value = bestMatch
     } else {
-      alert("Não foi possível identificar a carta. Aproxime e tente novamente.")
+      alert("Não foi possível identificar a carta com precisão. Aproxime a câmera, melhore a luz e tente novamente.")
     }
   } catch (err) {
     console.error("Scan error:", err)
