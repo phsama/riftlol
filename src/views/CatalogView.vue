@@ -534,12 +534,13 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 
   /* Hover preview */
   .card-hover-preview {
-    display: block; position: absolute; z-index: 100;
-    top: 50%; transform: translateY(-50%);
-    width: 440px; border-radius: var(--radius-lg); overflow: hidden;
+    display: block; position: absolute; z-index: 9999;
+    top: 50%; transform: translateY(-50%) scale(0.92);
+    width: 340px; border-radius: var(--radius-lg); overflow: hidden;
     box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.12);
-    opacity: 0; pointer-events: none;
-    transition: all 0.2s ease-out;
+    opacity: 0; pointer-events: none !important; /* Force to prevent stuck ghosts */
+    transition: all 0.15s ease-out;
+    left: 105%; /* Default show to the right */
   }
   .card-hover-preview img {
     width: 100%;
@@ -550,19 +551,18 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   /* Show preview when hovering the image wrapper */
   .card-image-wrap:hover .card-hover-preview {
     opacity: 1;
-    pointer-events: auto;
-    animation: preview-in 0.15s ease-out forwards;
+    transform: translateY(-50%) scale(1);
   }
-  /* Flip to left side when near right edge */
+  
+  /* Flip to left side for the last two columns to prevent screen overflow */
   .card-tile:nth-child(4n) .card-hover-preview,
-  .card-tile:nth-child(5n) .card-hover-preview {
+  .card-tile:nth-child(4n-1) .card-hover-preview,
+  .card-tile:nth-child(5n) .card-hover-preview,
+  .card-tile:nth-child(5n-1) .card-hover-preview,
+  .card-tile:nth-child(6n) .card-hover-preview,
+  .card-tile:nth-child(6n-1) .card-hover-preview {
     left: auto;
     right: 105%;
-  }
-
-  @keyframes preview-in {
-    from { opacity: 0; transform: translateY(-50%) scale(0.92); }
-    to   { opacity: 1; transform: translateY(-50%) scale(1); }
   }
 }
 </style>

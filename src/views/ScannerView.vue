@@ -64,6 +64,13 @@
        </router-link>
        <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" @click="goToCard">Ver Detalhes</button>
     </div>
+
+    <!-- Debug Area -->
+    <div v-if="debugInfo" class="debug-panel fade-in" style="background:#111; color:#0f0; padding:12px; font-family:monospace; font-size:11px; border-radius:8px; border: 1px solid #333; margin-top:16px; word-break: break-all; white-space: pre-wrap;">
+      <div style="font-weight:bold; margin-bottom:8px; color:white;">OCR Debug Log:</div>
+      <div>{{ debugInfo }}</div>
+      <button @click="debugInfo = null" class="btn btn-ghost btn-sm" style="margin-top:12px; border: 1px solid #444; width: 100%;">Fechar Debug</button>
+    </div>
   </div>
 </template>
 
@@ -79,6 +86,7 @@ const canvas = ref(null)
 const isCameraOpen = ref(false)
 const processing = ref(false)
 const resultCard = ref(null)
+const debugInfo = ref(null)
 const stream = ref(null)
 const facingMode = ref('environment') // Default to back camera
 
@@ -116,11 +124,18 @@ async function capturePhoto() {
 
   processing.value = true
   const context = canvas.value.getContext('2d')
-  canvas.value.width = video.value.videoWidth
-  canvas.value.height = video.value.videoHeight
+  
+  // Scale up the canvas 2.5x to give Tesseract a much higher resolution image to parse
+  // Mobile cameras preview at low res, text gets muddy. Upscaling forces a larger bitmap.
+  const SCALE = 2.5; 
+  canvas.value.width = video.value.videoWidth * SCALE
+  canvas.value.height = video.value.videoHeight * SCALE
+  
+  // Disable smoothing for OCR to keep edges sharp
+  context.imageSmoothingEnabled = false;
   context.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height)
 
-  const imageData = canvas.value.toDataURL('image/jpeg', 0.8)
+  const imageData = canvas.value.toDataURL('image/jpeg', 0.9)
   
   try {
     // 1. Run local OCR with Tesseract
@@ -165,13 +180,16 @@ async function capturePhoto() {
     console.log(`Best OCR Match: ${bestMatch?.name} (Score: ${highestScore.toFixed(2)})`)
     
     // Threshold of 0.55 handles issues like "Flora" instead of "Fiora"
-    if (bestMatch && highestScore > 0.55) {
-      resultCard.value = bestMatch
+    if (bestMatch && highestScore > 0.40) { // Lowered to 40% for extremely fuzzy matching
+      resultCard.value = bestMatch;
+      debugInfo.value = `✅ MATCH FORCED (>0.40):\n\nBest Match: ${bestMatch?.name}\nScore: ${(highestScore*100).toFixed(1)}%\n\nRaw Text Lines:\n${lines.join('\n')}`;
     } else {
+      debugInfo.value = `❌ FAILED MATCH:\n\nCards in DB: ${allCards.length}\nBest Try: ${bestMatch?.name}\nScore: ${(highestScore*100).toFixed(1)}%\n\nRaw Text Lines:\n${lines.length > 0 ? lines.join('\n') : '[NO TEXT DETECTED. Too dark/blurry?]'}`;
       alert("Não foi possível identificar a carta com precisão. Aproxime a câmera, melhore a luz e tente novamente.")
     }
   } catch (err) {
     console.error("Scan error:", err)
+    debugInfo.value = `CRITICAL ERROR: ${err.message}`
     alert("Erro ao processar imagem.")
   } finally {
     processing.value = false

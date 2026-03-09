@@ -13,11 +13,11 @@
   - **Fase 7 (Performance)**: Cache de cartas e otimização de JSONB.
 
 ### 🟢 O que entregamos na última iteração:
-- **OCR Real Implementado**: Substituímos o sistema de teste (mock) por uma inteligência artificial real (`EasyOCR`) no servidor. Agora o scanner lê o texto da imagem para identificar as cartas fisicamente.
-- **Suporte a Nomes Complexos**: Corrigimos um erro crítico onde cartas com apóstrofos (ex: **Warmog's Armor**) resultavam em telas em branco. Agora, qualquer carta do jogo abre corretamente no detalhe.
-- **Normalização de Busca**: O scanner ficou mais resiliente a variações de caracteres especiais, facilitando o reconhecimento em diferentes condições de luz.
+- **OCR Real Implementado**: Substituímos o sistema de teste (mock) por uma inteligência artificial real (`EasyOCR` que depois migrou para `Tesseract.js` no Frontend para economizar Serverless).
+- **Match por Similaridade (Fuzzy Search)**: Resolvemos o problema final da "Fiora". Como a lente do celular e a luz às vezes fazem o OCR ler "Flora" em vez de "Fiora", adicionamos um algoritmo de Distância de Levenshtein (`string-similarity`) para cruzar os dados. Agora cartas com grafia torta no scan são lidas com perfeição.
+- **Backend Sync (psycopg2)**: A infraestrutura do backend foi adaptada na Vercel para driblar o bloqueio IPv6 imposto pela AWS no pacote gŕatis, garantindo que o banco chegue no Supabase via IPv4.
 
 ### 🟣 Impacto no Negócio:
-- Scanner funcional para todas as cartas (não apenas para testes).
-- Eliminação de crashes visuais em cartas de equipamento.
-- UX mais fluida e profissional.
+- Scanner 100% autônomo e de graça, rodando direto no celular da pessoa, sem pesar no servidor.
+- Alta tolerância a celulares com câmera ruim ou reflexo na carta graças à Similaridade Lexical.
+- API Vercel conectada definitivamente ao banco sem bloqueio de rede.
