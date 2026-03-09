@@ -70,7 +70,8 @@
 <script setup>
 import { ref, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { createWorker } from 'tesseract.js'
+import riftcodexService from '@/services/riftcodex'
 
 const router = useRouter()
 const video = ref(null)
@@ -122,12 +123,37 @@ async function capturePhoto() {
   const imageData = canvas.value.toDataURL('image/jpeg', 0.8)
   
   try {
-    // Send to backend for identification
-    const response = await axios.post('/api/scan', { image: imageData })
-    if (response.data.card) {
-      resultCard.value = response.data.card
+    // 1. Run local OCR with Tesseract
+    const worker = await createWorker('eng')
+    const { data: { text } } = await worker.recognize(imageData)
+    await worker.terminate()
+    
+    console.log("OCR Detected Text:", text)
+    
+    // 2. Local search against cached cards
+    const allCards = await riftcodexService.getCards()
+    
+    // Clean and split lines
+    const lines = text.split('\n')
+      .map(l => l.trim().toLowerCase().replace("’", "'").replace("`", "'"))
+      .filter(l => l.length >= 3)
+      
+    let match = null
+    
+    // Prioritize exact or partial matches within lines
+    for (const line of lines) {
+      match = allCards.find(c => {
+        const cardNameClean = c.name.toLowerCase().replace("’", "'").replace("`", "'")
+        // Check if the card name is contained in the OCR line, or vice versa
+        return line.includes(cardNameClean) || cardNameClean === line
+      })
+      if (match) break
+    }
+    
+    if (match) {
+      resultCard.value = match
     } else {
-      alert("Não foi possível identificar a carta. Tente novamente.")
+      alert("Não foi possível identificar a carta. Aproxime e tente novamente.")
     }
   } catch (err) {
     console.error("Scan error:", err)
