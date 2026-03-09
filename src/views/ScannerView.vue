@@ -149,48 +149,60 @@ async function capturePhoto() {
     const allCards = await riftcodexService.getCards()
     const stringSimilarity = (await import('string-similarity')).default;
     
-    // Clean and split lines
-    const lines = text.split('\n')
-      .map(l => l.trim().toLowerCase().replace("’", "'").replace("`", "'"))
-      .filter(l => l.length >= 3)
+    // Clean and split ALL OCR text into an array of words
+    const allOcrWords = text
+      .toLowerCase()
+      .replace(/['`’]/g, "'")
+      .replace(/[^a-z0-9'\s]/g, "") // remove punctuation for cleaner matches
+      .split(/\s+/)
+      .filter(w => w.length > 0);
       
     let bestMatch = null;
     let highestScore = 0;
     
-    // Evaluate every card against every OCR line using fuzzy matching
+    // Evaluate sliding window over the OCR words to find the best fuzzy substring match
     for (const card of allCards) {
-      const cardNameClean = card.name.toLowerCase().replace("’", "'").replace("`", "'")
-      
-      for (const line of lines) {
-        // Find best partial match if line has more words, else direct similarity
-        let score = 0;
-        if (line.includes(cardNameClean)) {
-            score = 1.0; // exact substring match
-        } else {
-            score = stringSimilarity.compareTwoStrings(cardNameClean, line);
-        }
-        
-        if (score > highestScore) {
+      const cardNameClean = card.name.toLowerCase().replace(/['`’]/g, "'").replace(/[^a-z0-9'\s]/g, "");
+      const cardWords = cardNameClean.split(/\s+/).filter(w => w.length > 0);
+
+      // Direct exact match (shortcut)
+      if (allOcrWords.join(" ").includes(cardNameClean)) {
+        highestScore = 1.0;
+        bestMatch = card;
+        break; // Perfect match found!
+      }
+
+      // Sliding window
+      if (allOcrWords.length >= cardWords.length) {
+        for (let i = 0; i <= allOcrWords.length - cardWords.length; i++) {
+          const windowText = allOcrWords.slice(i, i + cardWords.length).join(' ');
+          const score = stringSimilarity.compareTwoStrings(cardNameClean, windowText);
+          if (score > highestScore) {
             highestScore = score;
             bestMatch = card;
+          }
+        }
+      } else if (allOcrWords.length > 0) {
+        const score = stringSimilarity.compareTwoStrings(cardNameClean, allOcrWords.join(' '));
+        if (score > highestScore) {
+          highestScore = score;
+          bestMatch = card;
         }
       }
     }
     
     console.log(`Best OCR Match: ${bestMatch?.name} (Score: ${highestScore.toFixed(2)})`)
     
-    // Threshold of 0.55 handles issues like "Flora" instead of "Fiora"
-    if (bestMatch && highestScore > 0.40) { // Lowered to 40% for extremely fuzzy matching
+    // Threshold of 0.60 is safe now since sliding window isolates the exact name tokens
+    if (bestMatch && highestScore >= 0.60) {
       resultCard.value = bestMatch;
-      debugInfo.value = `✅ MATCH FORCED (>0.40):\n\nBest Match: ${bestMatch?.name}\nScore: ${(highestScore*100).toFixed(1)}%\n\nRaw Text Lines:\n${lines.join('\n')}`;
+      debugInfo.value = `✅ MATCH FORCED (>=0.60):\n\nBest Match: ${bestMatch?.name}\nScore: ${(highestScore*100).toFixed(1)}%\n\nRaw Text:\n${text}`;
     } else {
-      debugInfo.value = `❌ FAILED MATCH:\n\nCards in DB: ${allCards.length}\nBest Try: ${bestMatch?.name}\nScore: ${(highestScore*100).toFixed(1)}%\n\nRaw Text Lines:\n${lines.length > 0 ? lines.join('\n') : '[NO TEXT DETECTED. Too dark/blurry?]'}`;
-      alert("Não foi possível identificar a carta com precisão. Aproxime a câmera, melhore a luz e tente novamente.")
+      debugInfo.value = `❌ FAILED MATCH:\n\nBest Try: ${bestMatch?.name}\nScore: ${(highestScore*100).toFixed(1)}%\n\nRaw Text:\n${text || '[NO TEXT DETECTED. Too dark/blurry?]'}\n\nProcessed Words: [${allOcrWords.join(', ')}]`;
     }
   } catch (err) {
     console.error("Scan error:", err)
     debugInfo.value = `CRITICAL ERROR: ${err.message}`
-    alert("Erro ao processar imagem.")
   } finally {
     processing.value = false
   }
