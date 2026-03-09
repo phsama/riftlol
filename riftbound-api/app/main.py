@@ -21,3 +21,7 @@ app.include_router(cards.router, prefix="/api/cards")
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.get("/api/test")
+def test_endpoint():
+    return {"status": "python is alive!"}
