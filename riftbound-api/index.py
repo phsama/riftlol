@@ -1,5 +1,10 @@
 import sys
+import os
 import traceback
+
+# Vercel executes the function from the repository root (/var/task)
+# We need to tell Python that "app" is in the same folder as this index.py file.
+sys.path.insert(0, os.path.dirname(__file__))
 
 try:
     from app.main import app
