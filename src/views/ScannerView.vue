@@ -257,10 +257,14 @@ onBeforeUnmount(() => {
 }
 
 .camera-placeholder {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 16px;
+  z-index: 10;
 }
 .placeholder-icon { font-size: 3rem; opacity: 0.5; }
 
