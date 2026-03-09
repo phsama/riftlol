@@ -3,7 +3,7 @@ from app.core.config import settings
 
 # asyncpg driver is required for SQLAlchemy async
 engine = create_async_engine(
-    settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://") if settings.DATABASE_URL else "",
+    settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://") if settings.DATABASE_URL else "postgresql+asyncpg://postgres:postgres@localhost:5432/dummy",
     echo=False,
     future=True,
     pool_size=10,
