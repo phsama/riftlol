@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/riftcodex-api/:path*",
-            "destination": "https://api.riftcodex.com/:path*"
+            "destination": "https://riftlol.onrender.com/:path*"
         },
         {
             "source": "/(.*)",
