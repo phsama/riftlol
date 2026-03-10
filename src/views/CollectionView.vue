@@ -62,7 +62,7 @@
           />
           <MultiSelectDropdown
             v-model="selectedSets"
-            :options="sets.map(s => ({ value: s.set_id, label: s.label || s.name }))"
+            :options="sets.map(s => ({ value: s.set_id || s.id, label: s.label || s.name }))"
             placeholder="Sets"
           />
         </div>
@@ -370,7 +370,7 @@ const filteredCards = computed(() => {
   }
   if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
   if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
-  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set_id))
+  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set?.set_id || c.set?.id || c.set_id))
   if (selectedEnergy.value !== null) {
     result = selectedEnergy.value === 6
       ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)

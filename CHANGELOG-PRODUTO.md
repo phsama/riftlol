@@ -1,3 +1,14 @@
+## [2026-03-10] - Correção do Filtro de Edições (Sets)
+
+### 🟢 O que entregamos nesta iteração:
+- **Filtro de Edições Funcional**: Corrigido o bug que impedia o filtro por expansão/set de funcionar corretamente no Catálogo e no Álbum da Coleção. O sistema agora lê a nova estrutura de dados de set da API (`c.set.set_id`) e aplica a busca local sem falhas.
+- **Identidade Visual das Runas/Domínios**: Ajustamos as cores globais de representação dos domínios (Mind, Body, Calm, Chaos, Order, Fury) para refletir os tons oficiais e idênticos aos dos ícones, garantindo consistência pela aplicação inteira.
+
+### 🟣 Impacto no Negócio:
+- Os jogadores agora conseguem isolar a visualização apenas para as cartas de um Set específico (ex: "Origins" ou "SFD"), facilitando o foco em completar expansões individuais ou montar decks temáticos sem poluição visual.
+
+---
+
 ## [2026-03-08] - Consolidação Geral & Resumo Executivo 📊
 
 ### 🟢 Status do Projeto: 

@@ -40,13 +40,13 @@
   --color-rift-700: #163a8f;
 
   /* ── Domain colors ── */
-  --color-domain-body: #e05555;
-  --color-domain-calm: #55b8e0;
-  --color-domain-chaos: #e07035;
+  --color-domain-body: #f97316; /* Orange */
+  --color-domain-calm: #10b981; /* Green */
+  --color-domain-chaos: #a855f7; /* Purple */
   --color-domain-colorless: #8888a0;
-  --color-domain-fury: #d43d6f;
-  --color-domain-mind: #8b6fd4;
-  --color-domain-order: #50b88a;
+  --color-domain-fury: #ef4444; /* Red */
+  --color-domain-mind: #0ea5e9; /* Blue */
+  --color-domain-order: #eab308; /* Yellow */
 
   /* ── Rarity colors ── */
   --color-rarity-common: #8888a0;
@@ -158,13 +158,13 @@ a:hover {
   text-transform: uppercase;
 }
 
-.domain-body     { background: rgba(224, 85, 85, 0.15); color: var(--color-domain-body); border: 1px solid rgba(224, 85, 85, 0.25); }
-.domain-calm     { background: rgba(85, 184, 224, 0.15); color: var(--color-domain-calm); border: 1px solid rgba(85, 184, 224, 0.25); }
-.domain-chaos    { background: rgba(224, 112, 53, 0.15); color: var(--color-domain-chaos); border: 1px solid rgba(224, 112, 53, 0.25); }
+.domain-body     { background: rgba(249, 115, 22, 0.15); color: var(--color-domain-body); border: 1px solid rgba(249, 115, 22, 0.25); }
+.domain-calm     { background: rgba(16, 185, 129, 0.15); color: var(--color-domain-calm); border: 1px solid rgba(16, 185, 129, 0.25); }
+.domain-chaos    { background: rgba(168, 85, 247, 0.15); color: var(--color-domain-chaos); border: 1px solid rgba(168, 85, 247, 0.25); }
 .domain-colorless { background: rgba(136, 136, 160, 0.15); color: var(--color-domain-colorless); border: 1px solid rgba(136, 136, 160, 0.25); }
-.domain-fury     { background: rgba(212, 61, 111, 0.15); color: var(--color-domain-fury); border: 1px solid rgba(212, 61, 111, 0.25); }
-.domain-mind     { background: rgba(139, 111, 212, 0.15); color: var(--color-domain-mind); border: 1px solid rgba(139, 111, 212, 0.25); }
-.domain-order    { background: rgba(80, 184, 138, 0.15); color: var(--color-domain-order); border: 1px solid rgba(80, 184, 138, 0.25); }
+.domain-fury     { background: rgba(239, 68, 68, 0.15); color: var(--color-domain-fury); border: 1px solid rgba(239, 68, 68, 0.25); }
+.domain-mind     { background: rgba(14, 165, 233, 0.15); color: var(--color-domain-mind); border: 1px solid rgba(14, 165, 233, 0.25); }
+.domain-order    { background: rgba(234, 179, 8, 0.15); color: var(--color-domain-order); border: 1px solid rgba(234, 179, 8, 0.25); }
 
 /* ── Rarity badge ── */
 .rarity-badge {
