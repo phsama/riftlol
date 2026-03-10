@@ -1,7 +1,7 @@
 {
   "nav": {
     "catalog": "Catálogo",
-    "collection": "Álbum",
+    "collection": "Coleção",
     "decks": "Meus Decks",
     "scanner": "Scanner",
     "how_to_play": "Como Jogar"
@@ -46,11 +46,11 @@
   "collection": {
     "title": "Minha Coleção",
     "stats": "{owned} / {total} cartas únicas",
-    "export": "Exportar Álbum",
+    "export": "Exportar Coleção",
     "export_title": "Exportar Minha Coleção",
     "export_hint": "Aqui estão todas as cartas que você possui, formatadas com suas versões especiais (Foil, Alt.Art, etc).",
     "copy_collection": "Copiar Coleção",
-    "search_placeholder": "Buscar no álbum...",
+    "search_placeholder": "Buscar na coleção...",
     "manage_variants": "Gerenciar Variantes / Foil",
     "variants_title": "Variantes Foil / Edições",
     "normal_art": "Arte Padrão",
@@ -68,7 +68,7 @@
     "only_owned": "Apenas Possuídas",
     "empty": "Nenhuma carta encontrada",
     "empty_hint": "Ajuste os filtros ou busque outro nome.",
-    "login_prompt": "Faça login para ver seu álbum",
+    "login_prompt": "Faça login para ver sua coleção",
     "login_desc": "Acompanhe sua coleção, acompanhe variantes (Foil, Assinada) e guarde tudo na nuvem."
   },
   "catalog": {

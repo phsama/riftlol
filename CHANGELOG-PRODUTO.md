@@ -1,6 +1,14 @@
-## [2026-03-10] - Correção do Filtro de Edições (Sets)
+## [2026-03-10] - Guia "Como Jogar" e Redesign de Interface
 
 ### 🟢 O que entregamos nesta iteração:
+- **Área "Como Jogar"**: Lançamos um guia digital completo e imersivo, cobrindo regras básicas, montagem de deck, runas e fluxo de jogo. 
+- **Destaque em Keywords**: O glossário de efeitos (Keywords) recebeu um design premium focado em facilitar o aprendizado dos termos técnicos mais complexos do TCG.
+- **Novo Seletor de Idiomas**: Substituímos o seletor padrão por um componente customizado com flags, glassmorphism e animações suaves, elevando o padrão visual do produto.
+- **Navegação Inteligente**: O guia foi integrado dinamicamente no menu superior (desktop) e na barra de abas (mobile) para acesso rápido.
+
+---
+
+## [2026-03-10] - Correção do Filtro de Edições (Sets) e Internacionalização
 - **Filtro de Edições Funcional**: Corrigido o bug que impedia o filtro por expansão/set de funcionar corretamente no Catálogo e no Álbum da Coleção. O sistema agora lê a nova estrutura de dados de set da API (`c.set.set_id`) e aplica a busca local sem falhas.
 - **Identidade Visual das Runas/Domínios**: Ajustamos as cores globais de representação dos domínios (Mind, Body, Calm, Chaos, Order, Fury) para refletir os tons oficiais e idênticos aos dos ícones, garantindo consistência pela aplicação inteira.
 - **Sincronização de Decks na Nuvem**: Corrigido um problema onde decks criados no PC apareciam como "0 cartas" no celular. Agora o aplicativo se reconecta automaticamente ao banco de cartas global para "reidratar" as cartas salvas apenas pelo ID, garantindo que o deck carregue perfeitamente independente do dispositivo onde a conta for acessada.

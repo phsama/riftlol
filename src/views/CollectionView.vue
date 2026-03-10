@@ -17,7 +17,7 @@
           <div>
             <h1 class="collection-title">{{ $t('collection.title') }}</h1>
             <p class="collection-subtitle" v-if="!loading && allCards.length">
-              {{ $t('common.progress') }}: {{ uniqueCardsOwned }} / {{ uniqueCards.length }}
+              {{ $t('common.progress') }}: {{ uniqueCardsOwned }} / {{ groupedCards.length }}
             </p>
           </div>
           <button class="btn btn-secondary btn-sm export-trigger" @click="showExportModal = true" :disabled="loading || uniqueCardsOwned === 0">
