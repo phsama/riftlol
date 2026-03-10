@@ -7,6 +7,7 @@
 - **Novo Seletor de Idiomas**: Substituímos o seletor padrão por um componente customizado com flags, glassmorphism e animações suaves, elevando o padrão visual do produto.
 - **Navegação Inteligente**: O guia foi integrado dinamicamente no menu superior (desktop) e na barra de abas (mobile) para acesso rápido.
 - **SEO Premium**: Implementamos metadados dinâmicos (títulos e descrições) que mudam conforme a página e o idioma, além de tags para redes sociais (Open Graph/Twitter) e arquivos de indexação (`robots.txt`, `sitemap.xml`).
+- **Identidade Visual**: Criamos um novo favicon e imagem de preview (`og-image.png`) com design elegante e minimalista, reforçando a marca no navegador e em compartilhamentos sociais.
 - **Ajustes Visuais**: Refinamos o espaçamento das badges de domínio e o estilo dos filtros na coleção para evitar cortes e poluição visual.
 
 ---
