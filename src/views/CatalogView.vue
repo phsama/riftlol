@@ -159,7 +159,7 @@ const selectedRarities = ref([])
 const selectedSets = ref([])
 const selectedEnergy = ref(null)
 
-const availableDomains = ['Body', 'Calm', 'Chaos', 'Colorless', 'Fury', 'Mind', 'Order']
+const availableDomains = ['Body', 'Calm', 'Chaos', 'Fury', 'Mind', 'Order', 'Colorless']
 
 const availableTypes = computed(() => {
   const t = new Set()
@@ -346,7 +346,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 .catalog-subtitle { color: var(--color-text-secondary); font-size: 0.78rem; margin-top: 2px; }
 
 /* ── Search ── */
-.catalog-search { position: relative; }
+.catalog-search { position: relative; margin-bottom: 12px; }
 .search-icon {
   position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
   color: var(--color-text-tertiary); pointer-events: none;

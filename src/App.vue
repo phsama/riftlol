@@ -76,26 +76,28 @@
       </router-link>
     </nav>
     <!-- ── Auth Modal ── -->
-    <div v-if="authStore.showAuthModal" class="modal-backdrop" @click.self="authStore.showAuthModal = false">
-      <div class="modal auth-modal glass">
-        <h2 class="modal-title">{{ authStore.authMode === 'login' ? 'Acessar Conta' : 'Criar Conta' }}</h2>
-        <p v-if="authError" class="auth-error">{{ authError }}</p>
-        <div class="form-group">
-          <label class="form-label">E-mail</label>
-          <input type="email" v-model="email" class="input" placeholder="seu@email.com" @keyup.enter="handleEmailAuth"/>
+    <Teleport to="body">
+      <div v-if="authStore.showAuthModal" class="modal-backdrop" @click.self="authStore.showAuthModal = false">
+        <div class="modal auth-modal glass">
+          <h2 class="modal-title">{{ authStore.authMode === 'login' ? 'Acessar Conta' : 'Criar Conta' }}</h2>
+          <p v-if="authError" class="auth-error">{{ authError }}</p>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input type="email" v-model="email" class="input" placeholder="seu@email.com" @keyup.enter="handleEmailAuth"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input type="password" v-model="password" class="input" placeholder="••••••••" @keyup.enter="handleEmailAuth"/>
+          </div>
+          <button class="btn btn-primary auth-submit" :disabled="authLoading" @click="handleEmailAuth">
+            {{ authLoading ? 'Aguarde...' : (authStore.authMode === 'login' ? 'Entrar' : 'Cadastrar') }}
+          </button>
+          <button class="btn btn-ghost auth-switch" @click="authStore.authMode = authStore.authMode === 'login' ? 'signup' : 'login'">
+            {{ authStore.authMode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre' }}
+          </button>
         </div>
-        <div class="form-group">
-          <label class="form-label">Senha</label>
-          <input type="password" v-model="password" class="input" placeholder="••••••••" @keyup.enter="handleEmailAuth"/>
-        </div>
-        <button class="btn btn-primary auth-submit" :disabled="authLoading" @click="handleEmailAuth">
-          {{ authLoading ? 'Aguarde...' : (authStore.authMode === 'login' ? 'Entrar' : 'Cadastrar') }}
-        </button>
-        <button class="btn btn-ghost auth-switch" @click="authStore.authMode = authStore.authMode === 'login' ? 'signup' : 'login'">
-          {{ authStore.authMode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre' }}
-        </button>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 

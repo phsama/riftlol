@@ -204,9 +204,10 @@
     </div>
     
     <!-- ── Manage Variants Modal ── -->
-    <div v-if="managingCard" class="modal-overlay fade-in" @click="managingCard = null">
-      <div class="manage-modal stagger-enter" @click.stop>
-        <div class="modal-header">
+    <Teleport to="body">
+      <div v-if="managingCard" class="modal-overlay fade-in" @click="managingCard = null">
+        <div class="manage-modal stagger-enter" @click.stop>
+          <div class="modal-header">
           <h3>Variantes Foil / Edições</h3>
           <button class="btn-ghost" @click="managingCard = null">
              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -278,7 +279,8 @@
            </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Teleport>
 
   </div>
 </template>
@@ -311,7 +313,7 @@ const selectedEnergy = ref(null)
 const showOnlyOwned = ref(false)
 const managingCard = ref(null)
 
-const availableDomains = ['Body', 'Calm', 'Chaos', 'Colorless', 'Fury', 'Mind', 'Order']
+const availableDomains = ['Body', 'Calm', 'Chaos', 'Fury', 'Mind', 'Order', 'Colorless']
 
 function getQty(cardId, field) {
     return collectionStore.items[cardId]?.[field] || 0
