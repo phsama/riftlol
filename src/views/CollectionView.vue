@@ -347,45 +347,10 @@ const energyOptions = [
   { value: 3, label: '3' }, { value: 4, label: '4' }, { value: 5, label: '5' }, { value: 6, label: '6+' },
 ]
 
-const filteredCards = computed(() => {
-  let result = allCards.value
-  
-  if (showOnlyOwned.value) {
-      result = result.filter(c => collectionStore.getCardTotal(c.id) > 0)
-  }
-  
-  if (searchQuery.value.trim()) {
-    const q = searchQuery.value.trim().toLowerCase()
-    result = result.filter((c) => {
-      return c.name.toLowerCase().includes(q) ||
-             c.text?.raw?.toLowerCase().includes(q) ||
-             c.text?.rich?.toLowerCase().includes(q) ||
-             c.classification?.supertype?.toLowerCase().includes(q) ||
-             c.classification?.subtype?.toLowerCase().includes(q) ||
-             c.tags?.some((t) => t.toLowerCase().includes(q))
-    })
-  }
-  if (selectedDomains.value.length > 0) {
-    result = result.filter((c) => c.classification?.domain?.some((d) => selectedDomains.value.includes(d)))
-  }
-  if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
-  if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
-  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set?.set_id || c.set?.id || c.set_id))
-  if (selectedEnergy.value !== null) {
-    result = selectedEnergy.value === 6
-      ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)
-      : result.filter((c) => c.attributes?.energy === selectedEnergy.value)
-  }
-  
-  // Sort alphabetically typically for Album
-  result.sort((a,b) => a.name.localeCompare(b.name))
-  return result
-})
-
-// Deduplicate by name, keeping first version and organizing versions
-const uniqueCards = computed(() => {
+// Deduplicate by name, keeping first version and organizing versions across ALL cards
+const groupedCards = computed(() => {
   const seen = new Map()
-  for (const card of filteredCards.value) {
+  for (const card of allCards.value) {
     if (seen.has(card.name)) {
       const entry = seen.get(card.name)
       entry._altCount++
@@ -440,15 +405,50 @@ const uniqueCards = computed(() => {
   })
 })
 
+const filteredCards = computed(() => {
+  let result = groupedCards.value
+  
+  if (showOnlyOwned.value) {
+      result = result.filter(c => collectionStore.getCardTotal(c.id) > 0)
+  }
+  
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase()
+    result = result.filter((c) => {
+      return c.name.toLowerCase().includes(q) ||
+             c.text?.raw?.toLowerCase().includes(q) ||
+             c.text?.rich?.toLowerCase().includes(q) ||
+             c.classification?.supertype?.toLowerCase().includes(q) ||
+             c.classification?.subtype?.toLowerCase().includes(q) ||
+             c.tags?.some((t) => t.toLowerCase().includes(q))
+    })
+  }
+  if (selectedDomains.value.length > 0) {
+    result = result.filter((c) => c.classification?.domain?.some((d) => selectedDomains.value.includes(d)))
+  }
+  if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
+  if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
+  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set?.set_id || c.set?.id || c.set_id))
+  if (selectedEnergy.value !== null) {
+    result = selectedEnergy.value === 6
+      ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)
+      : result.filter((c) => c.attributes?.energy === selectedEnergy.value)
+  }
+  
+  // Sort alphabetically typically for Album
+  result.sort((a,b) => a.name.localeCompare(b.name))
+  return result
+})
+
 const uniqueCardsOwned = computed(() => {
     let count = 0;
-    uniqueCards.value.forEach(c => {
+    groupedCards.value.forEach(c => {
         if (collectionStore.getCardTotal(c.id) > 0) count++;
     })
     return count;
 })
 
-const visibleCards = computed(() => uniqueCards.value.slice(0, visibleCount.value))
+const visibleCards = computed(() => filteredCards.value.slice(0, visibleCount.value))
 
 // Helpers to know if variants exist
 const hasAltArt = (card) => card._versions.length > 1
@@ -490,7 +490,7 @@ const displayCards = computed(() => {
   })
 })
 
-const hasMore = computed(() => visibleCount.value < uniqueCards.value.length)
+const hasMore = computed(() => visibleCount.value < filteredCards.value.length)
 
 const hasActiveFilters = computed(() =>
   searchQuery.value.trim() || selectedDomains.value.length > 0 || selectedTypes.value.length > 0 ||

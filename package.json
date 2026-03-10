@@ -12,6 +12,7 @@
     "@supabase/supabase-js": "^2.98.0",
     "axios": "^1.13.6",
     "lodash-es": "^4.17.23",
+    "pg": "^8.20.0",
     "pinia": "^3.0.0",
     "string-similarity": "^4.0.4",
     "tesseract.js": "^7.0.0",
