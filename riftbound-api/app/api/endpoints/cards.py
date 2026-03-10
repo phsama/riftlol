@@ -88,4 +88,10 @@ def get_cached_cards(
     result = db.execute(query)
     raw_json = result.scalar()
     
-    return Response(content=raw_json, media_type="application/json")
+    return Response(
+        content=raw_json, 
+        media_type="application/json",
+        headers={
+            "Cache-Control": "public, max-age=600, s-maxage=86400, stale-while-revalidate=3600"
+        }
+    )
