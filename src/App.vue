@@ -11,20 +11,29 @@
       <div class="nav-links-desktop">
         <router-link to="/" class="nav-link" :class="{ 'nav-link--active': $route.name === 'catalog' }">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          <span>Catálogo</span>
+          <span>{{ $t('nav.catalog') }}</span>
         </router-link>
         <router-link to="/scan" class="nav-link" :class="{ 'nav-link--active': $route.name === 'scanner' }">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span>Scan</span>
+          <span>{{ $t('nav.scanner') }}</span>
         </router-link>
         <router-link to="/collection" class="nav-link" :class="{ 'nav-link--active': $route.name === 'collection' }">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-          <span>Coleção</span>
+          <span>{{ $t('nav.collection') }}</span>
         </router-link>
         <router-link to="/decks" class="nav-link" :class="{ 'nav-link--active': $route.name === 'decks' || $route.name === 'deck-editor' }">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          <span>Meus Decks</span>
+          <span>{{ $t('nav.decks') }}</span>
         </router-link>
+        
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+          <select v-model="$i18n.locale" @change="saveLang" class="lang-select">
+            <option value="pt">PT</option>
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+          </select>
+        </div>
         
         <!-- Auth Section -->
         <div class="nav-auth" v-if="authStore.isInitialized">
@@ -32,7 +41,7 @@
             <div class="user-profile">
               <img v-if="authStore.user.user_metadata?.avatar_url" :src="authStore.user.user_metadata.avatar_url" alt="Avatar" class="user-avatar" />
               <div v-else class="user-avatar-placeholder">{{ authStore.user.email?.charAt(0).toUpperCase() }}</div>
-              <button class="nav-btn btn-ghost" @click="authStore.signOut" title="Sair">
+              <button class="nav-btn btn-ghost" @click="authStore.signOut" :title="$t('common.logout')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               </button>
             </div>
@@ -40,7 +49,7 @@
           <template v-else>
             <button class="nav-btn btn-primary" @click="authStore.openLogin('login')">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-              Entrar
+              {{ $t('common.login') }}
             </button>
           </template>
         </div>
@@ -60,33 +69,33 @@
     <nav class="bottom-tabs glass">
       <router-link to="/" class="tab-item" :class="{ 'tab-item--active': $route.name === 'catalog' || $route.name === 'card-detail' }">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>Catálogo</span>
+        <span>{{ $t('nav.catalog') }}</span>
       </router-link>
       <router-link to="/scan" class="tab-item" :class="{ 'tab-item--active': $route.name === 'scanner' }">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span>Scan</span>
+        <span>{{ $t('nav.scanner') }}</span>
       </router-link>
       <router-link to="/collection" class="tab-item" :class="{ 'tab-item--active': $route.name === 'collection' }">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-        <span>Coleção</span>
+        <span>{{ $t('nav.collection') }}</span>
       </router-link>
       <router-link to="/decks" class="tab-item" :class="{ 'tab-item--active': $route.name === 'decks' || $route.name === 'deck-editor' }">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-        <span>Decks</span>
+        <span>{{ $t('nav.decks') }}</span>
       </router-link>
     </nav>
     <!-- ── Auth Modal ── -->
     <Teleport to="body">
       <div v-if="authStore.showAuthModal" class="modal-backdrop" @click.self="authStore.showAuthModal = false">
         <div class="modal auth-modal glass">
-          <h2 class="modal-title">{{ authStore.authMode === 'login' ? 'Acessar Conta' : 'Criar Conta' }}</h2>
+          <h2 class="modal-title">{{ $t('auth.login_title') }}</h2>
           <p v-if="authError" class="auth-error">{{ authError }}</p>
           <div class="form-group">
             <label class="form-label">E-mail</label>
-            <input type="email" v-model="email" class="input" placeholder="seu@email.com" @keyup.enter="handleEmailAuth"/>
+            <input type="email" v-model="email" class="input" :placeholder="$t('auth.email_placeholder')" @keyup.enter="handleEmailAuth"/>
           </div>
           <div class="form-group">
-            <label class="form-label">Senha</label>
+            <label class="form-label">{{ $t('auth.password') || 'Senha' }}</label>
             <div class="password-input-wrap">
               <input :type="showPassword ? 'text' : 'password'" v-model="password" class="input" placeholder="••••••••" @keyup.enter="handleEmailAuth"/>
               <button class="btn-ghost password-toggle" @click="showPassword = !showPassword" tabindex="-1">
@@ -96,10 +105,10 @@
             </div>
           </div>
           <button class="btn btn-primary auth-submit" :disabled="authLoading" @click="handleEmailAuth">
-            {{ authLoading ? 'Aguarde...' : (authStore.authMode === 'login' ? 'Entrar' : 'Cadastrar') }}
+            {{ authLoading ? $t('common.loading') : $t('common.login') }}
           </button>
           <button class="btn btn-ghost auth-switch" @click="authStore.authMode = authStore.authMode === 'login' ? 'signup' : 'login'">
-            {{ authStore.authMode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre' }}
+            {{ authStore.authMode === 'login' ? ($t('auth.signup_link') || 'Signup') : ($t('auth.login_link') || 'Login') }}
           </button>
         </div>
       </div>
@@ -110,8 +119,14 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 
 const authStore = useAuthStore()
+const { locale } = useI18n()
+
+function saveLang() {
+  localStorage.setItem('lang', locale.value)
+}
 
 // Auth modal state for inputs
 const email = ref('')
@@ -126,7 +141,7 @@ onMounted(() => {
 
 async function handleEmailAuth() {
   if (!email.value || !password.value) {
-    authError.value = "Preencha e-mail e senha"
+    authError.value = t('auth.empty_fields') || "Preencha e-mail e senha"
     return
   }
   authLoading.value = true
@@ -142,9 +157,9 @@ async function handleEmailAuth() {
     password.value = ''
   } catch (err) {
     if (err.message.includes('Invalid login credentials')) {
-      authError.value = "E-mail ou senha incorretos."
+      authError.value = t('auth.invalid_credentials') || "E-mail ou senha incorretos."
     } else {
-      authError.value = err.message || "Erro de autenticação"
+      authError.value = err.message || t('common.error')
     }
   } finally {
     authLoading.value = false
@@ -352,4 +367,32 @@ async function handleEmailAuth() {
 .password-toggle:hover { color: var(--color-text-primary); background: rgba(255,255,255,0.05); }
 .auth-submit { margin-top: 8px; justify-content: center; }
 .auth-switch { font-size: 0.8rem; }
+
+/* ── Lang Switcher ── */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid var(--color-border-subtle);
+}
+.lang-select {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.lang-select:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--color-text-primary);
+}
+.lang-select:focus {
+  outline: none;
+  background: rgba(255,255,255,0.1);
+}
 </style>

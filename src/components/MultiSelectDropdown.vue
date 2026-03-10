@@ -7,13 +7,13 @@
       type="button"
     >
       <span class="ms-label">
-        {{ modelValue.length === 0 ? placeholder : `${placeholder} (${modelValue.length})` }}
+        {{ modelValue.length === 0 ? displayPlaceholder : `${displayPlaceholder} (${modelValue.length})` }}
       </span>
       <svg class="ms-chevron" :class="{ 'ms-chevron-up': isOpen }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     
     <div v-if="isOpen" class="ms-menu glass">
-      <div v-if="options.length === 0" class="ms-empty">Nenhuma opção</div>
+      <div v-if="options.length === 0" class="ms-empty">{{ $t('common.no_options') }}</div>
       <label
         v-for="opt in options"
         :key="opt.value || opt"
@@ -33,13 +33,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   modelValue: { type: Array, required: true },
   options: { type: Array, required: true },
-  placeholder: { type: String, default: 'Selecione' }
+  placeholder: { type: String, default: '' }
 })
+
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+const displayPlaceholder = computed(() => props.placeholder || t('common.all'))
+
 
 const emit = defineEmits(['update:modelValue'])
 

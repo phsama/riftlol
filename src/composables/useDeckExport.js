@@ -52,6 +52,46 @@ export function exportFull(cards, sideboard = []) {
     return text
 }
 
+export function exportCollection(items, allCards) {
+    const lines = []
+    
+    // Sort allCards by name for a better list
+    const sortedCards = allCards
+        .filter(c => items[c.id])
+        .sort((a, b) => a.name.localeCompare(b.name))
+    
+    // items is an object: card_id -> { normal_qty, foil_qty, ... }
+    const processedIds = new Set()
+    
+    sortedCards.forEach(card => {
+        if (processedIds.has(card.id)) return
+        const qtyObj = items[card.id]
+        if (!qtyObj) return
+        
+        const variants = [
+            { key: 'normal_qty', label: '' },
+            { key: 'foil_qty', label: 'Foil' },
+            { key: 'alt_art_qty', label: 'Alt.Art' },
+            { key: 'alt_art_foil_qty', label: 'Alt.Art, Foil' },
+            { key: 'signed_qty', label: 'Signed' },
+            { key: 'overnumbered_qty', label: 'Overnumbered' },
+            { key: 'overnumbered_foil_qty', label: 'Overnumbered, Foil' }
+        ]
+        
+        variants.forEach(v => {
+            const q = qtyObj[v.key] || 0
+            if (q > 0) {
+                const label = v.label ? ` (${v.label})` : ''
+                lines.push(`${q} ${card.name}${label}`)
+            }
+        })
+        
+        processedIds.add(card.id)
+    })
+    
+    return lines.join('\n')
+}
+
 export async function copyToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text)

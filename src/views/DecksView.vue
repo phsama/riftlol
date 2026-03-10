@@ -2,14 +2,14 @@
   <div class="decks-page fade-in">
     <header class="decks-header">
       <div>
-        <h1 class="decks-title">Meus Decks</h1>
+        <h1 class="decks-title">{{ $t('decks.title') }}</h1>
         <p class="decks-subtitle" v-if="decksStore.decks.length">
-          {{ decksStore.decks.length }} deck{{ decksStore.decks.length !== 1 ? 's' : '' }}
+          {{ $t('decks.subtitle', { count: decksStore.decks.length }) }}
         </p>
       </div>
       <button v-if="authStore.user" class="btn btn-primary btn-sm" @click="openCreateModal">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Criar deck
+        {{ $t('decks.create_btn') }}
       </button>
     </header>
 
@@ -18,9 +18,9 @@
       <div class="empty-cards-stack" style="display:flex; align-items:center; justify-content:center;">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-text-tertiary);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
-      <h3 class="empty-title">Faça login para gerenciar decks</h3>
-      <p class="empty-text">Seus decks são salvos de forma segura e sincronizados na sua conta de forma automática.</p>
-      <button class="btn btn-primary" @click="authStore.openLogin('login')">Entrar agora</button>
+      <h3 class="empty-title">{{ $t('decks.login_prompt') }}</h3>
+      <p class="empty-text">{{ $t('decks.login_desc') }}</p>
+      <button class="btn btn-primary" @click="authStore.openLogin('login')">{{ $t('common.login') }}</button>
     </div>
 
     <!-- Empty state -->
@@ -30,9 +30,9 @@
         <div class="empty-card-2"></div>
         <div class="empty-card-3"></div>
       </div>
-      <h3 class="empty-title">Nenhum deck ainda</h3>
-      <p class="empty-text">Monte seu primeiro deck para organizar suas cartas e exportar listas de compra.</p>
-      <button class="btn btn-primary" @click="openCreateModal">Criar meu primeiro deck</button>
+      <h3 class="empty-title">{{ $t('decks.empty_title') }}</h3>
+      <p class="empty-text">{{ $t('decks.empty_desc') }}</p>
+      <button class="btn btn-primary" @click="openCreateModal">{{ $t('decks.create_first') }}</button>
     </div>
 
     <!-- Deck list -->
@@ -58,8 +58,8 @@
           <div class="deck-info">
             <h3 class="deck-name">{{ deck.name }}</h3>
             <div class="deck-stats">
-              <span>{{ getTotalCards(deck) }} carta{{ getTotalCards(deck) !== 1 ? 's' : '' }}</span>
-              <span v-if="deck.sideboard?.length"> · {{ getSideTotal(deck) }} side</span>
+              <span>{{ $t('decks.card_count', { count: getTotalCards(deck) }) }}</span>
+              <span v-if="deck.sideboard?.length"> · {{ getSideTotal(deck) }} {{ $t('decks.sideboard_count') }}</span>
             </div>
             <div class="deck-domains" v-if="getDeckDomains(deck).length">
               <span v-for="d in getDeckDomains(deck)" :key="d" class="domain-badge" :class="`domain-${d.toLowerCase()}`">{{ d }}</span>
@@ -68,10 +68,10 @@
           <svg class="deck-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </router-link>
         <div class="deck-actions">
-          <button class="btn btn-ghost btn-icon btn-sm" title="Duplicar" @click="decksStore.duplicateDeck(deck.id)">
+          <button class="btn btn-ghost btn-icon btn-sm" :title="$t('decks.duplicate')" @click="decksStore.duplicateDeck(deck.id)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
-          <button class="btn btn-ghost btn-icon btn-sm" title="Excluir" @click="confirmDelete(deck)">
+          <button class="btn btn-ghost btn-icon btn-sm" :title="$t('decks.delete')" @click="confirmDelete(deck)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
@@ -82,18 +82,18 @@
     <Teleport to="body">
       <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
         <div class="modal glass fade-in">
-          <h3 class="modal-title">Criar novo deck</h3>
+          <h3 class="modal-title">{{ $t('decks.create_modal_title') }}</h3>
           <input
             v-model="newDeckName"
             class="input"
-            placeholder="Nome do deck — ex: Aggro Chaos, Control Mind..."
+            :placeholder="$t('decks.create_modal_placeholder')"
             id="new-deck-name"
             @keyup.enter="createDeck"
             ref="newDeckInput"
           />
           <div class="modal-actions">
-            <button class="btn btn-ghost" @click="showCreateModal = false">Cancelar</button>
-            <button class="btn btn-primary" :disabled="!newDeckName.trim()" @click="createDeck">Criar deck</button>
+            <button class="btn btn-ghost" @click="showCreateModal = false">{{ $t('decks.cancel') }}</button>
+            <button class="btn btn-primary" :disabled="!newDeckName.trim()" @click="createDeck">{{ $t('decks.create_btn') }}</button>
           </div>
         </div>
       </div>
@@ -103,11 +103,13 @@
     <Teleport to="body">
       <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
         <div class="modal glass fade-in">
-          <h3 class="modal-title">Excluir deck</h3>
-          <p class="modal-text">Tem certeza que deseja excluir <strong>{{ deckToDelete?.name }}</strong>?</p>
+          <h3 class="modal-title">{{ $t('decks.delete_modal_title') }}</h3>
+          <p class="modal-text">
+            {{ $t('decks.delete_modal_confirm', { name: deckToDelete?.name }) }}
+          </p>
           <div class="modal-actions">
-            <button class="btn btn-ghost" @click="showDeleteModal = false">Cancelar</button>
-            <button class="btn btn-danger" @click="deleteDeck">Excluir</button>
+            <button class="btn btn-ghost" @click="showDeleteModal = false">{{ $t('decks.cancel') }}</button>
+            <button class="btn btn-danger" @click="deleteDeck">{{ $t('decks.delete') }}</button>
           </div>
         </div>
       </div>

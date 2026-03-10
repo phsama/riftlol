@@ -5,19 +5,25 @@
       <div style="font-size: 2.5rem; color: var(--color-text-tertiary); margin-bottom: 8px;">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
-      <h3 class="empty-title">Faça login para ver seu álbum</h3>
-      <p class="empty-text">Acompanhe sua coleção, acompanhe variantes (Foil, Assinada) e guarde tudo na nuvem.</p>
-      <button class="btn btn-primary" style="margin-top: 12px;" @click="authStore.openLogin('login')">Entrar agora</button>
+      <h3 class="empty-title">{{ $t('collection.login_prompt') }}</h3>
+      <p class="empty-text">{{ $t('collection.login_desc') }}</p>
+      <button class="btn btn-primary" style="margin-top: 12px;" @click="authStore.openLogin('login')">{{ $t('common.login') }}</button>
     </div>
 
     <div v-else>
       <!-- ── Header ── -->
       <header class="collection-header">
-        <div>
-          <h1 class="collection-title">Minha Coleção</h1>
-          <p class="collection-subtitle" v-if="!loading && allCards.length">
-            Progresso: {{ uniqueCardsOwned }} / {{ uniqueCards.length }} cartas únicas
-          </p>
+        <div class="header-content">
+          <div>
+            <h1 class="collection-title">{{ $t('collection.title') }}</h1>
+            <p class="collection-subtitle" v-if="!loading && allCards.length">
+              {{ $t('common.progress') }}: {{ uniqueCardsOwned }} / {{ uniqueCards.length }}
+            </p>
+          </div>
+          <button class="btn btn-secondary btn-sm export-trigger" @click="showExportModal = true" :disabled="loading || uniqueCardsOwned === 0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            {{ $t('collection.export') }}
+          </button>
         </div>
       </header>
 
@@ -28,7 +34,7 @@
           v-model="searchQuery"
           type="text"
           class="input search-input"
-          placeholder="Buscar no álbum..."
+          :placeholder="$t('collection.search_placeholder')"
         />
         <button v-if="searchQuery" class="search-clear btn-ghost btn-icon" @click="searchQuery = ''">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -53,17 +59,12 @@
           <MultiSelectDropdown
             v-model="selectedTypes"
             :options="availableTypes"
-            placeholder="Tipos"
+            :placeholder="$t('catalog.filters.types')"
           />
           <MultiSelectDropdown
             v-model="selectedRarities"
             :options="availableRarities"
-            placeholder="Raridades"
-          />
-          <MultiSelectDropdown
-            v-model="selectedSets"
-            :options="sets.map(s => ({ value: s.set_id || s.id, label: s.label || s.name }))"
-            placeholder="Sets"
+            :placeholder="$t('catalog.filters.rarities')"
           />
         </div>
 
@@ -86,11 +87,11 @@
             @click="showOnlyOwned = !showOnlyOwned"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>
-            Apenas Possuídas
+            {{ $t('collection.only_owned') }}
           </button>
         </div>
 
-        <button v-if="hasActiveFilters" class="btn btn-ghost btn-sm clear-btn" @click="clearFilters">✕ Limpar</button>
+        <button v-if="hasActiveFilters" class="btn btn-ghost btn-sm clear-btn" @click="clearFilters">✕ {{ $t('common.clear') }}</button>
       </div>
 
       <!-- ── Loading ── -->
@@ -105,17 +106,17 @@
       <!-- ── Error ── -->
       <div v-else-if="error" class="empty-state fade-in">
         <div class="empty-icon">⚠️</div>
-        <h3 class="empty-title">Algo deu errado</h3>
+        <h3 class="empty-title">{{ $t('common.something_went_wrong') }}</h3>
         <p class="empty-text">{{ error }}</p>
-        <button class="btn btn-primary" @click="fetchAllData">Tentar novamente</button>
+        <button class="btn btn-primary" @click="fetchAllData">{{ $t('common.try_again') }}</button>
       </div>
 
       <!-- ── Empty ── -->
       <div v-else-if="filteredCards.length === 0" class="empty-state fade-in">
         <div class="empty-icon">🔍</div>
-        <h3 class="empty-title">Nenhuma carta encontrada</h3>
-        <p class="empty-text">Ajuste os filtros ou busque outro nome.</p>
-        <button v-if="hasActiveFilters" class="btn btn-secondary btn-sm" @click="clearFilters">Limpar filtros</button>
+        <h3 class="empty-title">{{ $t('collection.empty') }}</h3>
+        <p class="empty-text">{{ $t('collection.empty_hint') }}</p>
+        <button v-if="hasActiveFilters" class="btn btn-secondary btn-sm" @click="clearFilters">{{ $t('common.clear_filters') }}</button>
       </div>
 
       <!-- ── Cards grid ── -->
@@ -161,7 +162,7 @@
             <div class="collection-controls">
                 <!-- Base Variant (Aggregated) -->
                 <div class="variant-row" :class="{'variant-row--active': getQty(card.id, 'normal_qty') + getQty(card.id, 'foil_qty') > 0}">
-                    <span class="variant-label">Normal</span>
+                    <span class="variant-label">{{ $t('collection.normal') }}</span>
                     <div class="variant-stepper">
                         <button class="step-btn" @click="removeSmart(card.id, 'normal_qty', 'foil_qty')">−</button>
                         <span class="step-val">{{ getQty(card.id, 'normal_qty') + getQty(card.id, 'foil_qty') }}</span>
@@ -170,7 +171,7 @@
                 </div>
                 <!-- Alt Art Variant (Aggregated) -->
                 <div class="variant-row" :class="{'variant-row--active': getQty(card.id, 'alt_art_qty') + getQty(card.id, 'alt_art_foil_qty') > 0, 'variant-row--disabled': !hasAltArt(card)}">
-                    <span class="variant-label v-alt">🎨 AArt</span>
+                    <span class="variant-label v-alt">{{ $t('collection.aart') }}</span>
                     <div class="variant-stepper">
                         <button class="step-btn" :disabled="!hasAltArt(card)" @click="removeSmart(card.id, 'alt_art_qty', 'alt_art_foil_qty')">−</button>
                         <span class="step-val">{{ getQty(card.id, 'alt_art_qty') + getQty(card.id, 'alt_art_foil_qty') }}</span>
@@ -179,7 +180,7 @@
                 </div>
                 <!-- Overnumbered/Signed Variant (Aggregated) -->
                 <div class="variant-row" :class="{'variant-row--active': getQty(card.id, 'overnumbered_qty') + getQty(card.id, 'overnumbered_foil_qty') > 0, 'variant-row--disabled': !hasSigned(card)}">
-                    <span class="variant-label v-sign">📈 Over</span>
+                    <span class="variant-label v-sign">{{ $t('collection.over') }}</span>
                     <div class="variant-stepper">
                         <button class="step-btn" :disabled="!hasSigned(card)" @click="removeSmart(card.id, 'overnumbered_qty', 'overnumbered_foil_qty')">−</button>
                         <span class="step-val">{{ getQty(card.id, 'overnumbered_qty') + getQty(card.id, 'overnumbered_foil_qty') }}</span>
@@ -189,7 +190,7 @@
                 
                 <button class="manage-btn" @click.prevent="managingCard = card">
                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                   <span>Gerenciar Variantes / Foil</span>
+                   <span>{{ $t('collection.manage_variants') }}</span>
                 </button>
             </div>
             
@@ -208,7 +209,7 @@
       <div v-if="managingCard" class="modal-overlay fade-in" @click="managingCard = null">
         <div class="manage-modal stagger-enter" @click.stop>
           <div class="modal-header">
-          <h3>Variantes Foil / Edições</h3>
+          <h3>{{ $t('collection.variants_title') }}</h3>
           <button class="btn-ghost" @click="managingCard = null">
              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -217,9 +218,9 @@
         <div class="modal-body">
            <!-- Normal Group -->
            <div class="manage-group">
-              <h5 class="manage-group-title">Arte Padrão</h5>
+              <h5 class="manage-group-title">{{ $t('collection.normal_art') }}</h5>
               <div class="manage-row">
-                 <span class="manage-label">Normal</span>
+                 <span class="manage-label">{{ $t('collection.normal') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'normal_qty', -1)">−</button>
                     <span class="step-val">{{ getQty(managingCard.id, 'normal_qty') }}</span>
@@ -227,7 +228,7 @@
                  </div>
               </div>
               <div class="manage-row foil-row">
-                 <span class="manage-label manage-label-foil">⭐ Foil Brilhante</span>
+                 <span class="manage-label manage-label-foil">{{ $t('collection.foil') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'foil_qty', -1)">−</button>
                     <span class="step-val">{{ getQty(managingCard.id, 'foil_qty') }}</span>
@@ -238,9 +239,9 @@
 
            <!-- AArt Group -->
            <div class="manage-group" v-if="hasAltArt(managingCard)">
-              <h5 class="manage-group-title v-alt">Arte Alternativa</h5>
+              <h5 class="manage-group-title v-alt">{{ $t('collection.alt_art') }}</h5>
               <div class="manage-row">
-                 <span class="manage-label">Normal AArt</span>
+                 <span class="manage-label">{{ $t('collection.normal_aart') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'alt_art_qty', -1)">−</button>
                     <span class="step-val">{{ getQty(managingCard.id, 'alt_art_qty') }}</span>
@@ -248,7 +249,7 @@
                  </div>
               </div>
               <div class="manage-row foil-row">
-                 <span class="manage-label manage-label-foil">⭐ AArt Foil</span>
+                 <span class="manage-label manage-label-foil">{{ $t('collection.aart_foil') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'alt_art_foil_qty', -1)">−</button>
                     <span class="step-val">{{ getQty(managingCard.id, 'alt_art_foil_qty') }}</span>
@@ -259,9 +260,9 @@
 
            <!-- Overnumbered Group -->
            <div class="manage-group" v-if="hasSigned(managingCard)">
-              <h5 class="manage-group-title v-sign">📈 Overnumbered</h5>
+              <h5 class="manage-group-title v-sign">{{ $t('collection.overnumbered_title') }}</h5>
               <div class="manage-row">
-                 <span class="manage-label">Normal Over</span>
+                 <span class="manage-label">{{ $t('collection.normal_over') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'overnumbered_qty', -1)">−</button>
                     <span class="step-val">{{ getQty(managingCard.id, 'overnumbered_qty') }}</span>
@@ -269,7 +270,7 @@
                  </div>
               </div>
               <div class="manage-row foil-row">
-                 <span class="manage-label manage-label-foil">⭐ Over Foil</span>
+                 <span class="manage-label manage-label-foil">{{ $t('collection.over_foil') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'overnumbered_foil_qty', -1)">−</button>
                     <span class="step-val">{{ getQty(managingCard.id, 'overnumbered_foil_qty') }}</span>
@@ -281,23 +282,59 @@
       </div>
       </div>
     </Teleport>
+    <!-- ── Export Modal ── -->
+    <Teleport to="body">
+      <div v-if="showExportModal" class="modal-overlay fade-in" @click.self="showExportModal = false">
+        <div class="modal glass fade-in export-modal">
+          <div class="modal-header">
+            <h3>{{ $t('collection.export_title') }}</h3>
+          </div>
+          <div class="modal-body">
+             <p class="export-hint">{{ $t('collection.export_hint') }}</p>
+             <div class="export-preview">
+                <pre class="export-text">{{ exportedText }}</pre>
+             </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" @click="showExportModal = false">{{ $t('common.close') }}</button>
+            <button class="btn btn-primary" @click="copyCollectionExport">{{ copyLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { getCards, getSets } from '@/services/riftcodex'
+import { getCards } from '@/services/riftcodex'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
+import { exportCollection, copyToClipboard } from '@/composables/useDeckExport'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 const collectionStore = useCollectionStore()
 
 const BATCH_SIZE = 24
 const allCards = ref([])
-const sets = ref([])
+
+const showExportModal = ref(false)
+const copyLabel = ref(t('collection.copy_collection'))
+
+const exportedText = computed(() => {
+    return exportCollection(collectionStore.items, allCards.value)
+})
+
+async function copyCollectionExport() {
+    const ok = await copyToClipboard(exportedText.value)
+    copyLabel.value = ok ? `✓ ${t('common.copied')}` : t('common.error')
+    setTimeout(() => { copyLabel.value = t('collection.copy_collection') }, 2500)
+}
 const loading = ref(true)
 const error = ref(null)
 const visibleCount = ref(BATCH_SIZE)
@@ -308,7 +345,6 @@ const searchQuery = ref('')
 const selectedDomains = ref([])
 const selectedTypes = ref([])
 const selectedRarities = ref([])
-const selectedSets = ref([])
 const selectedEnergy = ref(null)
 const showOnlyOwned = ref(false)
 const managingCard = ref(null)
@@ -429,7 +465,6 @@ const filteredCards = computed(() => {
   }
   if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
   if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
-  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set?.set_id || c.set?.id || c.set_id))
   if (selectedEnergy.value !== null) {
     result = selectedEnergy.value === 6
       ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)
@@ -495,11 +530,11 @@ const hasMore = computed(() => visibleCount.value < filteredCards.value.length)
 
 const hasActiveFilters = computed(() =>
   searchQuery.value.trim() || selectedDomains.value.length > 0 || selectedTypes.value.length > 0 ||
-  selectedRarities.value.length > 0 || selectedSets.value.length > 0 || selectedEnergy.value !== null ||
+  selectedRarities.value.length > 0 || selectedEnergy.value !== null ||
   showOnlyOwned.value
 )
 
-watch([searchQuery, selectedDomains, selectedTypes, selectedRarities, selectedSets, selectedEnergy, showOnlyOwned], () => {
+watch([searchQuery, selectedDomains, selectedTypes, selectedRarities, selectedEnergy, showOnlyOwned], () => {
   visibleCount.value = BATCH_SIZE
   nextTick(setupObserver)
 }, { deep: true })
@@ -521,7 +556,6 @@ function clearFilters() {
   selectedDomains.value = []
   selectedTypes.value = []
   selectedRarities.value = []
-  selectedSets.value = []
   selectedEnergy.value = null
   showOnlyOwned.value = false
 }
@@ -542,23 +576,13 @@ async function fetchAllData() {
   loading.value = true
   error.value = null
   try {
-    // Inicie os dois fetches paralelamente
-    const cardsPromise = getCards()
-    const setsPromise = getSets()
-    
-    // Libera a renderização da tela principal APENAS esperando as cartas
-    const c = await cardsPromise
+    const c = await getCards()
     allCards.value = Array.isArray(c) ? c : []
-    
-    // O Dropdown de Sets continuará carregando silenciosamente (non-blocking)
-    setsPromise.then(s => {
-      sets.value = Array.isArray(s) ? s : []
-    }).catch(() => {})
     
     await nextTick()
     setupObserver()
   } catch (e) {
-    error.value = 'Verifique sua conexão e tente novamente.'
+    error.value = t('common.something_went_wrong')
   } finally {
     loading.value = false
   }
@@ -837,5 +861,58 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 @media (min-width: 769px) {
   .collection-title { font-size: 1.8rem; }
   .cards-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+}
+/* ── Export Modal Specifics ── */
+.export-modal {
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+}
+.export-hint {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 12px;
+}
+.export-preview {
+    background: var(--color-bg-deep);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.export-text {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin: 0;
+}
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px;
+    border-top: 1px solid var(--color-border-subtle);
+}
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+.export-trigger svg {
+    margin-right: 6px;
+}
+@media (max-width: 600px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .export-trigger {
+        width: 100%;
+        justify-content: center;
+    }
 }
 </style>

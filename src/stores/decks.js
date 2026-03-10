@@ -158,7 +158,15 @@ export const useDecksStore = defineStore('decks', () => {
     async function duplicateDeck(id) {
         const original = getDeck(id)
         if (!original) return null
-        const copy = await createDeck(`${original.name} (cópia)`)
+        
+        // We use the i18n global to get the suffix if possible, otherwise fallback
+        let suffix = '(copy)'
+        try {
+            const { i18n } = await import('@/i18n')
+            suffix = i18n.global.t('decks.copy_suffix')
+        } catch (e) { /* ignore */ }
+
+        const copy = await createDeck(`${original.name} ${suffix}`)
         copy.cards = JSON.parse(JSON.stringify(original.cards))
         copy.sideboard = JSON.parse(JSON.stringify(original.sideboard || []))
         copy.mainChampionId = original.mainChampionId

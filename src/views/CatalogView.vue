@@ -3,9 +3,9 @@
     <!-- ── Header ── -->
     <header class="catalog-header fade-in">
       <div>
-        <h1 class="catalog-title">Catálogo de Cartas</h1>
+        <h1 class="catalog-title">{{ $t('catalog.title') }}</h1>
         <p class="catalog-subtitle" v-if="!loading && allCards.length">
-          {{ uniqueCards.length }} carta{{ uniqueCards.length !== 1 ? 's' : '' }}
+          {{ $t('catalog.unique_count', { count: uniqueCards.length }) }}
         </p>
       </div>
     </header>
@@ -17,7 +17,7 @@
         v-model="searchQuery"
         type="text"
         class="input search-input"
-        placeholder="Buscar por nome, texto, mecânica..."
+        :placeholder="$t('catalog.search_placeholder')"
         id="catalog-search"
       />
       <button v-if="searchQuery" class="search-clear btn-ghost btn-icon" @click="searchQuery = ''">
@@ -43,17 +43,12 @@
         <MultiSelectDropdown
           v-model="selectedTypes"
           :options="availableTypes"
-          placeholder="Tipos"
+          :placeholder="$t('catalog.filters.types')"
         />
         <MultiSelectDropdown
           v-model="selectedRarities"
           :options="availableRarities"
-          placeholder="Raridades"
-        />
-        <MultiSelectDropdown
-          v-model="selectedSets"
-          :options="sets.map(s => ({ value: s.set_id || s.id, label: s.label || s.name }))"
-          placeholder="Sets"
+          :placeholder="$t('catalog.filters.rarities')"
         />
       </div>
 
@@ -68,7 +63,7 @@
         >⚡{{ e.label }}</button>
       </div>
 
-      <button v-if="hasActiveFilters" class="btn btn-ghost btn-sm clear-btn" @click="clearFilters">✕ Limpar</button>
+      <button v-if="hasActiveFilters" class="btn btn-ghost btn-sm clear-btn" @click="clearFilters">✕ {{ $t('common.clear') }}</button>
     </div>
 
     <!-- ── Loading ── -->
@@ -83,17 +78,17 @@
     <!-- ── Error ── -->
     <div v-else-if="error" class="empty-state fade-in">
       <div class="empty-icon">⚠️</div>
-      <h3 class="empty-title">Algo deu errado</h3>
+      <h3 class="empty-title">{{ $t('common.something_went_wrong') }}</h3>
       <p class="empty-text">{{ error }}</p>
-      <button class="btn btn-primary" @click="fetchAllData">Tentar novamente</button>
+      <button class="btn btn-primary" @click="fetchAllData">{{ $t('common.try_again') }}</button>
     </div>
 
     <!-- ── Empty ── -->
     <div v-else-if="filteredCards.length === 0" class="empty-state fade-in">
       <div class="empty-icon">🔍</div>
-      <h3 class="empty-title">Nenhuma carta encontrada</h3>
-      <p class="empty-text">Ajuste os filtros ou busque outro nome.</p>
-      <button v-if="hasActiveFilters" class="btn btn-secondary btn-sm" @click="clearFilters">Limpar filtros</button>
+      <h3 class="empty-title">{{ $t('collection.empty') }}</h3>
+      <p class="empty-text">{{ $t('collection.empty_hint') }}</p>
+      <button v-if="hasActiveFilters" class="btn btn-secondary btn-sm" @click="clearFilters">{{ $t('common.clear_filters') }}</button>
     </div>
 
     <!-- ── Cards grid ── -->
@@ -115,7 +110,7 @@
             class="card-image"
             loading="lazy"
           />
-          <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
+          <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ $t('catalog.alt_arts_count', { count: card._altCount }) }}</span>
           <!-- Desktop hover preview -->
           <div class="card-hover-preview">
             <img :src="card.media?.image_url" :alt="card.name" />
@@ -140,12 +135,14 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { getCards, getSets } from '@/services/riftcodex'
+import { getCards } from '@/services/riftcodex'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const BATCH_SIZE = 24
 const allCards = ref([])
-const sets = ref([])
 const loading = ref(true)
 const error = ref(null)
 const visibleCount = ref(BATCH_SIZE)
@@ -156,7 +153,6 @@ const searchQuery = ref('')
 const selectedDomains = ref([])
 const selectedTypes = ref([])
 const selectedRarities = ref([])
-const selectedSets = ref([])
 const selectedEnergy = ref(null)
 
 const availableDomains = ['Body', 'Calm', 'Chaos', 'Fury', 'Mind', 'Order', 'Colorless']
@@ -197,7 +193,6 @@ const filteredCards = computed(() => {
   }
   if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
   if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
-  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set?.set_id || c.set?.id || c.set_id))
   if (selectedEnergy.value !== null) {
     result = selectedEnergy.value === 6
       ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)
@@ -269,10 +264,10 @@ const hasMore = computed(() => visibleCount.value < uniqueCards.value.length)
 
 const hasActiveFilters = computed(() =>
   searchQuery.value.trim() || selectedDomains.value.length > 0 || selectedTypes.value.length > 0 ||
-  selectedRarities.value.length > 0 || selectedSets.value.length > 0 || selectedEnergy.value !== null
+  selectedRarities.value.length > 0 || selectedEnergy.value !== null
 )
 
-watch([searchQuery, selectedDomains, selectedTypes, selectedRarities, selectedSets, selectedEnergy], () => {
+watch([searchQuery, selectedDomains, selectedTypes, selectedRarities, selectedEnergy], () => {
   visibleCount.value = BATCH_SIZE
   nextTick(setupObserver)
 }, { deep: true })
@@ -287,7 +282,6 @@ function clearFilters() {
   selectedDomains.value = []
   selectedTypes.value = []
   selectedRarities.value = []
-  selectedSets.value = []
   selectedEnergy.value = null
 }
 
@@ -307,23 +301,13 @@ async function fetchAllData() {
   loading.value = true
   error.value = null
   try {
-    // Inicie os caches paralelamente
-    const cardsPromise = getCards()
-    const setsPromise = getSets()
-    
-    // Libera a renderização da tela principal APENAS esperando as cartas
-    const c = await cardsPromise
+    const c = await getCards()
     allCards.value = Array.isArray(c) ? c : []
-    
-    // O Dropdown de Sets continuará carregando silenciosamente (non-blocking)
-    setsPromise.then(s => {
-      sets.value = Array.isArray(s) ? s : []
-    }).catch(() => {})
     
     await nextTick()
     setupObserver()
   } catch (e) {
-    error.value = 'Verifique sua conexão e tente novamente.'
+    error.value = t('common.something_went_wrong')
   } finally {
     loading.value = false
   }

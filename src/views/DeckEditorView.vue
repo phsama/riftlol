@@ -22,11 +22,11 @@
       <div class="editor-actions">
         <button class="btn btn-secondary btn-sm" @click="showImportModal = true">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Importar
+          {{ $t('editor.import') }}
         </button>
         <button class="btn btn-secondary btn-sm" @click="showExportModal = true" :disabled="!deck.cards.length">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Exportar
+          {{ $t('editor.export') }}
         </button>
       </div>
     </header>
@@ -35,12 +35,12 @@
     <div class="stats-bar glass">
       <div class="stat">
         <span class="stat-value">{{ totalCards }}</span>
-        <span class="stat-label">Main</span>
+        <span class="stat-label">{{ $t('editor.main_deck') }}</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
         <span class="stat-value">{{ sideboardTotal }}</span>
-        <span class="stat-label">Side</span>
+        <span class="stat-label">{{ $t('editor.sideboard') }}</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
@@ -48,7 +48,7 @@
           <span v-for="d in deckDomains" :key="d" class="domain-badge" :class="`domain-${d.toLowerCase()}`">{{ d }}</span>
           <span v-if="!deckDomains.length" class="stat-value" style="font-size:0.8rem;">—</span>
         </div>
-        <span class="stat-label">Domínios</span>
+        <span class="stat-label">{{ $t('editor.domains') }}</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
@@ -58,7 +58,7 @@
             <span class="energy-bar-label">{{ bar.cost }}</span>
           </div>
         </div>
-        <span class="stat-label">Energia</span>
+        <span class="stat-label">{{ $t('editor.energy') }}</span>
       </div>
     </div>
 
@@ -70,7 +70,7 @@
           v-model="searchQuery"
           type="text"
           class="input input-sm search-input"
-          placeholder="Adicionar (buscar por nome, mecânica...)"
+          :placeholder="$t('editor.add_placeholder')"
           id="editor-card-search"
           @focus="showSearchResults = true"
         />
@@ -108,7 +108,7 @@
     <section class="deck-section" v-if="deck.cards.length || !deck.sideboard?.length">
       <h2 class="section-title">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-        Main Deck
+        {{ $t('editor.main_deck') }}
         <span class="section-count">{{ totalCards }}</span>
       </h2>
 
@@ -116,7 +116,7 @@
         <!-- Lendas (type=Legend) -->
         <div v-if="mainLegends.length" class="hero-col legend-group">
           <h3 class="group-label group-label--legend">
-            <span>⭐</span> Lendas
+            <span>⭐</span> {{ $t('editor.legends') }}
           </h3>
           <div class="card-entries card-entries--grid">
             <div v-for="entry in mainLegends" :key="entry.cardId" class="card-entry card-entry--legend">
@@ -145,7 +145,7 @@
         <!-- Main Champion (user-selected) -->
         <div v-if="mainChampionEntry" class="hero-col champion-hero-group">
           <h3 class="group-label group-label--champion">
-            <span>🛡️</span> Campeão Principal
+            <span>🛡️</span> {{ $t('editor.main_champion') }}
           </h3>
           <div class="card-entry card-entry--main-champion">
             <div class="entry-img-link" :class="{'entry-img-link--landscape': mainChampionEntry.type === 'Battlefield'}">
@@ -192,7 +192,7 @@
               class="star-btn"
               :class="{ 'star-btn--active': deck.mainChampionId === entry.cardId }"
               @click="decksStore.setMainChampion(deck.id, entry.cardId)"
-              title="Definir como Campeão Principal"
+              :title="$t('editor.set_main_champion')"
             >★</button>
             <div class="entry-qty">
               <button class="qty-btn" @click="decksStore.removeCard(deck.id, entry.cardId)">−</button>
@@ -204,7 +204,7 @@
       </div>
 
       <div v-if="!deck.cards.length" class="section-empty">
-        <p>Use a busca acima ou importe uma lista para montar seu deck.</p>
+        <p>{{ $t('editor.empty_deck_hint') }}</p>
       </div>
     </section>
 
@@ -214,7 +214,7 @@
     <section class="deck-section" v-if="deck.sideboard?.length">
       <h2 class="section-title section-title--side">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"/></svg>
-        Sideboard
+        {{ $t('editor.sideboard') }}
         <span class="section-count">{{ sideboardTotal }}</span>
       </h2>
       <div class="card-entries card-entries--grid">
@@ -247,35 +247,29 @@
     <Teleport to="body">
       <div v-if="showImportModal" class="modal-overlay" @click.self="showImportModal = false">
         <div class="modal glass fade-in">
-          <h3 class="modal-title">Importar lista de cartas</h3>
-          <p class="modal-hint">Cole sua decklist no formato: <code>3 Carta Nome</code><br/>Use <code>Sideboard:</code> para separar o sideboard.</p>
+          <h3 class="modal-title">{{ $t('editor.import_title') }}</h3>
+          <p class="modal-hint">
+            {{ $t('editor.import_hint', { format: '3 Carta Nome', sideboard: 'Sideboard:' }) }}
+          </p>
           <textarea
             v-model="importText"
             class="input import-textarea"
-            placeholder="1 Fiora, Worthy
-3 Sett, Brawler
-2 B.F. Sword
-6 Order Rune
-Sideboard:
-1 Warmog's Armor
-2 Unyielding Spirit"
+            :placeholder="$t('editor.import_placeholder')"
             rows="10"
             id="import-textarea"
             ref="importTextarea"
           ></textarea>
 
           <div v-if="importResult" class="import-result" :class="importResult.unmatched.length ? 'import-result--warn' : 'import-result--ok'">
-            <span v-if="!importResult.unmatched.length">✓ {{ importResult.matched }} carta{{ importResult.matched !== 1 ? 's' : '' }} importada{{ importResult.matched !== 1 ? 's' : '' }} com sucesso!</span>
+            <span v-if="!importResult.unmatched.length">{{ $t('editor.import_success', { count: importResult.matched }) }}</span>
             <span v-else>
-              ✓ {{ importResult.matched }} importada{{ importResult.matched !== 1 ? 's' : '' }}.
-              ⚠ {{ importResult.unmatched.length }} não encontrada{{ importResult.unmatched.length !== 1 ? 's' : '' }}:
-              <strong>{{ importResult.unmatched.join(', ') }}</strong>
+              {{ $t('editor.import_warn', { matched: importResult.matched, unmatched: importResult.unmatched.length, list: importResult.unmatched.join(', ') }) }}
             </span>
           </div>
 
           <div class="modal-actions">
-            <button class="btn btn-ghost" @click="showImportModal = false; importResult = null">Fechar</button>
-            <button class="btn btn-primary" :disabled="!importText.trim()" @click="doImport">Importar deck</button>
+            <button class="btn btn-ghost" @click="showImportModal = false; importResult = null">{{ $t('common.close') }}</button>
+            <button class="btn btn-primary" :disabled="!importText.trim()" @click="doImport">{{ $t('editor.import') }}</button>
           </div>
         </div>
       </div>
@@ -298,7 +292,7 @@ Sideboard:
             <pre class="export-text">{{ exportedText }}</pre>
           </div>
           <div class="modal-actions">
-            <button class="btn btn-ghost" @click="showExportModal = false">Fechar</button>
+            <button class="btn btn-ghost" @click="showExportModal = false">{{ $t('common.close') }}</button>
             <button class="btn btn-primary" @click="copyExport">{{ copyLabel }}</button>
           </div>
         </div>
@@ -314,15 +308,15 @@ Sideboard:
     <div style="font-size: 2.5rem; color: var(--color-text-tertiary); margin-bottom: 8px;">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
-    <h3 class="empty-title">Faça login para gerenciar decks</h3>
-    <button class="btn btn-primary" style="margin-top: 12px;" @click="authStore.openLogin('login')">Entrar agora</button>
+    <h3 class="empty-title">{{ $t('decks.login_prompt') }}</h3>
+    <button class="btn btn-primary" style="margin-top: 12px;" @click="authStore.openLogin('login')">{{ $t('common.login') }}</button>
   </div>
 
   <!-- Not found -->
   <div v-else class="empty-state fade-in" style="padding: 60px 20px; text-align: center;">
     <div style="font-size: 2.5rem;">🔍</div>
-    <h3 class="empty-title">Deck não encontrado</h3>
-    <router-link to="/decks" class="btn btn-primary" style="margin-top: 12px;">Ver todos os decks</router-link>
+    <h3 class="empty-title">{{ $t('editor.deck_not_found') }}</h3>
+    <router-link to="/decks" class="btn btn-primary" style="margin-top: 12px;">{{ $t('editor.view_all') }}</router-link>
   </div>
 </template>
 
@@ -332,8 +326,10 @@ import { useDecksStore } from '@/stores/decks'
 import { useAuthStore } from '@/stores/auth'
 import { getCards } from '@/services/riftcodex'
 import { EXPORT_FORMATS, copyToClipboard } from '@/composables/useDeckExport'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({ id: String })
+const { t } = useI18n()
 const decksStore = useDecksStore()
 const authStore = useAuthStore()
 
@@ -421,7 +417,7 @@ const uniqueSearchResults = computed(() => {
 function addCard(card) {
   decksStore.addCard(props.id, card)
   showToast.value = true
-  toastMessage.value = `${card.name} adicionada!`
+  toastMessage.value = t('editor.added_toast', { name: card.name })
   setTimeout(() => { showToast.value = false }, 2500)
 }
 
@@ -450,7 +446,7 @@ function doImport() {
 // ── Export ──
 const showExportModal = ref(false)
 const selectedFormat = ref('generic')
-const copyLabel = ref('Copiar para clipboard')
+const copyLabel = ref(t('editor.copy_clipboard'))
 
 const exportedText = computed(() => {
   if (!deck.value) return ''
@@ -459,8 +455,8 @@ const exportedText = computed(() => {
 })
 async function copyExport() {
   const ok = await copyToClipboard(exportedText.value)
-  copyLabel.value = ok ? '✓ Copiado!' : 'Falha'
-  setTimeout(() => { copyLabel.value = 'Copiar para clipboard' }, 2500)
+  copyLabel.value = ok ? t('common.copied') : t('common.error')
+  setTimeout(() => { copyLabel.value = t('editor.copy_clipboard') }, 2500)
 }
 </script>
 

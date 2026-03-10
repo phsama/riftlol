@@ -17,6 +17,7 @@
     "string-similarity": "^4.0.4",
     "tesseract.js": "^7.0.0",
     "vue": "^3.5.0",
+    "vue-i18n": "^9.14.5",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {

@@ -1,9 +1,8 @@
-
 <template>
   <div class="scanner-view fade-in">
     <header class="scanner-header">
-      <h1 class="scanner-title">Scanear Carta</h1>
-      <p class="scanner-subtitle">Aponte a câmera para uma carta física para identificá-la.</p>
+      <h1 class="scanner-title">{{ $t('scanner.title') }}</h1>
+      <p class="scanner-subtitle">{{ $t('scanner.subtitle') }}</p>
     </header>
 
     <div class="scanner-container">
@@ -21,13 +20,13 @@
         <!-- Initial Start Button -->
         <div v-if="!isCameraOpen" class="camera-placeholder">
           <div class="placeholder-icon">📸</div>
-          <button class="btn btn-primary" @click="startCamera">Abrir Câmera</button>
+          <button class="btn btn-primary" @click="startCamera">{{ $t('scanner.open_camera') }}</button>
         </div>
 
         <!-- Loading / Processing state -->
         <div v-if="processing" class="processing-overlay">
           <div class="spinner"></div>
-          <span>Identificando carta...</span>
+          <span>{{ $t('scanner.identifying') }}</span>
         </div>
       </div>
 
@@ -50,8 +49,8 @@
     <!-- Results Area -->
     <div v-if="resultCard" class="scan-result fade-in">
        <div class="result-header">
-         <span>Carta Identificada:</span>
-         <button class="btn-ghost btn-sm" @click="resultCard = null">Limpar</button>
+         <span>{{ $t('scanner.identified') }}</span>
+         <button class="btn-ghost btn-sm" @click="resultCard = null">{{ $t('scanner.clear') }}</button>
        </div>
        <router-link :to="{ name: 'card-detail', params: { name: resultCard.name } }" class="result-card-link">
          <img :src="resultCard.media?.image_url" :alt="resultCard.name" class="result-thumb" />
@@ -64,13 +63,13 @@
        </router-link>
 
         <div class="collection-controls scan-controls-panel">
-            <h4 class="scan-controls-title">Adicionar à Coleção</h4>
+            <h4 class="scan-controls-title">{{ $t('scanner.add_to_collection') }}</h4>
             
            <!-- Normal Group -->
            <div class="manage-group">
-              <h5 class="manage-group-title">Arte Padrão</h5>
+              <h5 class="manage-group-title">{{ $t('collection.normal_art') }}</h5>
               <div class="manage-row">
-                 <span class="manage-label">Normal</span>
+                 <span class="manage-label">{{ $t('collection.normal') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'normal_qty', -1)">−</button>
                     <span class="step-val">{{ getQty('normal_qty') }}</span>
@@ -78,7 +77,7 @@
                  </div>
               </div>
               <div class="manage-row foil-row">
-                 <span class="manage-label manage-label-foil">⭐ Foil Brilhante</span>
+                 <span class="manage-label manage-label-foil">{{ $t('collection.foil') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'foil_qty', -1)">−</button>
                     <span class="step-val">{{ getQty('foil_qty') }}</span>
@@ -89,9 +88,9 @@
 
            <!-- AArt Group -->
            <div class="manage-group" v-if="hasAltArt">
-              <h5 class="manage-group-title v-alt">Arte Alternativa</h5>
+              <h5 class="manage-group-title v-alt">{{ $t('collection.alt_art') }}</h5>
               <div class="manage-row">
-                 <span class="manage-label">Normal AArt</span>
+                 <span class="manage-label">{{ $t('collection.normal_aart') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'alt_art_qty', -1)">−</button>
                     <span class="step-val">{{ getQty('alt_art_qty') }}</span>
@@ -99,7 +98,7 @@
                  </div>
               </div>
               <div class="manage-row foil-row">
-                 <span class="manage-label manage-label-foil">⭐ AArt Foil</span>
+                 <span class="manage-label manage-label-foil">{{ $t('collection.aart_foil') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'alt_art_foil_qty', -1)">−</button>
                     <span class="step-val">{{ getQty('alt_art_foil_qty') }}</span>
@@ -110,9 +109,9 @@
 
            <!-- Overnumbered Group -->
            <div class="manage-group" v-if="hasSigned">
-              <h5 class="manage-group-title v-sign">📈 Overnumbered</h5>
+              <h5 class="manage-group-title v-sign">{{ $t('collection.overnumbered_title') }}</h5>
               <div class="manage-row">
-                 <span class="manage-label">Normal Over</span>
+                 <span class="manage-label">{{ $t('collection.normal_over') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'overnumbered_qty', -1)">−</button>
                     <span class="step-val">{{ getQty('overnumbered_qty') }}</span>
@@ -120,7 +119,7 @@
                  </div>
               </div>
               <div class="manage-row foil-row">
-                 <span class="manage-label manage-label-foil">⭐ Over Foil</span>
+                 <span class="manage-label manage-label-foil">{{ $t('collection.over_foil') }}</span>
                  <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'overnumbered_foil_qty', -1)">−</button>
                     <span class="step-val">{{ getQty('overnumbered_foil_qty') }}</span>
@@ -130,7 +129,7 @@
            </div>
         </div>
 
-       <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" @click="goToCard">Ver Detalhes</button>
+       <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" @click="goToCard">{{ $t('scanner.view_details') }}</button>
     </div>
 
   </div>
@@ -142,7 +141,9 @@ import { useRouter } from 'vue-router'
 import { createWorker } from 'tesseract.js'
 import riftcodexService from '@/services/riftcodex'
 import { useCollectionStore } from '@/stores/collection'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const router = useRouter()
 const collectionStore = useCollectionStore()
 const video = ref(null)
@@ -180,7 +181,7 @@ async function startCamera() {
       isCameraOpen.value = true
     }
   } catch (err) {
-    scanError.value = "Não foi possível acessar a câmera. Verifique as permissões."
+    scanError.value = t('scanner.error_camera')
   }
 }
 
@@ -279,10 +280,10 @@ async function capturePhoto() {
       resultCard.value = bestMatch;
       scanError.value = null;
     } else {
-      scanError.value = "Não identificamos a carta com precisão. Melhore a luz e tente novamente.";
+      scanError.value = t('scanner.error_ocr');
     }
   } catch (err) {
-    scanError.value = "Houve uma interrupção ao processar a imagem. Tente novamente.";
+    scanError.value = t('scanner.error_interrupted');
   } finally {
     processing.value = false
   }

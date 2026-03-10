@@ -3,14 +3,14 @@
     <!-- Back -->
     <router-link to="/" class="back-link">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-      Voltar
+      {{ $t('common.back') }}
     </router-link>
 
     <div class="detail-layout">
       <!-- Card image -->
       <div class="detail-image-wrap">
         <img :src="card.media?.image_url" :alt="card.name" class="detail-image" />
-        <div v-if="isChampion" class="champion-badge">⭐ Lenda</div>
+        <div v-if="isChampion" class="champion-badge">{{ $t('detail.lenda') }}</div>
         
         <!-- Alt arts slider -->
         <div v-if="cardVersions.length > 1" class="art-slider-controls">
@@ -42,7 +42,7 @@
         <!-- Attributes -->
         <div class="detail-attributes" v-if="hasAttributes">
           <div class="attr-chip" v-if="card.attributes?.energy != null">
-            <span class="attr-label">Energia</span>
+            <span class="attr-label">{{ $t('detail.energy') }}</span>
             <span class="attr-value attr-energy">{{ card.attributes.energy }}</span>
           </div>
           <div class="attr-chip" v-if="card.attributes?.might != null">
@@ -61,13 +61,13 @@
 
         <!-- Meta -->
         <div class="detail-meta-row" v-if="card.set">
-          <span class="meta-label">Set:</span> {{ card.set.label }} ({{ card.set.id }})
+          <span class="meta-label">{{ $t('detail.set') }}:</span> {{ card.set.label }} ({{ card.set.id }})
         </div>
         <div class="detail-meta-row" v-if="card.media?.artist">
-          <span class="meta-label">Artista:</span> {{ card.media.artist }}
+          <span class="meta-label">{{ $t('detail.artist') }}:</span> {{ card.media.artist }}
         </div>
         <div class="detail-meta-row" v-if="card.public_code">
-          <span class="meta-label">Código:</span> {{ card.public_code }}
+          <span class="meta-label">{{ $t('detail.code') }}:</span> {{ card.public_code }}
         </div>
 
         <div class="detail-tags" v-if="card.tags?.length">
@@ -76,26 +76,26 @@
 
         <!-- Metadata badges -->
         <div class="detail-badges" v-if="card.metadata?.alternate_art || card.metadata?.signature || card.metadata?.overnumbered">
-          <span v-if="card.metadata.alternate_art" class="meta-badge meta-alt">Arte Alternativa</span>
+          <span v-if="card.metadata.alternate_art" class="meta-badge meta-alt">{{ $t('collection.alt_art') }}</span>
           <span v-if="card.metadata.signature" class="meta-badge meta-sig">Assinada</span>
-          <span v-if="card.metadata.overnumbered" class="meta-badge meta-over">Overnumbered</span>
+          <span v-if="card.metadata.overnumbered" class="meta-badge meta-over">{{ $t('collection.overnumbered') }}</span>
         </div>
 
         <!-- Add to deck (sticky on mobile) -->
         <div class="detail-actions">
           <div class="deck-selector" v-if="decksStore.decks.length">
             <select v-model="selectedDeckId" class="input" id="deck-select">
-              <option value="" disabled>Selecionar deck...</option>
+              <option value="" disabled>{{ $t('detail.select_deck') }}</option>
               <option v-for="deck in decksStore.decks" :key="deck.id" :value="deck.id">{{ deck.name }}</option>
             </select>
-            <button class="btn btn-primary" :disabled="!selectedDeckId" @click="addToDeck">Adicionar</button>
+            <button class="btn btn-primary" :disabled="!selectedDeckId" @click="addToDeck">{{ $t('common.save') }}</button>
           </div>
-          <router-link v-else to="/decks" class="btn btn-secondary" style="width:100%;">Criar seu primeiro deck</router-link>
+          <router-link v-else to="/decks" class="btn btn-secondary" style="width:100%;">{{ $t('decks.create_first') }}</router-link>
         </div>
       </div>
     </div>
 
-    <div v-if="showToast" class="toast toast-success">✓ Carta adicionada!</div>
+    <div v-if="showToast" class="toast toast-success">{{ $t('detail.added_toast') }}</div>
   </div>
 
   <!-- Loading -->
@@ -107,9 +107,9 @@
   <!-- Error -->
   <div v-else class="empty-state fade-in">
     <div style="font-size: 2.5rem;">😔</div>
-    <h3 class="empty-title">Carta não encontrada</h3>
-    <p class="empty-text">{{ error || 'Não foi possível carregar essa carta.' }}</p>
-    <router-link to="/" class="btn btn-primary">Voltar ao catálogo</router-link>
+    <h3 class="empty-title">{{ $t('detail.not_found') }}</h3>
+    <p class="empty-text">{{ error || $t('detail.not_found_desc') }}</p>
+    <router-link to="/" class="btn btn-primary">{{ $t('detail.back_to_catalog') }}</router-link>
   </div>
 </template>
 
