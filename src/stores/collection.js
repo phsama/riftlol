@@ -4,7 +4,7 @@ import { api } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 
 export const useCollectionStore = defineStore('collection', () => {
-    const items = ref({}) // key: card_id, value: { normal_qty, foil_qty, alt_art_qty, signed_qty, overnumbered_qty }
+    const items = ref({}) // key: card_id, value: { normal_qty, foil_qty, alt_art_qty, alt_art_foil_qty, signed_qty, overnumbered_qty, overnumbered_foil_qty }
     const isLoading = ref(false)
     const error = ref(null)
     const initialized = ref(false)
@@ -29,8 +29,10 @@ export const useCollectionStore = defineStore('collection', () => {
                     normal_qty: item.normal_qty,
                     foil_qty: item.foil_qty,
                     alt_art_qty: item.alt_art_qty,
+                    alt_art_foil_qty: item.alt_art_foil_qty || 0,
                     signed_qty: item.signed_qty,
-                    overnumbered_qty: item.overnumbered_qty
+                    overnumbered_qty: item.overnumbered_qty,
+                    overnumbered_foil_qty: item.overnumbered_foil_qty || 0
                 }
             })
             items.value = newItems
@@ -48,7 +50,7 @@ export const useCollectionStore = defineStore('collection', () => {
         if (!authStore.user) return
 
         const current = items.value[cardId] || {
-            normal_qty: 0, foil_qty: 0, alt_art_qty: 0, signed_qty: 0, overnumbered_qty: 0
+            normal_qty: 0, foil_qty: 0, alt_art_qty: 0, alt_art_foil_qty: 0, signed_qty: 0, overnumbered_qty: 0, overnumbered_foil_qty: 0
         }
 
         const newValue = Math.max(0, current[field] + delta)
@@ -73,7 +75,7 @@ export const useCollectionStore = defineStore('collection', () => {
     function getCardTotal(cardId) {
         const item = items.value[cardId]
         if (!item) return 0
-        return item.normal_qty + item.foil_qty + item.alt_art_qty + item.signed_qty + item.overnumbered_qty
+        return item.normal_qty + item.foil_qty + item.alt_art_qty + (item.alt_art_foil_qty || 0) + item.signed_qty + item.overnumbered_qty + (item.overnumbered_foil_qty || 0)
     }
 
     return {

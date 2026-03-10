@@ -16,8 +16,10 @@ class CollectionItem(Base):
     normal_qty = Column(Integer, default=0, nullable=False)
     foil_qty = Column(Integer, default=0, nullable=False)
     alt_art_qty = Column(Integer, default=0, nullable=False)
+    alt_art_foil_qty = Column(Integer, default=0, nullable=False)
     signed_qty = Column(Integer, default=0, nullable=False)
     overnumbered_qty = Column(Integer, default=0, nullable=False)
+    overnumbered_foil_qty = Column(Integer, default=0, nullable=False)
 
     # A user can only have one collection item record per card_id
     __table_args__ = (

@@ -159,40 +159,39 @@
             
             <!-- Collection controls -->
             <div class="collection-controls">
-                <!-- Base Variant -->
-                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.normal_qty > 0}">
+                
+                <div class="variant-row foil-switch-row">
+                    <label class="foil-switch-label">
+                        <input type="checkbox" v-model="isFoilMode[card.id]">
+                        <span>Opções Foil ⭐</span>
+                    </label>
+                </div>
+
+                <!-- Base Variant (Normal or Normal Foil) -->
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'foil_qty' : 'normal_qty'] > 0}">
                     <span class="variant-label">Normal</span>
                     <div class="variant-stepper">
-                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
-                        <span class="step-val">{{ collectionStore.items[card.id]?.normal_qty || 0 }}</span>
-                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
-                    </div>
-                </div>
-                <!-- Foil Variant -->
-                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.foil_qty > 0}">
-                    <span class="variant-label v-foil">⭐ Foil</span>
-                    <div class="variant-stepper">
-                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
-                        <span class="step-val">{{ collectionStore.items[card.id]?.foil_qty || 0 }}</span>
-                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
+                        <button class="step-btn" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'foil_qty' : 'normal_qty', -1)">−</button>
+                        <span class="step-val">{{ collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'foil_qty' : 'normal_qty'] || 0 }}</span>
+                        <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'foil_qty' : 'normal_qty', 1)">+</button>
                     </div>
                 </div>
                 <!-- Alt Art Variant -->
-                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.alt_art_qty > 0, 'variant-row--disabled': !hasAltArt(card)}">
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'alt_art_foil_qty' : 'alt_art_qty'] > 0, 'variant-row--disabled': !hasAltArt(card)}">
                     <span class="variant-label v-alt">🎨 AArt</span>
                     <div class="variant-stepper">
-                        <button class="step-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
-                        <span class="step-val">{{ collectionStore.items[card.id]?.alt_art_qty || 0 }}</span>
-                        <button class="step-btn step-add" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
+                        <button class="step-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'alt_art_foil_qty' : 'alt_art_qty', -1)">−</button>
+                        <span class="step-val">{{ collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'alt_art_foil_qty' : 'alt_art_qty'] || 0 }}</span>
+                        <button class="step-btn step-add" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'alt_art_foil_qty' : 'alt_art_qty', 1)">+</button>
                     </div>
                 </div>
-                <!-- Signed Variant -->
-                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.signed_qty > 0, 'variant-row--disabled': !hasSigned(card)}">
-                    <span class="variant-label v-sign">✍️ Sign</span>
+                <!-- Overnumbered/Signed Variant -->
+                <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'overnumbered_foil_qty' : 'overnumbered_qty'] > 0, 'variant-row--disabled': !hasSigned(card)}">
+                    <span class="variant-label v-sign">📈 Over</span>
                     <div class="variant-stepper">
-                        <button class="step-btn" :disabled="!hasSigned(card)" @click="collectionStore.updateItemQty(card.id, 'signed_qty', -1)">−</button>
-                        <span class="step-val">{{ collectionStore.items[card.id]?.signed_qty || 0 }}</span>
-                        <button class="step-btn step-add" :disabled="!hasSigned(card)" @click="collectionStore.updateItemQty(card.id, 'signed_qty', 1)">+</button>
+                        <button class="step-btn" :disabled="!hasSigned(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'overnumbered_foil_qty' : 'overnumbered_qty', -1)">−</button>
+                        <span class="step-val">{{ collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'overnumbered_foil_qty' : 'overnumbered_qty'] || 0 }}</span>
+                        <button class="step-btn step-add" :disabled="!hasSigned(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'overnumbered_foil_qty' : 'overnumbered_qty', 1)">+</button>
                     </div>
                 </div>
             </div>
@@ -235,6 +234,7 @@ const selectedRarities = ref([])
 const selectedSets = ref([])
 const selectedEnergy = ref(null)
 const showOnlyOwned = ref(false)
+const isFoilMode = ref({})
 
 const availableDomains = ['Body', 'Calm', 'Chaos', 'Colorless', 'Fury', 'Mind', 'Order']
 
@@ -642,6 +642,19 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
     margin-top: auto; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);
     transition: opacity 0.3s;
 }
+
+.foil-switch-row {
+    background: transparent !important;
+    justify-content: flex-end;
+    margin-bottom: 2px;
+}
+.foil-switch-label {
+    font-size: 0.65rem; color: var(--color-gold-400); font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    padding: 2px 4px; border-radius: 4px; transition: background 0.2s;
+}
+.foil-switch-label:hover { background: rgba(201,168,76,0.1); }
+
 .variant-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 3px 6px; border-radius: 4px; background: rgba(0,0,0,0.1);

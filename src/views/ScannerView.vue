@@ -62,6 +62,43 @@
            </span>
          </div>
        </router-link>
+
+        <div class="collection-controls scan-controls-panel">
+            <div class="variant-row foil-switch-row">
+                <label class="foil-switch-label">
+                    <input type="checkbox" v-model="isFoilActive">
+                    <span>Opções Foil ⭐</span>
+                </label>
+            </div>
+            
+            <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'foil_qty' : 'normal_qty'] > 0}">
+                <span class="variant-label">Normal</span>
+                <div class="variant-stepper">
+                    <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'foil_qty' : 'normal_qty', -1)">−</button>
+                    <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'foil_qty' : 'normal_qty'] || 0 }}</span>
+                    <button class="step-btn step-add" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'foil_qty' : 'normal_qty', 1)">+</button>
+                </div>
+            </div>
+            
+            <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty'] > 0, 'variant-row--disabled': !hasAltArt}">
+                <span class="variant-label v-alt">🎨 AArt</span>
+                <div class="variant-stepper">
+                    <button class="step-btn" :disabled="!hasAltArt" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty', -1)">−</button>
+                    <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty'] || 0 }}</span>
+                    <button class="step-btn step-add" :disabled="!hasAltArt" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty', 1)">+</button>
+                </div>
+            </div>
+            
+            <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty'] > 0, 'variant-row--disabled': !hasSigned}">
+                <span class="variant-label v-sign">📈 Over</span>
+                <div class="variant-stepper">
+                    <button class="step-btn" :disabled="!hasSigned" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty', -1)">−</button>
+                    <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty'] || 0 }}</span>
+                    <button class="step-btn step-add" :disabled="!hasSigned" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
        <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" @click="goToCard">Ver Detalhes</button>
     </div>
 
@@ -69,12 +106,14 @@
 </template>
 
 <script setup>
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { createWorker } from 'tesseract.js'
 import riftcodexService from '@/services/riftcodex'
+import { useCollectionStore } from '@/stores/collection'
 
 const router = useRouter()
+const collectionStore = useCollectionStore()
 const video = ref(null)
 const canvas = ref(null)
 const isCameraOpen = ref(false)
@@ -82,6 +121,20 @@ const processing = ref(false)
 const resultCard = ref(null)
 const stream = ref(null)
 const facingMode = ref('environment') // Default to back camera
+const isFoilActive = ref(false)
+const allCardsData = ref([])
+
+const recognizedCardVersions = computed(() => {
+  if (!resultCard.value) return []
+  return allCardsData.value.filter(c => c.name === resultCard.value.name)
+})
+const hasAltArt = computed(() => recognizedCardVersions.value.length > 1)
+const hasSigned = computed(() => {
+  return recognizedCardVersions.value.some(v => 
+        (v.tags && v.tags.some(t => t.toLowerCase().includes('sign') || t.toLowerCase().includes('over'))) || 
+        v.metadata?.signature === true
+    )
+})
 
 async function startCamera() {
   try {
@@ -146,6 +199,7 @@ async function capturePhoto() {
     
     // 2. Local search against cached cards
     const allCards = await riftcodexService.getCards()
+    allCardsData.value = allCards // Cache for computed properties
     const stringSimilarity = (await import('string-similarity')).default;
     
     // Clean and split ALL OCR text into an array of words
@@ -404,4 +458,30 @@ onBeforeUnmount(() => {
   animation: rotate 1s linear infinite;
 }
 @keyframes rotate { to { transform: rotate(360deg); } }
+
+/* Controls Panel */
+.scan-controls-panel {
+    background: rgba(0,0,0,0.2);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    margin-top: 12px;
+}
+.collection-controls { display: flex; flex-direction: column; gap: 4px; }
+.foil-switch-row { background: transparent !important; justify-content: flex-end; margin-bottom: 2px; }
+.foil-switch-label { font-size: 0.65rem; color: var(--color-gold-400); font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; }
+.foil-switch-label:hover { background: rgba(201,168,76,0.1); }
+.variant-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.15); transition: background 0.2s; }
+.variant-row--active { background: rgba(255,255,255,0.06); }
+.variant-row--disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
+.variant-label { font-size: 0.7rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; }
+.variant-row--active .variant-label { color: var(--color-text-primary); }
+.variant-row--active .v-alt { color: #d67cf2 !important; }
+.variant-row--active .v-sign { color: #50b88a !important; }
+.variant-stepper { display: flex; align-items: center; gap: 8px; }
+.step-val { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; width: 16px; text-align: center; color: var(--color-text-secondary); }
+.variant-row--active .step-val { color: var(--color-text-primary); }
+.step-btn { width: 24px; height: 24px; border:none; border-radius:4px; background: var(--color-bg-surface); color: var(--color-text-secondary); display:flex; align-items:center; justify-content:center; font-weight:700; font-family: var(--font-body); cursor:pointer; transition:all 0.15s; }
+.step-btn:hover { background: var(--color-border-subtle); color: var(--color-text-primary); }
+.step-add { color: var(--color-text-primary); }
+.step-add:hover { background: rgba(74, 127, 255, 0.2); color: var(--color-rift-400); }
 </style>
