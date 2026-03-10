@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { api } from '@/services/api'
+import { getCards } from '@/services/riftcodex'
 import { useAuthStore } from '@/stores/auth'
 import debounce from 'lodash-es/debounce'
 
@@ -37,6 +38,10 @@ export const useDecksStore = defineStore('decks', () => {
         loading.value = true
         try {
             const { data } = await api.get('/decks')
+            
+            const allCards = await getCards()
+            const cardMap = new Map((allCards || []).map(c => [c.id, c]))
+
             // O backend retorna DeckOut, vamos mapear para como o app espera
             decks.value = data.map(d => ({
                 id: d.id,
@@ -44,17 +49,24 @@ export const useDecksStore = defineStore('decks', () => {
                 mainChampionId: d.main_champion_id,
                 createdAt: d.created_at,
                 updatedAt: d.updated_at,
-                cards: d.cards.filter(c => !c.is_sideboard).map(c => ({
-                    // Pra simplificar no frontend mantemos a mesclagem com a _buildCardEntry (quando carrega precisaria juntar c os metadados do riftcodex se quisermos desenhar td,
-                    // mas podemos só carregar pq c.card_id tem a PK lá.
-                    cardId: c.card_id,
-                    quantity: c.quantity,
-                    // TODO: Na UI precisamos da carta cheia (API /cards) ou deixar o ComponentView buscar via ID nas cartas globais...
-                })),
-                sideboard: d.cards.filter(c => c.is_sideboard).map(c => ({
-                    cardId: c.card_id,
-                    quantity: c.quantity
-                }))
+                cards: d.cards.filter(c => !c.is_sideboard).map(c => {
+                    const fullCard = cardMap.get(c.card_id)
+                    if (fullCard) {
+                        const entry = _buildCardEntry(fullCard)
+                        entry.quantity = c.quantity
+                        return entry
+                    }
+                    return { cardId: c.card_id, quantity: c.quantity }
+                }),
+                sideboard: d.cards.filter(c => c.is_sideboard).map(c => {
+                    const fullCard = cardMap.get(c.card_id)
+                    if (fullCard) {
+                        const entry = _buildCardEntry(fullCard)
+                        entry.quantity = c.quantity
+                        return entry
+                    }
+                    return { cardId: c.card_id, quantity: c.quantity }
+                })
             }))
         } catch (e) {
             console.error('Failed to fetch decks from API', e)

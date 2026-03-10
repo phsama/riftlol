@@ -3,6 +3,7 @@
 ### 🟢 O que entregamos nesta iteração:
 - **Filtro de Edições Funcional**: Corrigido o bug que impedia o filtro por expansão/set de funcionar corretamente no Catálogo e no Álbum da Coleção. O sistema agora lê a nova estrutura de dados de set da API (`c.set.set_id`) e aplica a busca local sem falhas.
 - **Identidade Visual das Runas/Domínios**: Ajustamos as cores globais de representação dos domínios (Mind, Body, Calm, Chaos, Order, Fury) para refletir os tons oficiais e idênticos aos dos ícones, garantindo consistência pela aplicação inteira.
+- **Sincronização de Decks na Nuvem**: Corrigido um problema onde decks criados no PC apareciam como "0 cartas" no celular. Agora o aplicativo se reconecta automaticamente ao banco de cartas global para "reidratar" as cartas salvas apenas pelo ID, garantindo que o deck carregue perfeitamente independente do dispositivo onde a conta for acessada.
 
 ### 🟣 Impacto no Negócio:
 - Os jogadores agora conseguem isolar a visualização apenas para as cartas de um Set específico (ex: "Origins" ou "SFD"), facilitando o foco em completar expansões individuais ou montar decks temáticos sem poluição visual.
