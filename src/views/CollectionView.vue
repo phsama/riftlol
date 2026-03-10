@@ -566,11 +566,11 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 24px;
 }
 .collection-title {
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--color-text-primary), var(--color-gold-400));
@@ -578,25 +578,25 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.collection-subtitle { color: var(--color-text-secondary); font-size: 0.78rem; margin-top: 2px; }
+.collection-subtitle { color: var(--color-text-secondary); font-size: 0.85rem; margin-top: 4px; }
 
 /* ── Empty auth state ── */
 .login-prompt { padding: 60px 20px; text-align: center; display:flex; flex-direction:column; align-items:center; }
 
 /* ── Search & Filters ── */
-.collection-search { position: relative; }
+.collection-search { position: relative; margin-bottom: 12px; }
 .search-icon {
-  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
   color: var(--color-text-tertiary); pointer-events: none;
 }
-.search-input { padding-left: 38px; padding-right: 36px; }
-.search-clear { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+.search-input { padding-left: 44px; padding-right: 36px; height: 48px; border-radius: 12px; font-size: 1rem; }
+.search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
 
-.filter-bar { display: flex; flex-direction: column; gap: 8px; }
+.filter-bar { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
 .filter-scroll {
-  display: flex; gap: 6px; overflow-x: auto;
+  display: flex; gap: 10px; overflow-x: auto;
   -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
 }
 .filter-scroll::-webkit-scrollbar { display: none; }
 
