@@ -133,7 +133,7 @@
             class="card-image-wrap"
             :class="[
               {'card-image-wrap--landscape': card.orientation === 'landscape' || card.classification?.type === 'Battlefield'},
-              {'foil-glow': collectionStore.items[card.id]?.foil_qty > 0}
+              {'foil-glow': collectionStore.items[card.id]?.foil_qty > 0 || collectionStore.items[card.id]?.alt_art_foil_qty > 0 || collectionStore.items[card.id]?.overnumbered_foil_qty > 0 || isFoilMode[card.id]}
             ]"
           >
             <img
@@ -163,13 +163,13 @@
                 <div class="variant-row foil-switch-row">
                     <label class="foil-switch-label">
                         <input type="checkbox" v-model="isFoilMode[card.id]">
-                        <span>Opções Foil ⭐</span>
+                        <span>Marcar como Foil ⭐</span>
                     </label>
                 </div>
 
                 <!-- Base Variant (Normal or Normal Foil) -->
                 <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'foil_qty' : 'normal_qty'] > 0}">
-                    <span class="variant-label">Normal</span>
+                    <span class="variant-label">{{ isFoilMode[card.id] ? 'Normal Foil' : 'Normal' }}</span>
                     <div class="variant-stepper">
                         <button class="step-btn" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'foil_qty' : 'normal_qty', -1)">−</button>
                         <span class="step-val">{{ collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'foil_qty' : 'normal_qty'] || 0 }}</span>
@@ -178,7 +178,7 @@
                 </div>
                 <!-- Alt Art Variant -->
                 <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'alt_art_foil_qty' : 'alt_art_qty'] > 0, 'variant-row--disabled': !hasAltArt(card)}">
-                    <span class="variant-label v-alt">🎨 AArt</span>
+                    <span class="variant-label v-alt">🎨 {{ isFoilMode[card.id] ? 'AArt Foil' : 'AArt' }}</span>
                     <div class="variant-stepper">
                         <button class="step-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'alt_art_foil_qty' : 'alt_art_qty', -1)">−</button>
                         <span class="step-val">{{ collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'alt_art_foil_qty' : 'alt_art_qty'] || 0 }}</span>
@@ -187,7 +187,7 @@
                 </div>
                 <!-- Overnumbered/Signed Variant -->
                 <div class="variant-row" :class="{'variant-row--active': collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'overnumbered_foil_qty' : 'overnumbered_qty'] > 0, 'variant-row--disabled': !hasSigned(card)}">
-                    <span class="variant-label v-sign">📈 Over</span>
+                    <span class="variant-label v-sign">📈 {{ isFoilMode[card.id] ? 'Over Foil' : 'Over' }}</span>
                     <div class="variant-stepper">
                         <button class="step-btn" :disabled="!hasSigned(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode[card.id] ? 'overnumbered_foil_qty' : 'overnumbered_qty', -1)">−</button>
                         <span class="step-val">{{ collectionStore.items[card.id]?.[isFoilMode[card.id] ? 'overnumbered_foil_qty' : 'overnumbered_qty'] || 0 }}</span>
@@ -373,13 +373,19 @@ const displayCards = computed(() => {
     const qty = collectionStore.items[baseCard.id] || {}
     let activeVersion = baseCard._versions[0] // Default to Normal (index 0 after sort)
     
+    const hasAnySigned = qty.signed_qty > 0 || qty.overnumbered_qty > 0 || qty.overnumbered_foil_qty > 0
+    const hasAnyAltArt = qty.alt_art_qty > 0 || qty.alt_art_foil_qty > 0
+    
     // IF user has Signed copies, show the signed version if it exists
-    if (qty.signed_qty > 0) {
-       const signed = baseCard._versions.find(v => (v.tags?.some(t => t.toLowerCase().includes('sign'))) || v.metadata?.signature === true)
+    if (hasAnySigned) {
+       const signed = baseCard._versions.find(v => 
+          (v.tags?.some(t => t.toLowerCase().includes('sign') || t.toLowerCase().includes('over'))) || 
+          v.metadata?.signature === true
+       )
        if (signed) activeVersion = signed
     } 
     // ELSE IF user has Alt Art copies, show the first Alt Art version (index 1+)
-    else if (qty.alt_art_qty > 0 && baseCard._versions.length > 1) {
+    else if (hasAnyAltArt && baseCard._versions.length > 1) {
        const altArt = baseCard._versions.find((v, idx) => idx > 0)
        if (altArt) activeVersion = altArt
     }

@@ -67,12 +67,12 @@
             <div class="variant-row foil-switch-row">
                 <label class="foil-switch-label">
                     <input type="checkbox" v-model="isFoilActive">
-                    <span>Opções Foil ⭐</span>
+                    <span>Marcar como Foil ⭐</span>
                 </label>
             </div>
             
             <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'foil_qty' : 'normal_qty'] > 0}">
-                <span class="variant-label">Normal</span>
+                <span class="variant-label">{{ isFoilActive ? 'Normal Foil' : 'Normal' }}</span>
                 <div class="variant-stepper">
                     <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'foil_qty' : 'normal_qty', -1)">−</button>
                     <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'foil_qty' : 'normal_qty'] || 0 }}</span>
@@ -81,7 +81,7 @@
             </div>
             
             <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty'] > 0, 'variant-row--disabled': !hasAltArt}">
-                <span class="variant-label v-alt">🎨 AArt</span>
+                <span class="variant-label v-alt">🎨 {{ isFoilActive ? 'AArt Foil' : 'AArt' }}</span>
                 <div class="variant-stepper">
                     <button class="step-btn" :disabled="!hasAltArt" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty', -1)">−</button>
                     <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty'] || 0 }}</span>
@@ -90,7 +90,7 @@
             </div>
             
             <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty'] > 0, 'variant-row--disabled': !hasSigned}">
-                <span class="variant-label v-sign">📈 Over</span>
+                <span class="variant-label v-sign">📈 {{ isFoilActive ? 'Over Foil' : 'Over' }}</span>
                 <div class="variant-stepper">
                     <button class="step-btn" :disabled="!hasSigned" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty', -1)">−</button>
                     <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty'] || 0 }}</span>
