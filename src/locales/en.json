@@ -1,4 +1,30 @@
 {
+  "seo": {
+    "catalog": {
+      "title": "Card Catalog | Riftbound Deck Manager",
+      "desc": "Explore all Riftbound cards. Filter by domains, types, and rarities to find what you need."
+    },
+    "collection": {
+      "title": "My Collection | Riftbound Deck Manager",
+      "desc": "Manage your personal Riftbound collection. Track owned cards, foil variants, and export your list."
+    },
+    "decks": {
+      "title": "My Decks | Riftbound Deck Manager",
+      "desc": "Create, edit, and share your best Riftbound decks."
+    },
+    "scanner": {
+      "title": "Card Scanner | Riftbound Deck Manager",
+      "desc": "Quickly identify your physical cards using the camera and add them to your collection."
+    },
+    "how_to_play": {
+      "title": "How to Play Riftbound | Beginner's Guide",
+      "desc": "Learn the basic rules, rune mechanics, and game terms of Riftbound TCG."
+    },
+    "default": {
+      "title": "Riftbound Deck Manager",
+      "desc": "Your ultimate companion for managing your journey in Riftbound TCG."
+    }
+  },
   "nav": {
     "catalog": "Catalog",
     "collection": "Collection",

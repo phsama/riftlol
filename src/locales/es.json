@@ -1,4 +1,30 @@
 {
+  "seo": {
+    "catalog": {
+      "title": "Catálogo de Cartas | Riftbound Deck Manager",
+      "desc": "Explora todas las cartas de Riftbound. Filtra por dominios, tipos y rarezas para encontrar lo que necesitas."
+    },
+    "collection": {
+      "title": "Mi Colección | Riftbound Deck Manager",
+      "desc": "Gestiona tu colección personal de Riftbound. Sigue las cartas que posees, variantes foil y exporta tu lista."
+    },
+    "decks": {
+      "title": "Mis Mazos | Riftbound Deck Manager",
+      "desc": "Crea, edita y comparte tus mejores mazos de Riftbound."
+    },
+    "scanner": {
+      "title": "Escáner de Cartas | Riftbound Deck Manager",
+      "desc": "Identifica tus cartas físicas rápidamente usando la cámara y añádelas a tu colección."
+    },
+    "how_to_play": {
+      "title": "Cómo Jugar Riftbound | Guía para Principiantes",
+      "desc": "Aprende las reglas básicas, mecánicas de runas y términos del juego Riftbound TCG."
+    },
+    "default": {
+      "title": "Riftbound Deck Manager",
+      "desc": "Tu compañero definitivo para gestionar tu viaje en Riftbound TCG."
+    }
+  },
   "nav": {
     "catalog": "Catálogo",
     "collection": "Colección",

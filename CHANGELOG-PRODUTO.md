@@ -6,6 +6,8 @@
 - **Destaque em Keywords**: O glossário de efeitos (Keywords) recebeu um design premium focado em facilitar o aprendizado dos termos técnicos mais complexos do TCG.
 - **Novo Seletor de Idiomas**: Substituímos o seletor padrão por um componente customizado com flags, glassmorphism e animações suaves, elevando o padrão visual do produto.
 - **Navegação Inteligente**: O guia foi integrado dinamicamente no menu superior (desktop) e na barra de abas (mobile) para acesso rápido.
+- **SEO Premium**: Implementamos metadados dinâmicos (títulos e descrições) que mudam conforme a página e o idioma, além de tags para redes sociais (Open Graph/Twitter) e arquivos de indexação (`robots.txt`, `sitemap.xml`).
+- **Ajustes Visuais**: Refinamos o espaçamento das badges de domínio e o estilo dos filtros na coleção para evitar cortes e poluição visual.
 
 ---
 

@@ -141,12 +141,39 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 
 const authStore = useAuthStore()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
+const route = useRoute()
+
+function updateSEO() {
+  const seoKey = route.meta?.seoKey || 'default'
+  const title = t(`seo.${seoKey}.title`)
+  const desc = t(`seo.${seoKey}.desc`)
+  
+  document.title = title
+  
+  // Update description meta tag
+  let metaDesc = document.querySelector('meta[name="description"]')
+  if (!metaDesc) {
+    metaDesc = document.createElement('meta')
+    metaDesc.setAttribute('name', 'description')
+    document.head.appendChild(metaDesc)
+  }
+  metaDesc.setAttribute('content', desc)
+  
+  // Update html lang attribute
+  document.documentElement.lang = locale.value === 'pt' ? 'pt-BR' : locale.value
+}
+
+// Watch for route or locale changes
+watch([() => route.path, locale], () => {
+  updateSEO()
+}, { immediate: true })
 
 function saveLang() {
   localStorage.setItem('lang', locale.value)

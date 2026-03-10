@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://riftbound-deck-manager.vercel.app/sitemap.xml
