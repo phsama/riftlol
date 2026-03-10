@@ -2,6 +2,7 @@
 
 ### 🟢 O que entregamos nesta iteração:
 - **Área "Como Jogar"**: Lançamos um guia digital completo e imersivo, cobrindo regras básicas, montagem de deck, runas e fluxo de jogo. 
+- **Correção e Renomeação**: Corrigimos um erro técnico (TypeError) que impedia a abertura da tela de Coleção e renomeamos o termo "Álbum" para **"Coleção"** em todos os idiomas, tornando a navegação mais intuitiva.
 - **Destaque em Keywords**: O glossário de efeitos (Keywords) recebeu um design premium focado em facilitar o aprendizado dos termos técnicos mais complexos do TCG.
 - **Novo Seletor de Idiomas**: Substituímos o seletor padrão por um componente customizado com flags, glassmorphism e animações suaves, elevando o padrão visual do produto.
 - **Navegação Inteligente**: O guia foi integrado dinamicamente no menu superior (desktop) e na barra de abas (mobile) para acesso rápido.

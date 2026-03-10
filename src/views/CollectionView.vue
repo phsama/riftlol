@@ -649,7 +649,10 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   border: 1px solid var(--color-border-subtle);
 }
 .filter-pill-owned.filter-pill--active {
-  background: rgba(80,184,138,0.15); color: var(--color-domain-order); border-color: rgba(80,184,138,0.4);
+  background: rgba(34, 197, 94, 0.15); /* Subtle green background */
+  color: #fabd2f; /* Premium gold-yellow */
+  border-color: rgba(250, 189, 47, 0.6); /* Semi-transparent gold border */
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.1); 
 }
 
 .filter-pill-energy {
