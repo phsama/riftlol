@@ -69,7 +69,7 @@ export const useDecksStore = defineStore('decks', () => {
                 })
             }))
         } catch (e) {
-            console.error('Failed to fetch decks from API', e)
+            // fallback silently
             decks.value = loadFromStorage() // fallback
         } finally {
             loading.value = false
@@ -90,7 +90,7 @@ export const useDecksStore = defineStore('decks', () => {
             }
             await api.put(`/decks/${deck.id}`, payload)
         } catch (e) {
-            console.error('Erro salvando deck na API', e)
+            // auth or net failure silently skipped
         }
     }, 1000)
 
@@ -125,7 +125,9 @@ export const useDecksStore = defineStore('decks', () => {
                 // Post API expects different structure (cards: []) e vai retornar uuid
                 const { data } = await api.post('/decks/', { name, cards: [] })
                 deck.id = data.id // Atualiza o ID fake pelo do DB
-            } catch (e) { console.error('Error creating API deck', e) }
+            } catch (e) { 
+                // silently fallback to local fake UUID
+            }
         }
         return deck
     }
@@ -139,7 +141,9 @@ export const useDecksStore = defineStore('decks', () => {
         if (idx !== -1) {
             decks.value.splice(idx, 1)
             saveToStorage(decks.value)
-            if (authStore.user) api.delete(`/decks/${id}`).catch(console.error)
+            if (authStore.user) {
+                api.delete(`/decks/${id}`).catch(() => {})
+            }
         }
     }
 

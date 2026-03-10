@@ -141,7 +141,6 @@ async function handleEmailAuth() {
     email.value = ''
     password.value = ''
   } catch (err) {
-    console.error("Auth Error:", err)
     if (err.message.includes('Invalid login credentials')) {
       authError.value = "E-mail ou senha incorretos."
     } else {

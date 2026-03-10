@@ -318,13 +318,12 @@ async function fetchAllData() {
     // O Dropdown de Sets continuará carregando silenciosamente (non-blocking)
     setsPromise.then(s => {
       sets.value = Array.isArray(s) ? s : []
-    }).catch(err => console.error('Erro loading sets', err))
+    }).catch(() => {})
     
     await nextTick()
     setupObserver()
   } catch (e) {
-    error.value = 'Não foi possível carregar as cartas. Verifique sua conexão.'
-    console.error(e)
+    error.value = 'Verifique sua conexão e tente novamente.'
   } finally {
     loading.value = false
   }

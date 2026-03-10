@@ -428,7 +428,7 @@ function addCard(card) {
 function handleClickOutside(e) { if (!e.target.closest('.quick-add')) showSearchResults.value = false }
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
-  try { const data = await getCards(); allCards.value = Array.isArray(data) ? data : [] } catch (e) { console.error(e) }
+  try { const data = await getCards(); allCards.value = Array.isArray(data) ? data : [] } catch (e) { /* silent fail, data handled via cache */ }
 })
 onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside) })
 

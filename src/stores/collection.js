@@ -38,7 +38,6 @@ export const useCollectionStore = defineStore('collection', () => {
             items.value = newItems
             initialized.value = true
         } catch (err) {
-            console.error('Failed to load collection:', err)
             error.value = 'Houve um erro ao carregar sua coleção.'
         } finally {
             isLoading.value = false
@@ -66,7 +65,6 @@ export const useCollectionStore = defineStore('collection', () => {
                 [field]: newValue
             })
         } catch (err) {
-            console.error('Failed to update collection item:', err)
             // Revert on failure
             items.value[cardId] = current
         }

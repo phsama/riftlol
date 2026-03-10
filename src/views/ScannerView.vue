@@ -150,6 +150,7 @@ const canvas = ref(null)
 const isCameraOpen = ref(false)
 const processing = ref(false)
 const resultCard = ref(null)
+const scanError = ref(null)
 const stream = ref(null)
 const facingMode = ref('environment') // Default to back camera
 const allCardsData = ref([])
@@ -179,8 +180,7 @@ async function startCamera() {
       isCameraOpen.value = true
     }
   } catch (err) {
-    console.error("Error accessing camera:", err)
-    alert("Não foi possível acessar a câmera. Verifique as permissões.")
+    scanError.value = "Não foi possível acessar a câmera. Verifique as permissões."
   }
 }
 
@@ -226,8 +226,6 @@ async function capturePhoto() {
     const worker = await createWorker('eng')
     const { data: { text } } = await worker.recognize(imageData)
     await worker.terminate()
-    
-    console.log("OCR Raw Text:", text)
     
     // 2. Local search against cached cards
     const allCards = await riftcodexService.getCards()
@@ -276,17 +274,15 @@ async function capturePhoto() {
       }
     }
     
-    console.log(`Best OCR Match: ${bestMatch?.name} (Score: ${highestScore.toFixed(2)})`)
-    
     // Threshold of 0.60 is safe now since sliding window isolates the exact name tokens
     if (bestMatch && highestScore >= 0.60) {
       resultCard.value = bestMatch;
+      scanError.value = null;
     } else {
-      alert("Não foi possível identificar a carta com precisão. Aproxime a câmera, melhore a luz e tente novamente.");
+      scanError.value = "Não identificamos a carta com precisão. Melhore a luz e tente novamente.";
     }
   } catch (err) {
-    console.error("Scan error:", err)
-    alert("Erro ao processar imagem.");
+    scanError.value = "Houve uma interrupção ao processar a imagem. Tente novamente.";
   } finally {
     processing.value = false
   }
@@ -386,6 +382,16 @@ onBeforeUnmount(() => {
 @keyframes scan-move {
   0%, 100% { top: 15%; }
   50% { top: 85%; }
+}
+
+.scan-error {
+  position: absolute;
+  top: 16px; left: 16px; right: 16px;
+  background: rgba(220, 38, 38, 0.9);
+  color: white; padding: 12px; border-radius: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.85rem; z-index: 30;
+  backdrop-filter: blur(4px);
 }
 
 .processing-overlay {

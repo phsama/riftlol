@@ -406,7 +406,8 @@ const groupedCards = computed(() => {
 })
 
 const filteredCards = computed(() => {
-  let result = groupedCards.value
+  // Always work with a fresh copy to avoid mutating the original groupedCards array
+  let result = [...groupedCards.value]
   
   if (showOnlyOwned.value) {
       result = result.filter(c => collectionStore.getCardTotal(c.id) > 0)
@@ -541,14 +542,23 @@ async function fetchAllData() {
   loading.value = true
   error.value = null
   try {
-    const [c, s] = await Promise.all([getCards(), getSets()])
+    // Inicie os dois fetches paralelamente
+    const cardsPromise = getCards()
+    const setsPromise = getSets()
+    
+    // Libera a renderização da tela principal APENAS esperando as cartas
+    const c = await cardsPromise
     allCards.value = Array.isArray(c) ? c : []
-    sets.value = Array.isArray(s) ? s : []
+    
+    // O Dropdown de Sets continuará carregando silenciosamente (non-blocking)
+    setsPromise.then(s => {
+      sets.value = Array.isArray(s) ? s : []
+    }).catch(() => {})
+    
     await nextTick()
     setupObserver()
   } catch (e) {
-    error.value = 'Não foi possível carregar as cartas. Verifique sua conexão.'
-    console.error(e)
+    error.value = 'Verifique sua conexão e tente novamente.'
   } finally {
     loading.value = false
   }

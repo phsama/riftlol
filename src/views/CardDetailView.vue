@@ -198,7 +198,6 @@ onMounted(async () => {
   loading.value = true
   try {
     const cardName = decodeURIComponent(props.name || route.params.name).trim()
-    console.log("Loading card:", cardName)
     const allCards = await getCards()
     
     // Use a more relaxed name matching to handle potential encoding/apostrophe issues
@@ -262,7 +261,6 @@ onMounted(async () => {
     }
   } catch (e) {
     error.value = 'Erro ao carregar a carta.'
-    console.error(e)
   } finally {
     loading.value = false
   }
