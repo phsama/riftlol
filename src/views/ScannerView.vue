@@ -64,39 +64,70 @@
        </router-link>
 
         <div class="collection-controls scan-controls-panel">
-            <div class="variant-row foil-switch-row">
-                <label class="foil-switch-label">
-                    <input type="checkbox" v-model="isFoilActive">
-                    <span>Marcar como Foil ⭐</span>
-                </label>
-            </div>
+            <h4 class="scan-controls-title">Adicionar à Coleção</h4>
             
-            <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'foil_qty' : 'normal_qty'] > 0}">
-                <span class="variant-label">{{ isFoilActive ? 'Normal Foil' : 'Normal' }}</span>
-                <div class="variant-stepper">
-                    <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'foil_qty' : 'normal_qty', -1)">−</button>
-                    <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'foil_qty' : 'normal_qty'] || 0 }}</span>
-                    <button class="step-btn step-add" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'foil_qty' : 'normal_qty', 1)">+</button>
-                </div>
-            </div>
-            
-            <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty'] > 0, 'variant-row--disabled': !hasAltArt}">
-                <span class="variant-label v-alt">🎨 {{ isFoilActive ? 'AArt Foil' : 'AArt' }}</span>
-                <div class="variant-stepper">
-                    <button class="step-btn" :disabled="!hasAltArt" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty', -1)">−</button>
-                    <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty'] || 0 }}</span>
-                    <button class="step-btn step-add" :disabled="!hasAltArt" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'alt_art_foil_qty' : 'alt_art_qty', 1)">+</button>
-                </div>
-            </div>
-            
-            <div class="variant-row" :class="{'variant-row--active': collectionStore.items[resultCard.id]?.[isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty'] > 0, 'variant-row--disabled': !hasSigned}">
-                <span class="variant-label v-sign">📈 {{ isFoilActive ? 'Over Foil' : 'Over' }}</span>
-                <div class="variant-stepper">
-                    <button class="step-btn" :disabled="!hasSigned" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty', -1)">−</button>
-                    <span class="step-val">{{ collectionStore.items[resultCard.id]?.[isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty'] || 0 }}</span>
-                    <button class="step-btn step-add" :disabled="!hasSigned" @click="collectionStore.updateItemQty(resultCard.id, isFoilActive ? 'overnumbered_foil_qty' : 'overnumbered_qty', 1)">+</button>
-                </div>
-            </div>
+           <!-- Normal Group -->
+           <div class="manage-group">
+              <h5 class="manage-group-title">Arte Padrão</h5>
+              <div class="manage-row">
+                 <span class="manage-label">Normal</span>
+                 <div class="variant-stepper">
+                    <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'normal_qty', -1)">−</button>
+                    <span class="step-val">{{ getQty('normal_qty') }}</span>
+                    <button class="step-btn step-add" @click="collectionStore.updateItemQty(resultCard.id, 'normal_qty', 1)">+</button>
+                 </div>
+              </div>
+              <div class="manage-row foil-row">
+                 <span class="manage-label manage-label-foil">⭐ Foil Brilhante</span>
+                 <div class="variant-stepper">
+                    <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'foil_qty', -1)">−</button>
+                    <span class="step-val">{{ getQty('foil_qty') }}</span>
+                    <button class="step-btn step-add" @click="collectionStore.updateItemQty(resultCard.id, 'foil_qty', 1)">+</button>
+                 </div>
+              </div>
+           </div>
+
+           <!-- AArt Group -->
+           <div class="manage-group" v-if="hasAltArt">
+              <h5 class="manage-group-title v-alt">Arte Alternativa</h5>
+              <div class="manage-row">
+                 <span class="manage-label">Normal AArt</span>
+                 <div class="variant-stepper">
+                    <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'alt_art_qty', -1)">−</button>
+                    <span class="step-val">{{ getQty('alt_art_qty') }}</span>
+                    <button class="step-btn step-add" @click="collectionStore.updateItemQty(resultCard.id, 'alt_art_qty', 1)">+</button>
+                 </div>
+              </div>
+              <div class="manage-row foil-row">
+                 <span class="manage-label manage-label-foil">⭐ AArt Foil</span>
+                 <div class="variant-stepper">
+                    <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'alt_art_foil_qty', -1)">−</button>
+                    <span class="step-val">{{ getQty('alt_art_foil_qty') }}</span>
+                    <button class="step-btn step-add" @click="collectionStore.updateItemQty(resultCard.id, 'alt_art_foil_qty', 1)">+</button>
+                 </div>
+              </div>
+           </div>
+
+           <!-- Overnumbered Group -->
+           <div class="manage-group" v-if="hasSigned">
+              <h5 class="manage-group-title v-sign">📈 Overnumbered</h5>
+              <div class="manage-row">
+                 <span class="manage-label">Normal Over</span>
+                 <div class="variant-stepper">
+                    <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'overnumbered_qty', -1)">−</button>
+                    <span class="step-val">{{ getQty('overnumbered_qty') }}</span>
+                    <button class="step-btn step-add" @click="collectionStore.updateItemQty(resultCard.id, 'overnumbered_qty', 1)">+</button>
+                 </div>
+              </div>
+              <div class="manage-row foil-row">
+                 <span class="manage-label manage-label-foil">⭐ Over Foil</span>
+                 <div class="variant-stepper">
+                    <button class="step-btn" @click="collectionStore.updateItemQty(resultCard.id, 'overnumbered_foil_qty', -1)">−</button>
+                    <span class="step-val">{{ getQty('overnumbered_foil_qty') }}</span>
+                    <button class="step-btn step-add" @click="collectionStore.updateItemQty(resultCard.id, 'overnumbered_foil_qty', 1)">+</button>
+                 </div>
+              </div>
+           </div>
         </div>
 
        <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" @click="goToCard">Ver Detalhes</button>
@@ -121,8 +152,9 @@ const processing = ref(false)
 const resultCard = ref(null)
 const stream = ref(null)
 const facingMode = ref('environment') // Default to back camera
-const isFoilActive = ref(false)
 const allCardsData = ref([])
+
+function getQty(field) { return collectionStore.items[resultCard.value?.id]?.[field] || 0 }
 
 const recognizedCardVersions = computed(() => {
   if (!resultCard.value) return []
@@ -459,29 +491,29 @@ onBeforeUnmount(() => {
 }
 @keyframes rotate { to { transform: rotate(360deg); } }
 
-/* Controls Panel */
+/* Controls Panel Detailed */
 .scan-controls-panel {
     background: rgba(0,0,0,0.2);
     border-radius: var(--radius-md);
-    padding: 8px;
+    padding: 12px;
     margin-top: 12px;
 }
-.collection-controls { display: flex; flex-direction: column; gap: 4px; }
-.foil-switch-row { background: transparent !important; justify-content: flex-end; margin-bottom: 2px; }
-.foil-switch-label { font-size: 0.65rem; color: var(--color-gold-400); font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; }
-.foil-switch-label:hover { background: rgba(201,168,76,0.1); }
-.variant-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.15); transition: background 0.2s; }
-.variant-row--active { background: rgba(255,255,255,0.06); }
-.variant-row--disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
-.variant-label { font-size: 0.7rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; }
-.variant-row--active .variant-label { color: var(--color-text-primary); }
-.variant-row--active .v-alt { color: #d67cf2 !important; }
-.variant-row--active .v-sign { color: #50b88a !important; }
+.scan-controls-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; text-align: center; }
+.collection-controls { display: flex; flex-direction: column; gap: 12px; }
+
+.manage-group { display: flex; flex-direction: column; gap: 6px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+.manage-group-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-tertiary); font-weight: 700; margin-bottom: 4px; }
+.v-alt { color: #d67cf2 !important; }
+.v-sign { color: #50b88a !important; }
+.manage-row { display: flex; justify-content: space-between; align-items: center; }
+.foil-row { margin-top: 4px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.05); }
+.manage-label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
+.manage-label-foil { color: var(--color-gold-400); text-shadow: 0 0 6px rgba(201,168,76,0.3); }
+
 .variant-stepper { display: flex; align-items: center; gap: 8px; }
-.step-val { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; width: 16px; text-align: center; color: var(--color-text-secondary); }
-.variant-row--active .step-val { color: var(--color-text-primary); }
-.step-btn { width: 24px; height: 24px; border:none; border-radius:4px; background: var(--color-bg-surface); color: var(--color-text-secondary); display:flex; align-items:center; justify-content:center; font-weight:700; font-family: var(--font-body); cursor:pointer; transition:all 0.15s; }
+.step-val { font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; width: 18px; text-align: center; color: var(--color-text-primary); }
+.step-btn { width: 28px; height: 28px; border:none; border-radius:4px; background: rgba(255,255,255,0.1); color: var(--color-text-secondary); display:flex; align-items:center; justify-content:center; font-weight:700; font-family: var(--font-body); cursor:pointer; transition:all 0.15s; }
 .step-btn:hover { background: var(--color-border-subtle); color: var(--color-text-primary); }
-.step-add { color: var(--color-text-primary); }
-.step-add:hover { background: rgba(74, 127, 255, 0.2); color: var(--color-rift-400); }
+.step-add { color: var(--color-text-primary); background: rgba(255,255,255,0.15); }
+.step-add:hover { background: rgba(74, 127, 255, 0.3); color: var(--color-rift-400); }
 </style>
