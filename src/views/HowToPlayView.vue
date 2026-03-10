@@ -25,10 +25,10 @@
             <h2 class="section-title">{{ $t('how_to_play.intro.title') }}</h2>
           </header>
           <div class="section-body">
-            <p class="guide-text">{{ $t('how_to_play.intro.p1') }}</p>
+            <p class="guide-text" v-html="formatMarkdown($t('how_to_play.intro.p1'))"></p>
             <div class="infographic goal-box glass">
               <span class="goal-icon">🏆</span>
-              <p class="guide-text highlighted">{{ $t('how_to_play.intro.p2') }}</p>
+              <p class="guide-text highlighted" v-html="formatMarkdown($t('how_to_play.intro.p2'))"></p>
             </div>
           </div>
         </section>
@@ -40,8 +40,8 @@
             <h2 class="section-title">{{ $t('how_to_play.deckbuilding.title') }}</h2>
           </header>
           <div class="section-body">
-            <p class="guide-text">{{ $t('how_to_play.deckbuilding.p1') }}</p>
-            <p class="guide-text">{{ $t('how_to_play.deckbuilding.p2') }}</p>
+            <p class="guide-text" v-html="formatMarkdown($t('how_to_play.deckbuilding.p1'))"></p>
+            <p class="guide-text" v-html="formatMarkdown($t('how_to_play.deckbuilding.p2'))"></p>
             <div class="card-types-grid">
                <div class="type-card glass">
                  <span class="type-icon">👤</span>
@@ -66,16 +66,16 @@
             <h2 class="section-title">{{ $t('how_to_play.resources.title') }}</h2>
           </header>
           <div class="section-body">
-            <p class="guide-text">{{ $t('how_to_play.resources.p1') }}</p>
+            <p class="guide-text" v-html="formatMarkdown($t('how_to_play.resources.p1'))"></p>
             <div class="rune-mechanics glass">
                <div class="mechanic-item">
                   <span class="mech-badge">Exhaust</span>
-                  <p class="guide-text small">{{ $t('how_to_play.resources.p2').split(') ou ')[0] }})</p>
+                  <p class="guide-text small" v-html="formatMarkdown($t('how_to_play.resources.p2').split(') ou ')[0] + ')')"></p>
                </div>
                <div class="mechanic-divider"></div>
                <div class="mechanic-item">
                   <span class="mech-badge sac">Sacrifice</span>
-                  <p class="guide-text small">{{ $t('how_to_play.resources.p2').split(') ou ')[1] }}</p>
+                  <p class="guide-text small" v-html="formatMarkdown($t('how_to_play.resources.p2').split(') ou ')[1])"></p>
                </div>
             </div>
           </div>
@@ -88,13 +88,13 @@
             <h2 class="section-title">{{ $t('how_to_play.combat.title') }}</h2>
           </header>
           <div class="section-body">
-            <p class="guide-text">{{ $t('how_to_play.combat.p1') }}</p>
+            <p class="guide-text" v-html="formatMarkdown($t('how_to_play.combat.p1'))"></p>
             <div class="domains-grid">
                <div v-for="d in ['Body', 'Mind', 'Calm', 'Chaos', 'Order', 'Fury']" :key="d" :class="['domain-pill', `domain-${d.toLowerCase()}`]">
                   {{ d }}
                </div>
             </div>
-            <p class="guide-text mt-4">{{ $t('how_to_play.combat.p2') }}</p>
+            <p class="guide-text mt-4" v-html="formatMarkdown($t('how_to_play.combat.p2'))"></p>
           </div>
         </section>
 
@@ -107,11 +107,11 @@
           </header>
           
           <div class="keywords-grid">
-            <div v-for="(kw, key) in $t('how_to_play.keywords.list')" :key="key" class="keyword-card glass-premium">
+            <div v-for="(kw, key) in tm('how_to_play.keywords.list')" :key="key" class="keyword-card glass-premium">
                <div class="keyword-header">
                  <span class="keyword-name">[{{ kw.name }}]</span>
                </div>
-               <p class="keyword-desc">{{ kw.desc }}</p>
+               <p class="keyword-desc" v-html="formatMarkdown(kw.desc)"></p>
             </div>
           </div>
         </section>
@@ -122,6 +122,15 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { tm } = useI18n()
+
+function formatMarkdown(text) {
+  if (!text) return ''
+  // Replace **text** with <strong>text</strong>
+  return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+}
 
 const activeSection = ref('intro')
 const sections = [

@@ -630,7 +630,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 .filter-scroll {
   display: flex; gap: 10px; overflow-x: auto;
   -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  padding-bottom: 4px;
+  padding: 4px 0;
 }
 .filter-scroll::-webkit-scrollbar { display: none; }
 
