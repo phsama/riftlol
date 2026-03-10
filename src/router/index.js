@@ -35,6 +35,11 @@ const router = createRouter({
             name: 'scanner',
             component: () => import('@/views/ScannerView.vue'),
         },
+        {
+            path: '/how-to-play',
+            name: 'how-to-play',
+            component: () => import('@/views/HowToPlayView.vue'),
+        },
     ],
     scrollBehavior() {
         return { top: 0 }

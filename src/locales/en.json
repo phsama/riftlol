@@ -3,7 +3,8 @@
     "catalog": "Catalog",
     "collection": "Album",
     "decks": "My Decks",
-    "scanner": "Scanner"
+    "scanner": "Scanner",
+    "how_to_play": "How to Play"
   },
   "common": {
     "login": "Login",
@@ -151,5 +152,66 @@
     "added_toast": "{name} added!",
     "deck_not_found": "Deck not found",
     "view_all": "View all decks"
+  },
+  "how_to_play": {
+    "title": "How to Play Riftbound",
+    "intro": {
+      "title": "Quick Start",
+      "p1": "Riftbound is a trading card game (TCG) where you choose a Champion, build your army, and battle for control of strategic battlefields.",
+      "p2": "The goal is simple: be the first to reach **8 points** (or 11 in team games). You earn points by taking control of a Battlefield and maintaining it at the start of your turn."
+    },
+    "deckbuilding": {
+      "title": "Deck Building",
+      "p1": "Your deck is composed of a **Legend**, which defines which domains (colors) you can use, and units, spells, and gear cards.",
+      "p2": "You also have a separate **Rune Deck**, which provides the resources to play your cards each turn."
+    },
+    "resources": {
+      "title": "Runes & Energy",
+      "p1": "Each card has an energy cost and sometimes a domain requirement. You pay these costs using your **Runes**.",
+      "p2": "Runes can be used in two ways: **Exhaust** (turn sideways to generate 1 temporary energy) or **Sacrifice** (return to the rune deck for more powerful effects)."
+    },
+    "combat": {
+      "title": "Combat & Domains",
+      "p1": "Units fight using their **Might** (Combat Power). When units from different players are on the same Battlefield, they automatically enter combat at the end of the turn.",
+      "p2": "There are 6 main domains: **Body**, **Mind**, **Calm**, **Chaos**, **Order**, and **Fury**."
+    },
+    "keywords": {
+      "title": "The Heart of Mastery: Keywords",
+      "subtitle": "Mastering Keywords is the most important step to becoming a Riftbound master.",
+      "list": {
+        "vanguard": {
+          "name": "Vanguard",
+          "desc": "This unit starts the game face-up on the central Battlefield."
+        },
+        "warded": {
+          "name": "Warded",
+          "desc": "This unit cannot be targeted by opponent's abilities or spells."
+        },
+        "fervor": {
+          "name": "Fervor X",
+          "desc": "Gains +X Might while attacking."
+        },
+        "action": {
+          "name": "Action",
+          "desc": "Abilities you can voluntarily activate during your main phase."
+        },
+        "repeat": {
+          "name": "Repeat",
+          "desc": "Effects that happen multiple times under certain conditions."
+        },
+        "deflect": {
+          "name": "Deflect X",
+          "desc": "Reduces damage taken by X."
+        },
+        "ambush": {
+          "name": "Ambush",
+          "desc": "Can be played during the opponent's turn or in response to actions."
+        },
+        "legendary": {
+          "name": "Legendary",
+          "desc": "You can only have one copy of this card in play at a time."
+        }
+      }
+    }
   }
 }

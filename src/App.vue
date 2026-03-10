@@ -25,14 +25,34 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           <span>{{ $t('nav.decks') }}</span>
         </router-link>
+        <router-link to="/how-to-play" class="nav-link" :class="{ 'nav-link--active': $route.name === 'how-to-play' }">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>{{ $t('nav.how_to_play') }}</span>
+        </router-link>
         
-        <!-- Language Switcher -->
-        <div class="lang-switcher">
-          <select v-model="$i18n.locale" @change="saveLang" class="lang-select">
-            <option value="pt">PT</option>
-            <option value="en">EN</option>
-            <option value="es">ES</option>
-          </select>
+        <!-- Custom Language Switcher -->
+        <div class="lang-switcher-wrap">
+          <button class="lang-trigger glass" @click="showLangDropdown = !showLangDropdown">
+            <span class="lang-flag">{{ languages.find(l => l.code === locale).flag }}</span>
+            <span class="lang-code">{{ locale.toUpperCase() }}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" :style="{ transform: showLangDropdown ? 'rotate(180deg)' : 'none' }"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          
+          <transition name="dropdown">
+            <div v-if="showLangDropdown" class="lang-dropdown glass shadow-lg">
+              <button 
+                v-for="lang in languages" 
+                :key="lang.code" 
+                class="lang-option"
+                :class="{ 'lang-option--active': locale === lang.code }"
+                @click="setLang(lang.code)"
+              >
+                <span class="lang-flag">{{ lang.flag }}</span>
+                <span class="lang-label">{{ lang.label }}</span>
+                <svg v-if="locale === lang.code" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+            </div>
+          </transition>
         </div>
         
         <!-- Auth Section -->
@@ -82,6 +102,10 @@
       <router-link to="/decks" class="tab-item" :class="{ 'tab-item--active': $route.name === 'decks' || $route.name === 'deck-editor' }">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
         <span>{{ $t('nav.decks') }}</span>
+      </router-link>
+      <router-link to="/how-to-play" class="tab-item" :class="{ 'tab-item--active': $route.name === 'how-to-play' }">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>{{ $t('nav.how_to_play') }}</span>
       </router-link>
     </nav>
     <!-- ── Auth Modal ── -->
@@ -134,6 +158,19 @@ const password = ref('')
 const showPassword = ref(false)
 const authLoading = ref(false)
 const authError = ref('')
+
+const showLangDropdown = ref(false)
+const languages = [
+  { code: 'pt', label: 'Português', flag: '🇧🇷' },
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' }
+]
+
+function setLang(code) {
+  locale.value = code
+  saveLang()
+  showLangDropdown.value = false
+}
 
 onMounted(() => {
   authStore.init()
@@ -387,12 +424,91 @@ async function handleEmailAuth() {
   border-radius: 4px;
   transition: all 0.2s;
 }
-.lang-select:hover {
-  background: rgba(255,255,255,0.05);
-  color: var(--color-text-primary);
-}
 .lang-select:focus {
   outline: none;
   background: rgba(255,255,255,0.1);
+}
+
+/* Custom Lang Switcher Styles */
+.lang-switcher-wrap {
+  position: relative;
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid var(--color-border-subtle);
+}
+
+.lang-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-gold-500);
+}
+
+.lang-flag { font-size: 1rem; }
+.lang-code { letter-spacing: 0.05em; }
+
+.lang-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 160px;
+  padding: 8px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-raised);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.lang-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+}
+
+.lang-option--active {
+  background: rgba(201, 168, 76, 0.1) !important;
+  color: var(--color-gold-400) !important;
+}
+
+.lang-label { flex: 1; }
+
+.dropdown-enter-active, .dropdown-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dropdown-enter-from, .dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>

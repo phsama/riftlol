@@ -3,7 +3,8 @@
     "catalog": "Catálogo",
     "collection": "Álbum",
     "decks": "Meus Decks",
-    "scanner": "Scanner"
+    "scanner": "Scanner",
+    "how_to_play": "Como Jogar"
   },
   "common": {
     "login": "Entrar",
@@ -151,5 +152,66 @@
     "added_toast": "{name} adicionada!",
     "deck_not_found": "Deck não encontrado",
     "view_all": "Ver todos os decks"
+  },
+  "how_to_play": {
+    "title": "Como Jogar Riftbound",
+    "intro": {
+      "title": "Início Rápido",
+      "p1": "Riftbound é um jogo de cartas (TCG) onde você escolhe um Campeão, monta seu exército e luta pelo controle de campos de batalha estratégicos.",
+      "p2": "O objetivo é simples: ser o primeiro a conquistar **8 pontos** (ou 11 em jogos de dupla). Você ganha pontos ao tomar o controle de um Battlefield e ao mantê-lo no início do seu turno."
+    },
+    "deckbuilding": {
+      "title": "Montagem de Deck",
+      "p1": "Seu deck é composto por uma **Lenda (Legend)**, que define quais domínios (cores) você pode usar, e cartas de unidades, feitiços e equipamentos.",
+      "p2": "Você também possui uma **Rune Deck** separada, que fornece os recursos para jogar suas cartas a cada turno."
+    },
+    "resources": {
+      "title": "Runas & Energia",
+      "p1": "Cada carta tem um custo em energia e, às vezes, um requisito de domínio. Você paga esses custos usando suas **Runas**.",
+      "p2": "Runas podem ser usadas de duas formas: **Exaustão** (virar para gerar 1 energia temporária) ou **Sacrifício** (devolver ao deck de runas para efeitos mais poderosos)."
+    },
+    "combat": {
+      "title": "Combate & Domínios",
+      "p1": "Unidades lutam usando seu **Might** (Poder de Combate). Quando unidades de jogadores diferentes estão no mesmo Battlefield, elas entram em combate automaticamente no final do turno.",
+      "p2": "Existem 6 domínios principais: **Body** (Força), **Mind** (Controle), **Calm** (Resiliência), **Chaos** (Imprevisibilidade), **Order** (Proteção) e **Fury** (Agressividade)."
+    },
+    "keywords": {
+      "title": "Coração da Maestria: Keywords",
+      "subtitle": "Dominar as Keywords é o passo mais importante para se tornar um mestre em Riftbound.",
+      "list": {
+        "vanguard": {
+          "name": "Vanguard",
+          "desc": "Esta unidade começa o jogo virada para cima no Battlefield central."
+        },
+        "warded": {
+          "name": "Warded",
+          "desc": "Esta unidade não pode ser alvo de habilidades ou feitiços de oponentes."
+        },
+        "fervor": {
+          "name": "Fervor X",
+          "desc": "Ganha +X de Might enquanto estiver atacando."
+        },
+        "action": {
+          "name": "Action",
+          "desc": "Habilidades que você pode ativar voluntariamente durante sua fase principal."
+        },
+        "repeat": {
+          "name": "Repeat",
+          "desc": "Efeitos que acontecem múltiplas vezes sob certas condições."
+        },
+        "deflect": {
+          "name": "Deflect X",
+          "desc": "Reduz o dano recebido em X."
+        },
+        "ambush": {
+          "name": "Ambush",
+          "desc": "Pode ser jogada durante o turno do oponente ou em resposta a ações."
+        },
+        "legendary": {
+          "name": "Legendary",
+          "desc": "Você só pode ter uma cópia desta carta em jogo por vez."
+        }
+      }
+    }
   }
 }
