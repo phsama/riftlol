@@ -197,7 +197,7 @@ const filteredCards = computed(() => {
   }
   if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
   if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
-  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set?.id))
+  if (selectedSets.value.length > 0) result = result.filter((c) => selectedSets.value.includes(c.set_id))
   if (selectedEnergy.value !== null) {
     result = selectedEnergy.value === 6
       ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)
@@ -346,19 +346,19 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
 .catalog-subtitle { color: var(--color-text-secondary); font-size: 0.78rem; margin-top: 2px; }
 
 /* ── Search ── */
-.catalog-search { position: relative; margin-bottom: 12px; }
+.catalog-search { position: relative; margin-bottom: 8px; }
 .search-icon {
   position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
   color: var(--color-text-tertiary); pointer-events: none;
 }
-.search-input { padding-left: 38px; padding-right: 36px; }
+.search-input { padding-left: 38px; padding-right: 36px; margin-bottom: 2px;}
 .search-clear { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
 
 /* ── Filter bar ── */
 .filter-bar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 .filter-scroll {
   display: flex;
