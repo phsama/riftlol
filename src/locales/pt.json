@@ -20,6 +20,14 @@
       "title": "Como Jogar Riftbound | Guia para Iniciantes",
       "desc": "Aprenda as regras básicas, mecânicas de runas e termos do jogo Riftbound TCG."
     },
+    "privacy": {
+      "title": "Política de Privacidade | Riftbound Deck Manager",
+      "desc": "Saiba como tratamos seus dados e garantimos sua privacidade."
+    },
+    "terms": {
+      "title": "Termos de Uso | Riftbound Deck Manager",
+      "desc": "Leia os termos e condições de uso do Riftbound Deck Manager."
+    },
     "default": {
       "title": "Riftbound Deck Manager",
       "desc": "O seu companheiro definitivo para gerenciar sua jornada no Riftbound TCG."
@@ -238,6 +246,23 @@
           "desc": "Você só pode ter uma cópia desta carta em jogo por vez."
         }
       }
+    }
+  },
+  "footer": {
+    "rights": "© 2024 Riftbound Deck Manager. Todos os direitos reservados.",
+    "privacy": "Privacidade",
+    "terms": "Termos"
+  },
+  "legal": {
+    "privacy": {
+      "title": "Política de Privacidade",
+      "last_updated": "Última atualização: Março 2024",
+      "content": "Sua privacidade é importante para nós. Esta política explica como coletamos e usamos seus dados ao utilizar o Riftbound Deck Manager.\n\n### 1. Coleta de Dados\nColetamos informações básicas como e-mail (ao criar conta) e dados de coleção para sincronização entre dispositivos. Não vendemos seus dados para terceiros.\n\n### 2. Uso de Informações\nUsamos seus dados para personalizar sua experiência, salvar seus decks e fornecer as funcionalidades do sistema.\n\n### 3. Cookies e Publicidade\nPodemos usar cookies para melhorar a navegação e exibir anúncios relevantes via parceiros como Google AdSense.\n\n### 4. Segurança\nEmpregamos medidas de segurança modernas como criptografia e autenticação via Supabase para proteger suas informações."
+    },
+    "terms": {
+      "title": "Termos de Uso",
+      "last_updated": "Última atualização: Março 2024",
+      "content": "Ao acessar o Riftbound Deck Manager, você concorda com os seguintes termos:\n\n### 1. Uso do Serviço\nEste site é uma ferramenta de auxílio para jogadores de Riftbound TCG. O uso deve ser pessoal e não comercial.\n\n### 2. Propriedade Intelectual\nRiftbound e todas as artes relacionadas são propriedade da Riftbound TCG / League of Legends. Este projeto é uma ferramenta de fãs sem afiliação oficial.\n\n### 3. Limitação de Responsabilidade\nO serviço é fornecido 'como está'. Não nos responsabilizamos por perdas de dados ou erros de interpretação das regras do jogo.\n\n### 4. Modificações\nReservamos o direito de alterar estes termos a qualquer momento, visando a melhoria do serviço."
     }
   }
 }

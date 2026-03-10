@@ -47,6 +47,20 @@ const router = createRouter({
             component: () => import('@/views/HowToPlayView.vue'),
             meta: { seoKey: 'how_to_play' }
         },
+        {
+            path: '/privacy',
+            name: 'privacy',
+            component: () => import('@/views/LegalView.vue'),
+            props: { type: 'privacy' },
+            meta: { seoKey: 'privacy' }
+        },
+        {
+            path: '/terms',
+            name: 'terms',
+            component: () => import('@/views/LegalView.vue'),
+            props: { type: 'terms' },
+            meta: { seoKey: 'terms' }
+        },
     ],
     scrollBehavior() {
         return { top: 0 }

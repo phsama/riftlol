@@ -83,6 +83,21 @@
           <component :is="Component" />
         </transition>
       </router-view>
+
+      <!-- Global Footer -->
+      <footer class="app-footer fade-in" v-if="$route.name !== 'deck-editor'">
+        <div class="footer-content">
+          <div class="footer-brand">
+            <span class="nav-logo">⚔</span>
+            <span class="nav-title">Riftbound <span class="nav-title-accent">Deck Manager</span></span>
+          </div>
+          <p class="footer-rights">{{ $t('footer.rights') }}</p>
+          <div class="footer-links">
+            <router-link to="/privacy" class="footer-link">{{ $t('footer.privacy') }}</router-link>
+            <router-link to="/terms" class="footer-link">{{ $t('footer.terms') }}</router-link>
+          </div>
+        </div>
+      </footer>
     </main>
 
     <!-- ── Bottom tab bar (mobile only) ── -->
@@ -537,5 +552,59 @@ async function handleEmailAuth() {
 .dropdown-enter-from, .dropdown-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+/* ── Footer ── */
+.app-footer {
+  margin-top: 80px;
+  padding: 40px 0;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.6;
+}
+
+.footer-rights {
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: var(--color-gold-400);
+}
+
+@media (max-width: 768px) {
+  .app-footer {
+    padding-bottom: 20px; /* Space handled by app-main padding-bottom */
+    margin-top: 40px;
+  }
+  .footer-links {
+    gap: 16px;
+  }
 }
 </style>
