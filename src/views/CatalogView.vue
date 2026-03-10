@@ -307,9 +307,19 @@ async function fetchAllData() {
   loading.value = true
   error.value = null
   try {
-    const [c, s] = await Promise.all([getCards(), getSets()])
+    // Inicie os caches paralelamente
+    const cardsPromise = getCards()
+    const setsPromise = getSets()
+    
+    // Libera a renderização da tela principal APENAS esperando as cartas
+    const c = await cardsPromise
     allCards.value = Array.isArray(c) ? c : []
-    sets.value = Array.isArray(s) ? s : []
+    
+    // O Dropdown de Sets continuará carregando silenciosamente (non-blocking)
+    setsPromise.then(s => {
+      sets.value = Array.isArray(s) ? s : []
+    }).catch(err => console.error('Erro loading sets', err))
+    
     await nextTick()
     setupObserver()
   } catch (e) {
@@ -332,10 +342,11 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 24px;
 }
 .catalog-title {
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--color-text-primary), var(--color-gold-400));
@@ -343,30 +354,31 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.catalog-subtitle { color: var(--color-text-secondary); font-size: 0.78rem; margin-top: 2px; }
+.catalog-subtitle { color: var(--color-text-secondary); font-size: 0.85rem; margin-top: 4px; }
 
 /* ── Search ── */
-.catalog-search { position: relative; margin-bottom: 8px; }
+.catalog-search { position: relative; margin-bottom: 12px; }
 .search-icon {
-  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
   color: var(--color-text-tertiary); pointer-events: none;
 }
-.search-input { padding-left: 38px; padding-right: 36px; margin-bottom: 2px;}
-.search-clear { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+.search-input { padding-left: 44px; padding-right: 36px; height: 48px; border-radius: 12px; font-size: 1rem; }
+.search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
 
 /* ── Filter bar ── */
 .filter-bar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 .filter-scroll {
   display: flex;
-  gap: 6px;
+  gap: 10px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
 }
 .filter-scroll::-webkit-scrollbar { display: none; }
 

@@ -43,7 +43,8 @@ export async function getCards() {
     if (cached) return cached
 
     // Nosso DB interno agora cospe o array inteiro direto em `items` num pull só!
-    const { data } = await localApi.get('/api/cards')
+    // Usamos axios puro para ignorar interceptor de Auth, permitindo Vercel Edge Caching ⚡
+    const { data } = await axios.get('/api/cards', { baseURL: import.meta.env.VITE_API_URL || '' })
     const allItems = data?.items || data || []
 
     setCache(cacheKey, allItems)
