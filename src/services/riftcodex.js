@@ -43,7 +43,7 @@ export async function getCards() {
     if (cached) return cached
 
     // Nosso DB interno agora cospe o array inteiro direto em `items` num pull só!
-    const { data } = await axios.get('/api/cards')
+    const { data } = await api.get('/cards')
     const allItems = data?.items || data || []
 
     setCache(cacheKey, allItems)

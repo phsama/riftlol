@@ -324,7 +324,7 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useDecksStore } from '@/stores/decks'
 import { useAuthStore } from '@/stores/auth'
-import { getCards } from '@/services/riftcodex'
+import riftcodex from '@/services/riftcodex'
 import { EXPORT_FORMATS, copyToClipboard } from '@/composables/useDeckExport'
 import { useI18n } from 'vue-i18n'
 
@@ -424,7 +424,7 @@ function addCard(card) {
 function handleClickOutside(e) { if (!e.target.closest('.quick-add')) showSearchResults.value = false }
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
-  try { const data = await getCards(); allCards.value = Array.isArray(data) ? data : [] } catch (e) { /* silent fail, data handled via cache */ }
+  try { const data = await riftcodex.getCards(); allCards.value = Array.isArray(data) ? data : [] } catch (e) { /* silent fail, data handled via cache */ }
 })
 onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside) })
 

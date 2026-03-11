@@ -401,7 +401,7 @@ async function fetchAllData() {
   loading.value = true
   error.value = null
   try {
-    const c = await getCards()
+    const c = await riftcodex.getCards()
     allCards.value = Array.isArray(c) ? c : []
     
     await nextTick()

@@ -116,10 +116,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getCards, searchCards } from '@/services/riftcodex'
+import { useI18n } from 'vue-i18n'
+import riftcodex from '@/services/riftcodex'
 import { useDecksStore } from '@/stores/decks'
 
 const props = defineProps({ name: String })
+const { t } = useI18n()
 const route = useRoute()
 const decksStore = useDecksStore()
 
@@ -198,7 +200,7 @@ onMounted(async () => {
   loading.value = true
   try {
     const cardName = decodeURIComponent(props.name || route.params.name).trim()
-    const allCards = await getCards()
+    const allCards = await riftcodex.getCards()
     
     // Use a more relaxed name matching to handle potential encoding/apostrophe issues
     const normalizedTarget = cardName.toLowerCase().replace(/['’]/g, "'")

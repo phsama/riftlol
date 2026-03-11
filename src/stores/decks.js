@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { api } from '@/services/api'
-import { getCards } from '@/services/riftcodex'
+import riftcodex from '@/services/riftcodex'
 import { useAuthStore } from '@/stores/auth'
 import debounce from 'lodash-es/debounce'
 
@@ -39,7 +39,7 @@ export const useDecksStore = defineStore('decks', () => {
         try {
             const { data } = await api.get('/decks')
             
-            const allCards = await getCards()
+            const allCards = await riftcodex.getCards()
             const cardMap = new Map((allCards || []).map(c => [c.id, c]))
 
             // O backend retorna DeckOut, vamos mapear para como o app espera
