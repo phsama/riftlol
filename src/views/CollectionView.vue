@@ -124,108 +124,102 @@
         <div
           v-for="card in displayCards"
           :key="card.id"
-          class="card-tile collection-tile"
+          class="card-tile collection-tile-horizontal"
           :class="[
             { 'card-tile--champion': card.classification?.type === 'Legend' },
             { 'collection-unowned': collectionStore.getCardTotal(card.id) === 0 }
           ]"
         >
-          <div 
-            class="card-image-wrap"
-            :class="[
-              {'card-image-wrap--landscape': card.orientation === 'landscape' || card.classification?.type === 'Battlefield'},
-              {'foil-glow': getQty(card.id, 'foil_qty') > 0 || getQty(card.id, 'alt_art_foil_qty') > 0 || getQty(card.id, 'overnumbered_foil_qty') > 0}
-            ]"
-          >
-            <img
-              :src="card.media?.image_url"
-              :alt="card.name"
-              class="card-image"
-              loading="lazy"
-              @mouseenter="hoveredCard = card"
-              @mouseleave="hoveredCard = null"
-            />
-            <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
+          <!-- Left side: Image & Name -->
+          <div class="card-horizontal-main">
+            <div 
+              class="card-image-wrap-horizontal"
+              :class="[
+                {'card-image-wrap--landscape': card.orientation === 'landscape' || card.classification?.type === 'Battlefield'},
+                {'foil-glow': card.is_display_foil}
+              ]"
+            >
+              <img
+                :src="card.display_media"
+                :alt="card.name"
+                class="card-image"
+                loading="lazy"
+                @mouseenter="hoveredCard = card"
+                @mouseleave="hoveredCard = null"
+              />
+              <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
+            </div>
             
+            <div class="card-info-horizontal">
+              <h3 class="card-name">{{ card.name }}</h3>
+              <div class="card-meta">
+                <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
+                <span v-if="card.attributes?.energy != null" class="card-energy">{{ card.attributes.energy }}</span>
+              </div>
+            </div>
           </div>
-          <div class="card-info">
-            <h3 class="card-name">{{ card.name }}</h3>
-            <div class="card-meta">
-              <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
-              <span v-if="card.attributes?.energy != null" class="card-energy">{{ card.attributes.energy }}</span>
+
+          <!-- Right side: Matrix Controls -->
+          <div class="collection-controls-matrix-horizontal">
+            <!-- Normal -->
+            <div class="v-h-row">
+              <span class="v-h-label">Normal</span>
+              <div class="v-h-stepper">
+                <button class="v-mini-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
+                <span class="v-mini-val">{{ getQty(card.id, 'normal_qty') }}</span>
+                <button class="v-mini-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
+              </div>
+              <div class="v-h-stepper v-h-foil">
+                <button class="v-mini-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
+                <span class="v-mini-val"><span class="v-star">⭐</span>{{ getQty(card.id, 'foil_qty') }}</span>
+                <button class="v-mini-btn btn-plus-gold" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
+              </div>
             </div>
-            
-            <!-- Final Aligned Matrix Controls - No Toggle, No Modal -->
-            <div class="collection-controls-matrix-final">
-                <!-- Normal -->
-                <div class="v-final-row">
-                    <span class="v-final-label">Normal</span>
-                    <div class="v-final-steppers">
-                        <div class="v-final-stepper">
-                            <button class="v-mini-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
-                            <span class="v-mini-val">{{ getQty(card.id, 'normal_qty') }}</span>
-                            <button class="v-mini-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
-                        </div>
-                        <div class="v-final-stepper v-final-foil">
-                            <button class="v-mini-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
-                            <span class="v-mini-val"><span class="v-star">⭐</span>{{ getQty(card.id, 'foil_qty') }}</span>
-                            <button class="v-mini-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- AArt -->
-                <div class="v-final-row" :class="{ 'v-row-off': !hasAltArt(card) }">
-                    <span class="v-final-label">AArt</span>
-                    <div class="v-final-steppers">
-                        <div class="v-final-stepper">
-                            <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
-                            <span class="v-mini-val">{{ getQty(card.id, 'alt_art_qty') }}</span>
-                            <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
-                        </div>
-                        <div class="v-final-stepper v-final-foil">
-                            <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', -1)">−</button>
-                            <span class="v-mini-val"><span class="v-star">⭐</span>{{ getQty(card.id, 'alt_art_foil_qty') }}</span>
-                            <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Signature -->
-                <div class="v-final-row" :class="{ 'v-row-off': !hasSignature(card) }">
-                    <span class="v-final-label">Signature</span>
-                    <div class="v-final-steppers">
-                        <div class="v-final-stepper">
-                            <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, 'signed_qty', -1)">−</button>
-                            <span class="v-mini-val">{{ getQty(card.id, 'signed_qty') }}</span>
-                            <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, 'signed_qty', 1)">+</button>
-                        </div>
-                        <div class="v-final-stepper v-final-foil">
-                            <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, 'signed_foil_qty', -1)">−</button>
-                            <span class="v-mini-val"><span class="v-star">⭐</span>{{ getQty(card.id, 'signed_foil_qty') }}</span>
-                            <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, 'signed_foil_qty', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Over -->
-                <div class="v-final-row" :class="{ 'v-row-off': !hasOvernumbered(card) }">
-                    <span class="v-final-label">Over</span>
-                    <div class="v-final-steppers">
-                        <div class="v-final-stepper">
-                            <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', -1)">−</button>
-                            <span class="v-mini-val">{{ getQty(card.id, 'overnumbered_qty') }}</span>
-                            <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', 1)">+</button>
-                        </div>
-                        <div class="v-final-stepper v-final-foil">
-                            <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', -1)">−</button>
-                            <span class="v-mini-val"><span class="v-star">⭐</span>{{ getQty(card.id, 'overnumbered_foil_qty') }}</span>
-                            <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
+            <!-- AArt -->
+            <div class="v-h-row" :class="{ 'v-row-off': !hasAltArt(card) }">
+              <span class="v-h-label">AArt</span>
+              <div class="v-h-stepper">
+                <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
+                <span class="v-mini-val">{{ getQty(card.id, 'alt_art_qty') }}</span>
+                <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
+              </div>
+              <div class="v-h-stepper v-h-foil">
+                <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', -1)">−</button>
+                <span class="v-mini-val"><span class="v-star">⭐</span>{{ getQty(card.id, 'alt_art_foil_qty') }}</span>
+                <button class="v-mini-btn btn-plus-gold" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', 1)">+</button>
+              </div>
             </div>
-            
+
+            <!-- Signature -->
+            <div class="v-h-row" :class="{ 'v-row-off': !hasSignature(card) }">
+              <span class="v-h-label">Signature</span>
+              <div class="v-h-stepper">
+                <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, 'signed_qty', -1)">−</button>
+                <span class="v-mini-val">{{ getQty(card.id, 'signed_qty') }}</span>
+                <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, 'signed_qty', 1)">+</button>
+              </div>
+              <div class="v-h-stepper v-h-foil">
+                <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, 'signed_foil_qty', -1)">−</button>
+                <span class="v-mini-val"><span class="v-star">⭐</span>{{ getQty(card.id, 'signed_foil_qty') }}</span>
+                <button class="v-mini-btn btn-plus-gold" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, 'signed_foil_qty', 1)">+</button>
+              </div>
+            </div>
+
+            <!-- Over -->
+            <div class="v-h-row" :class="{ 'v-row-off': !hasOvernumbered(card) }">
+              <span class="v-h-label">Over</span>
+              <div class="v-h-stepper">
+                <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', -1)">−</button>
+                <span class="v-mini-val">{{ getQty(card.id, 'overnumbered_qty') }}</span>
+                <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', 1)">+</button>
+              </div>
+              <div class="v-h-stepper v-h-foil">
+                <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', -1)">−</button>
+                <span class="v-mini-val"><span class="v-star">⭐</span>{{ getQty(card.id, 'overnumbered_foil_qty') }}</span>
+                <button class="v-mini-btn btn-plus-gold" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', 1)">+</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -447,14 +441,37 @@ const displayCards = computed(() => {
   return visibleCards.value.map(baseCard => {
     const qty = collectionStore.items[baseCard.id] || {}
     let activeVersion = baseCard._versions[0]
-    if (qty.signed_qty > 0 || qty.overnumbered_qty > 0) {
-       const signed = baseCard._versions.find(v => v.metadata?.signature === true || (v.tags?.some(t => t.toLowerCase().includes('sign'))))
-       if (signed) activeVersion = signed
-    } else if ((qty.alt_art_qty > 0 || qty.alt_art_foil_qty > 0) && baseCard._versions.length > 1) {
-       const altArt = baseCard._versions.find((v, idx) => idx > 0)
-       if (altArt) activeVersion = altArt
+    let isFoilActive = false
+
+    // Priority: Signature > Overnumbered > Alt Art > Normal
+    const signature = baseCard._versions.find(v => v.metadata?.signature === true || (v.tags?.some(t => t.toLowerCase().includes('sign'))))
+    const overnumbered = baseCard._versions.find(v => v.collector_number && parseInt(v.collector_number) > 200) // Rough check for overnumbered
+    const altArt = baseCard._versions.find((v, idx) => idx > 0 && v !== signature && v !== overnumbered)
+
+    if (qty.signed_qty > 0 || qty.signed_foil_qty > 0) {
+      if (signature) {
+        activeVersion = signature
+        isFoilActive = qty.signed_foil_qty > 0
+      }
+    } else if (qty.overnumbered_qty > 0 || qty.overnumbered_foil_qty > 0) {
+      if (overnumbered) {
+        activeVersion = overnumbered
+        isFoilActive = qty.overnumbered_foil_qty > 0
+      }
+    } else if (qty.alt_art_qty > 0 || qty.alt_art_foil_qty > 0) {
+      if (altArt) {
+        activeVersion = altArt
+        isFoilActive = qty.alt_art_foil_qty > 0
+      }
+    } else {
+      isFoilActive = qty.foil_qty > 0
     }
-    return { ...baseCard, media: { ...baseCard.media, image_url: activeVersion.media?.image_url } }
+
+    return { 
+      ...baseCard, 
+      display_media: activeVersion.media?.image_url,
+      is_display_foil: isFoilActive 
+    }
   })
 })
 
@@ -561,114 +578,209 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 .filter-selects { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* ── Cards grid ── */
-.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-.card-tile { display: flex; flex-direction: column; border-radius: var(--radius-md); background: var(--color-bg-raised); border: 1px solid var(--color-border-subtle); transition: all 0.2s ease; position: relative; }
-.collection-unowned .card-image { filter: grayscale(100%) opacity(0.4); }
-.card-image-wrap { position: relative; width: 100%; aspect-ratio: 744 / 1039; overflow: hidden; border-radius: var(--radius-md) var(--radius-md) 0 0; background: #000; }
-.card-image-wrap--landscape { aspect-ratio: 1039 / 744; }
-.card-image { width: 100%; height: 100%; object-fit: contain; }
-.alt-arts-badge { position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; border-radius: var(--radius-full); background: rgba(0,0,0,0.7); font-size: 0.55rem; color: var(--color-gold-400); z-index: 10; }
-
-/* ── Foil Glow ── */
-.foil-glow::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.4) 30%, rgba(255, 215, 0, 0.2) 45%, transparent 80%); mix-blend-mode: color-dodge; opacity: 0.75; animation: foil-shine 3s linear infinite; pointer-events: none; }
-@keyframes foil-shine { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
-
-.card-info { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
-.card-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.card-meta { display: flex; align-items: center; gap: 4px; margin-top: 3px; margin-bottom: 8px; }
-/* Final Aligned Matrix Styles */
-.collection-controls-matrix-final {
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.02);
-  margin-top: auto;
-  border-top: 1px solid var(--color-border-subtle);
+.cards-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
+  gap: 16px; 
 }
 
-.v-final-row {
+/* Horizontal Card Tile */
+.collection-tile-horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 120px;
+}
+
+.collection-tile-horizontal:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.collection-unowned {
+  opacity: 0.6;
+}
+
+.collection-unowned .card-image {
+  filter: grayscale(100%) contrast(0.8);
+}
+
+/* Left Section: Image & Basic Info */
+.card-horizontal-main {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-image-wrap-horizontal {
+  position: relative;
+  width: 70px;
+  height: 98px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.card-image-wrap--landscape {
+  width: 98px;
+  height: 70px;
+}
+
+.card-image-wrap-horizontal .card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-info-horizontal {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-info-horizontal .card-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right Section: Matrix Controls */
+.collection-controls-matrix-horizontal {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.v-h-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 2px 0;
+  padding: 1px 0;
 }
 
-.v-row-off {
-  opacity: 0.15;
-  pointer-events: none;
-  filter: grayscale(1);
-}
-
-.v-final-label {
+.v-h-label {
   font-size: 0.55rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #94a3b8;
-  width: 58px; /* Fixed width for alignment */
+  color: var(--color-text-tertiary);
+  width: 48px;
   flex-shrink: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.05em;
 }
 
-.v-final-steppers {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-}
-
-.v-final-stepper {
+.v-h-stepper {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
-  padding: 1px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 1px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.v-final-foil {
-  background: rgba(255, 215, 0, 0.08);
-  border-color: rgba(255, 215, 0, 0.15);
+.v-h-foil {
+  background: rgba(255, 215, 0, 0.05);
+  border-color: rgba(255, 215, 0, 0.1);
 }
 
 .v-mini-btn {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  color: #fff;
-  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
   cursor: pointer;
-  border-radius: 3px;
+  transition: all 0.2s;
 }
 
 .v-mini-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.btn-plus-gold {
+  color: #ffd700 !important;
+  font-weight: 900;
+}
+
+.btn-plus-gold:hover:not(:disabled) {
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  transform: scale(1.1);
 }
 
 .v-mini-val {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  color: #fff;
-  min-width: 12px;
+  min-width: 14px;
   text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.v-final-foil .v-mini-val {
+.v-h-foil .v-mini-val {
   color: #ffd700;
 }
 
 .v-star {
-  font-size: 0.55rem;
-  margin-right: 1px;
+  font-size: 0.6rem;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+.v-row-off {
+  opacity: 0.1;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+/* ── Foil Glow ── */
+.foil-glow {
+  position: relative;
+}
+.foil-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, #ffd700, #fff, #ffd700);
+  filter: blur(8px);
+  opacity: 0.3;
+  z-index: -1;
+  border-radius: inherit;
+}
+.foil-glow::after { 
+  content: ''; 
+  position: absolute; 
+  inset: 0; 
+  background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.4) 30%, rgba(255, 215, 0, 0.2) 45%, transparent 80%); 
+  mix-blend-mode: color-dodge; 
+  opacity: 0.75; 
+  animation: foil-shine 3s linear infinite; 
+  pointer-events: none; 
+}
+@keyframes foil-shine { 
+  0% { background-position: 200% center; } 
+  100% { background-position: -200% center; } 
 }
 
 
@@ -677,12 +789,53 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 .global-card-preview img { width: 100%; display: block; }
   .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
 
+@media (min-width: 1600px) {
+  .cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .global-card-preview { display: none !important; }
-  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 8px; }
+  .cards-grid { 
+    grid-template-columns: 1fr; 
+    gap: 10px; 
+  }
+  
+  .collection-tile-horizontal {
+    min-height: auto;
+  }
+  
+  .card-horizontal-main {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .card-image-wrap-horizontal {
+    width: 60px;
+    height: 84px;
+  }
+  
+  .card-image-wrap--landscape {
+    width: 84px;
+    height: 60px;
+  }
+  
+  .card-info-horizontal .card-name {
+    font-size: 0.9rem;
+  }
+  
+  .collection-controls-matrix-horizontal {
+    width: 180px;
+    padding: 8px;
+  }
+  
+  .v-h-label {
+    width: 36px;
+    font-size: 0.5rem;
+  }
+
   .export-trigger span { display: none; }
-  .card-info { padding: 6px 8px 8px; }
-  .card-name { font-size: 0.75rem; }
   
   /* Export Modal Mobile Adjustments */
   .export-modal { 
@@ -697,6 +850,16 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
   .export-modal-footer .btn {
     width: 100%;
     height: 48px;
+  }
+}
+
+/* Extra small mobile */
+@media (max-width: 400px) {
+  .collection-controls-matrix-horizontal {
+    width: 150px;
+  }
+  .v-h-label {
+    display: none;
   }
 }
 </style>

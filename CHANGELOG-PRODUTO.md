@@ -8,6 +8,11 @@
 - **Estabilidade de Preview**: Refatoramos o sistema de miniaturas para ser 100% estável e não "quebrar" mais o layout ao passar o mouse rapidamente.
 - **Área "Como Jogar" & Keywords**: Re-verificamos e corrigimos todos os termos técnicos (Keywords) para os nomes oficiais de Riftbound (Accelerate, Assault, Deathknell), eliminando termos de outros card games.
 - **Favicon & SEO Final**: Favicon premium com cache-busting e tags SEO devidamente propagadas para o domínio `riftnights.com`.
+- **Redesenho Premium da Coleção**: Interface totalmente reformulada para layout horizontal (estilo lista), facilitando a gestão de variantes.
+    - **1 Coluna no Mobile / 4 no Desktop**: Layout otimizado para legibilidade e organização, eliminando a poluição visual anterior.
+    - **Botão Plus Gold (+)**: Adição direta de unidades Foil com apenas um clique.
+    - **Lógica de Imagem Rara**: O card agora exibe automaticamente a arte mais rara que você possui (Assinada > Numerada > Alternativa > Normal).
+    - **Foil Priority Visual**: Efeito de "Glow" dourado nos cards quando a versão Foil está sendo exibida.
 
 ---
 
