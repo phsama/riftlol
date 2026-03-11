@@ -152,8 +152,6 @@
                 :alt="card.name"
                 class="card-image"
                 loading="lazy"
-                @mouseenter="hoveredCard = card"
-                @mouseleave="hoveredCard = null"
               />
               <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
             </div>
@@ -221,16 +219,6 @@
         <div class="loading-dots"><span></span><span></span><span></span></div>
       </div>
 
-      <!-- ── Global Hover Preview ── -->
-      <Teleport to="body">
-        <div 
-          v-if="hoveredCard" 
-          class="global-card-preview"
-          :style="previewPosition"
-        >
-          <img :src="hoveredCard.media?.image_url" :alt="hoveredCard.name" />
-        </div>
-      </Teleport>
 
       <!-- ── Export Modal ── -->
       <Teleport to="body">
@@ -320,9 +308,6 @@ const selectedTypes = ref([])
 const selectedRarities = ref([])
 const selectedEnergy = ref(null)
 const showOnlyOwned = ref(false)
-const hoveredCard = ref(null)
-const mouseX = ref(0)
-const mouseY = ref(0)
 
 const availableDomains = ['Body', 'Calm', 'Chaos', 'Fury', 'Mind', 'Order', 'Colorless']
 
@@ -518,23 +503,7 @@ function toggleDomain(d) {
   i === -1 ? selectedDomains.value.push(d) : selectedDomains.value.splice(i, 1)
 }
 
-watch(hoveredCard, (newCard) => {
-  if (!newCard) return
-})
-
 function clearFilters() { searchQuery.value = ''; selectedDomains.value = []; selectedTypes.value = []; selectedRarities.value = []; selectedEnergy.value = null; showOnlyOwned.value = false; }
-function handleGlobalMouseMove(e) { mouseX.value = e.clientX; mouseY.value = e.clientY; }
-
-const previewPosition = computed(() => {
-  if (!hoveredCard.value) return {}
-  const width = 340, height = 480, padding = 20
-  let left = mouseX.value + padding, top = mouseY.value - (height / 2)
-  if (left + width > window.innerWidth) left = mouseX.value - width - padding
-  if (top < padding) top = padding
-  if (top + height > window.innerHeight) top = window.innerHeight - height - padding
-  return { left: `${left}px`, top: `${top}px` }
-})
-
 function setupObserver() {
   if (observer) observer.disconnect()
   if (!sentinel.value) return
@@ -558,8 +527,8 @@ async function fetchAllData() {
   } catch (e) { error.value = t('common.something_went_wrong') } finally { loading.value = false }
 }
 
-onMounted(() => { fetchAllData(); window.addEventListener('mousemove', handleGlobalMouseMove) })
-onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventListener('mousemove', handleGlobalMouseMove) })
+onMounted(() => { fetchAllData(); })
+onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 </script>
 
 <style scoped>
@@ -772,9 +741,6 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
   color: #fbbf24;
   text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
 }
-i-val {
-  color: #ffd700;
-}
 
 .v-star {
   font-size: 0.6rem;
@@ -818,10 +784,8 @@ i-val {
 }
 
 
-/* ── Preview ── */
-.global-card-preview { position: fixed; width: 340px; border-radius: var(--radius-lg); overflow: hidden; z-index: 1000; box-shadow: var(--shadow-2xl); pointer-events: none; }
-.global-card-preview img { width: 100%; display: block; }
-  .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+/* ── Preview (Removed) ── */
+.loading-dots span:nth-child(3) { animation-delay: 0.3s; }
 
 @media (min-width: 1600px) {
   .cards-grid {
