@@ -17,10 +17,10 @@
           <div>
             <h1 class="collection-title">{{ $t('collection.title') }}</h1>
             <p class="collection-subtitle" v-if="!loading && allCards.length">
-              {{ $t('common.progress') }}: {{ uniqueCardsOwned }} / {{ groupedCards.length }}
+              {{ $t('common.progress') }}: {{ collectionProgress.owned }} / {{ collectionProgress.total }}
             </p>
           </div>
-          <button class="btn btn-secondary btn-sm export-trigger" @click="openExport" :disabled="loading || uniqueCardsOwned === 0">
+          <button class="btn btn-secondary btn-sm export-trigger" @click="openExport" :disabled="loading || collectionProgress.owned === 0">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             {{ $t('collection.export') }}
           </button>
@@ -516,10 +516,35 @@ const filteredCards = computed(() => {
   return result
 })
 
-const uniqueCardsOwned = computed(() => {
-    let count = 0;
-    groupedCards.value.forEach(c => { if (collectionStore.getCardTotal(c.id) > 0) count++; })
-    return count;
+const collectionProgress = computed(() => {
+    let total = 0
+    let owned = 0
+    
+    groupedCards.value.forEach(card => {
+        // 1. Normal version
+        total++
+        if (getQty(card.id, 'normal_qty') > 0 || getQty(card.id, 'foil_qty') > 0) owned++
+        
+        // 2. Alt Art
+        if (hasAltArt(card)) {
+            total++
+            if (getQty(card.id, 'alt_art_qty') > 0 || getQty(card.id, 'alt_art_foil_qty') > 0) owned++
+        }
+        
+        // 3. Signature
+        if (hasSignature(card)) {
+            total++
+            if (getQty(card.id, 'signed_qty') > 0 || getQty(card.id, 'signed_foil_qty') > 0) owned++
+        }
+        
+        // 4. Overnumbered
+        if (hasOvernumbered(card)) {
+            total++
+            if (getQty(card.id, 'overnumbered_qty') > 0 || getQty(card.id, 'overnumbered_foil_qty') > 0) owned++
+        }
+    })
+    
+    return { owned, total }
 })
 
 const visibleCards = computed(() => filteredCards.value.slice(0, visibleCount.value))
