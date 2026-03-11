@@ -9,10 +9,13 @@
 - **Área "Como Jogar" & Keywords**: Re-verificamos e corrigimos todos os termos técnicos (Keywords) para os nomes oficiais de Riftbound (Accelerate, Assault, Deathknell), eliminando termos de outros card games.
 - **Favicon & SEO Final**: Favicon premium com cache-busting e tags SEO devidamente propagadas para o domínio `riftnights.com`.
 - **Redesenho Premium da Coleção**: Interface totalmente reformulada para layout horizontal (estilo lista), facilitando a gestão de variantes.
-    - **1 Coluna no Mobile / 4 no Desktop**: Layout otimizado para legibilidade e organização, eliminando a poluição visual anterior.
-    - **Botão Plus Gold (+)**: Adição direta de unidades Foil com apenas um clique.
+    - **Densidade Visual (max-width)**: O layout não estica mais desenfreadamente se houver apenas uma carta pesquisada.
+    - **Botão Plus Gold (✦)**: Adição direta de unidades Foil com apenas um clique e visual claro.
     - **Lógica de Imagem Rara**: O card agora exibe automaticamente a arte mais rara que você possui (Assinada > Numerada > Alternativa > Normal).
-    - **Foil Priority Visual**: Efeito de "Glow" dourado nos cards quando a versão Foil está sendo exibida.
+    - **Foil Priority Visual**: Efeito de "Glow" dourado nos cards consertado, com animação e isolamento visual (`isolation: isolate`) refinados.
+- **Exportação de Coleção Corrigida**: O modal de cópia de coleção agora aparece com todas as variantes (inclusive `signed_foil_qty`), livre do travamento inicial.
+- **Perfomance de Foco (Alt+Tab)**: Coleção agora usa cache inteligente e não sofre reload desnecessário do servidor sempre que o usuário troca de aba/janela.
+- **Banco de Dados Sincronizado**: Patch de emergência no PostgreSQL de produção para adicionar a variante de Foil Assinada, eliminando Erro 500 no Backend.
 
 ---
 
