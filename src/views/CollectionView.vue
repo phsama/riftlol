@@ -136,7 +136,6 @@
               <h3 class="card-name">{{ card.name }}</h3>
               <div class="card-meta">
                 <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
-                <span v-if="card.attributes?.energy != null" class="card-energy">{{ card.attributes.energy }}</span>
               </div>
             </div>
 
@@ -577,7 +576,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 /* ── Cards grid ── */
 .cards-grid { 
   display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); 
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); 
   gap: 20px; 
 }
 
@@ -667,7 +666,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   gap: 8px;
   padding: 16px 20px;
   background: rgba(255, 255, 255, 0.02);
-  min-width: 220px;
+  min-width: 250px; /* Increased to ensure no cuts */
 }
 
 .v-h-row {
