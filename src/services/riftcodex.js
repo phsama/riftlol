@@ -114,5 +114,4 @@ export default {
     getRarities,
     getTypes,
     getSupertypes,
-    getCardPrices,
 }

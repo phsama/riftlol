@@ -214,38 +214,6 @@
         >
           <img :src="hoveredCard.media?.image_url" :alt="hoveredCard.name" />
           
-          <!-- Price Section -->
-          <div class="preview-price-box">
-            <div v-if="loadingPrices" class="price-loading">
-              <div class="spinner-sm"></div>
-              <span>{{ $t('catalog.loading_prices') }}</span>
-            </div>
-            <div v-else-if="cardPrices && cardPrices.found" class="price-content">
-              <div class="price-header">
-                <span class="price-market-label">{{ $t('catalog.market_prices') }}</span>
-                <span class="price-currency-badge" :class="{ 'fallback': cardPrices.is_fallback }">
-                  {{ cardPrices.currency }}
-                </span>
-              </div>
-              <div class="price-grid">
-                <div v-if="cardPrices.prices.min" class="price-item">
-                  <span class="p-label">{{ $t('catalog.price_min') }}</span>
-                  <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.min }}</span>
-                </div>
-                <div v-if="cardPrices.prices.avg" class="price-item">
-                  <span class="p-label">{{ $t('catalog.price_avg') }}</span>
-                  <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.avg }}</span>
-                </div>
-                <div v-if="cardPrices.prices.max" class="price-item">
-                  <span class="p-label">{{ $t('catalog.price_max') }}</span>
-                  <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.max }}</span>
-                </div>
-              </div>
-              <a :href="cardPrices.url" target="_blank" class="btn-liga-link">
-                {{ $t('catalog.view_on_liga') }} ↗
-              </a>
-            </div>
-          </div>
         </div>
       </Teleport>
     </div>
@@ -439,10 +407,8 @@ const selectedEnergy = ref(null)
 const showOnlyOwned = ref(false)
 const managingCard = ref(null)
 const hoveredCard = ref(null)
-const cardPrices = ref(null)
-const loadingPrices = ref(false)
-const mouseY = ref(0)
 const mouseX = ref(0)
+const mouseY = ref(0)
 
 const availableDomains = ['Body', 'Calm', 'Chaos', 'Fury', 'Mind', 'Order', 'Colorless']
 
@@ -562,16 +528,9 @@ function toggleDomain(d) {
   i === -1 ? selectedDomains.value.push(d) : selectedDomains.value.splice(i, 1)
 }
 
-const fetchPrices = useDebounceFn(async (card) => {
-  if (!card) return
-  loadingPrices.value = true
-  try {
-    const data = await riftcodex.getCardPrices(card.name, locale.value)
-    cardPrices.value = data
-  } catch (err) { console.error('Error fetching prices:', err) } finally { loadingPrices.value = false }
-}, 300)
-
-watch(hoveredCard, (newCard) => { if (!newCard) { cardPrices.value = null; return } fetchPrices(newCard) })
+watch(hoveredCard, (newCard) => {
+  if (!newCard) return
+})
 
 function clearFilters() { searchQuery.value = ''; selectedDomains.value = []; selectedTypes.value = []; selectedRarities.value = []; selectedEnergy.value = null; showOnlyOwned.value = false; }
 function handleGlobalMouseMove(e) { mouseX.value = e.clientX; mouseY.value = e.clientY; }
@@ -686,18 +645,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 /* ── Preview ── */
 .global-card-preview { position: fixed; width: 340px; border-radius: var(--radius-lg); overflow: hidden; z-index: 1000; box-shadow: var(--shadow-2xl); pointer-events: none; }
 .global-card-preview img { width: 100%; display: block; }
-.preview-price-box { background: rgba(15, 17, 26, 0.95); backdrop-filter: blur(8px); padding: 16px; border-top: 1px solid rgba(201, 168, 76, 0.2); pointer-events: auto; }
-.price-loading { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.85rem; padding: 10px 0; }
-.spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.price-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.price-market-label { font-size: 0.75rem; color: var(--primary-light); font-weight: 600; }
-.price-currency-badge { font-size: 0.65rem; padding: 2px 6px; background: rgba(201, 168, 76, 0.2); border-radius: 4px; }
-.price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-.price-item { display: flex; flex-direction: column; }
-.p-label { font-size: 0.6rem; color: var(--text-muted); }
-.p-value { font-size: 0.85rem; font-weight: 700; color: #fff; }
-.btn-liga-link { display: block; width: 100%; padding: 8px; background: var(--primary); color: #000; text-align: center; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-decoration: none; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
 
 @media (max-width: 768px) {
   .cards-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 8px; }
