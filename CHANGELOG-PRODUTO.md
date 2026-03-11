@@ -1,7 +1,7 @@
-# Changelog - Riftbound Deck Manager (RiftNights.com)
+# Changelog - Riftbound NIGHTS (RiftNights.com)
 
 ### 🟢 O que entregamos nesta iteração:
-- **Riftbound Nights**: Evoluímos a marca para **Riftbound Nights**, alinhando o Deck Manager com o portal principal. O design do logo foi refinado para um visual mais imponente e moderno.
+- **Riftbound NIGHTS**: Consolidamos a marca para **Riftbound NIGHTS**, unificando o Deck Manager em todas as frentes (Header, Footer, Termos Legais e SEO). O design agora reflete a identidade definitiva de lançamento.
 - **Integração de Preços (LigaRiftbound)**: O preview de cartas agora exibe cotações em tempo real (Mínimo, Médio, Máximo) vindas da LigaRiftbound. 
 - **Suporte Internacional de Moeda**: Para usuários em Inglês ou Espanhol, o sistema prioriza a exibição em Dólar ($) ou sinaliza a cotação em Real (R$) se for a única disponível, garantindo utilidade global.
 - **Botão de Compra Direta**: Adicionamos um link direto para o marketplace da LigaRiftbound em cada carta, facilitando a aquisição de unidades faltantes para o seu deck.

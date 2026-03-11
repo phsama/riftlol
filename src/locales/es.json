@@ -1,19 +1,19 @@
 {
   "seo": {
     "catalog": {
-      "title": "Catálogo de Cartas | Riftbound Deck Manager",
+      "title": "Catálogo de Cartas | Riftbound NIGHTS",
       "desc": "Explora todas las cartas de Riftbound. Filtra por dominios, tipos y rarezas para encontrar lo que necesitas."
     },
     "collection": {
-      "title": "Riftnights - Tu Portal de Estrategia de Riftbound TCG",
+      "title": "Riftbound NIGHTS - Tu Portal de Estrategia",
       "description": "Explora el catálogo completo de cartas de Riftbound TCG, organiza tu colección y crea mazos imbatibles. El gestor definitivo para compra, venta y cambio."
     },
     "decks": {
-      "title": "Mis Mazos | Riftbound Deck Manager",
+      "title": "Mis Mazos | Riftbound NIGHTS",
       "desc": "Crea, edita y comparte tus mejores mazos de Riftbound."
     },
     "scanner": {
-      "title": "Escáner de Cartas | Riftbound Deck Manager",
+      "title": "Escáner de Cartas | Riftbound NIGHTS",
       "desc": "Identifica tus cartas físicas rápidamente usando la cámara y añádelas a tu colección."
     },
     "how_to_play": {
@@ -21,15 +21,15 @@
       "desc": "Aprende las reglas básicas, mecánicas de runas y términos del juego Riftbound TCG."
     },
     "privacy": {
-      "title": "Política de Privacidad | Riftbound Deck Manager",
+      "title": "Política de Privacidad | Riftbound NIGHTS",
       "desc": "Conoce como tratamos tus datos y garantizamos tu privacidad."
     },
     "terms": {
-      "title": "Términos de Uso | Riftbound Deck Manager",
-      "desc": "Lee los términos y condiciones de uso de Riftbound Deck Manager."
+      "title": "Términos de Uso | Riftbound NIGHTS",
+      "desc": "Lee los términos y condiciones de uso de Riftbound NIGHTS."
     },
     "default": {
-      "title": "Riftbound Deck Manager",
+      "title": "Riftbound NIGHTS Deck Manager",
       "desc": "Tu compañero definitivo para gestionar tu viaje en Riftbound TCG."
     }
   },
@@ -194,7 +194,7 @@
     "title": "Cómo Jugar Riftbound",
     "intro": {
       "title": "Inicio Rápido",
-      "p1": "Riftbound es un juego de cartas (TCG) donde eliges un Campeón, creas tu ejército y luchas por el control de campos de batalla estratégicos.",
+      "p1": "Riftbound NIGHTS es un juego de cartas (TCG) donde eliges un Campeón, armas tu ejército y luchas por el control de campos de batalla estratégicos.",
       "p2": "El objetivo es simple: ser el primero en alcanzar **8 puntos** (u 11 en juegos de equipo). Ganas puntos al tomar el control de un Battlefield y al mantenerlo al inicio de tu turno."
     },
     "deckbuilding": {
@@ -268,7 +268,7 @@
       }
   },
   "footer": {
-    "rights": "© 2026 Riftbound Deck Manager. Todos los derechos reservados.",
+    "rights": "© 2026 Riftbound NIGHTS Deck Manager. Todos los derechos reservados.",
     "privacy": "Privacidad",
     "terms": "Términos"
   },
@@ -276,12 +276,12 @@
     "privacy": {
       "title": "Política de Privacidad",
       "last_updated": "Última actualización: Marzo 2026",
-      "content": "Tu privacidad es importante para nosotros. Esta política explica cómo recopilamos y utilizamos tus datos al usar Riftbound Deck Manager.\n\n### 1. Recopilación de Datos\nRecopilamos información básica como correo electrónico (al crear una cuenta) y datos de colección para la sincronización entre dispositivos. No vendemos tus datos a terceros.\n\n### 2. Uso de la Información\nUtilizamos tus datos para personalizar tu experiencia, guardar tus mazos y proporcionar las funcionalidades del sistema.\n\n### 3. Cookies y Publicidad\nPodemos utilizar cookies para mejorar la navegación y mostrar anuncios relevantes a través de socios como Google AdSense.\n\n### 4. Seguridad\nEmpleamos medidas de seguridad modernas como cifrado y autenticación a través de Supabase para proteger tu información."
+      "content": "Tu privacidad es importante para nosotros. Esta política explica cómo recopilamos y utilizamos tus datos al usar Riftbound NIGHTS Deck Manager.\n\n### 1. Recopilación de Datos\nRecopilamos información básica como correo electrónico (al crear una cuenta) y datos de colección para la sincronización entre dispositivos. No vendemos tus datos a terceros.\n\n### 2. Uso de la Información\nUtilizamos tus datos para personalizar tu experiencia, guardar tus mazos y proporcionar las funcionalidades del sistema.\n\n### 3. Cookies y Publicidad\nPodemos utilizar cookies para mejorar la navegación y mostrar anuncios relevantes a través de socios como Google AdSense.\n\n### 4. Seguridad\nEmpleamos medidas de seguridad modernas como cifrado y autenticación a través de Supabase para proteger tu información."
     },
     "terms": {
       "title": "Términos de Uso",
       "last_updated": "Última actualización: Marzo 2026",
-      "content": "Al acceder a Riftbound Deck Manager, aceptas os seguintes termos:\n\n### 1. Uso del Servicio\nEste sitio es una herramienta de auxilio para jugadores de Riftbound TCG. El uso debe ser personal y no comercial.\n\n### 2. Propiedad Intelectual\nRiftbound y todo el arte relacionado son propiedad de Riftbound TCG / League of Legends. Este proyecto es una herramienta de fans sin afiliación oficial.\n\n### 3. Limitación de Responsabilidad\nEl servicio se proporciona 'tal cual'. No nos responsabilizamos por la pérdida de datos o errores de interpretación de las reglas del juego.\n\n### 4. Modificaciones\nNos reservamos el derecho de cambiar estos términos en cualquier momento para mejorar el servicio."
+      "content": "Al acceder a Riftbound NIGHTS Deck Manager, aceptas os seguintes termos:\n\n### 1. Uso del Servicio\nEste sitio es una herramienta de auxilio para jugadores de Riftbound TCG. El uso debe ser personal y no comercial.\n\n### 2. Propiedad Intelectual\nRiftbound e todo el arte relacionado son propiedad de Riftbound TCG / League of Legends. Este proyecto es una herramienta de fans sin afiliación oficial.\n\n### 3. Limitación de Responsabilidad\nEl servicio se proporciona 'tal cual'. No nos responsabilizamos por la pérdida de datos o errores de interpretación de las reglas del juego.\n\n### 4. Modificaciones\nNos reservamos el derecho de cambiar estos términos en cualquier momento para mejorar el servicio."
     }
   }
 }

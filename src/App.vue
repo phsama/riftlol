@@ -4,7 +4,7 @@
     <nav class="app-nav glass">
       <router-link to="/" class="nav-brand">
         <span class="nav-logo">⚔</span>
-        <span class="nav-title">Riftbound <span class="nav-title-accent">Nights</span> <span class="nav-title-sub">Deck Manager</span></span>
+        <span class="nav-title">Riftbound <span class="nav-title-accent">NIGHTS</span> <span class="nav-title-sub">Deck Manager</span></span>
       </router-link>
 
       <!-- Desktop nav links -->
@@ -89,7 +89,7 @@
         <div class="footer-content">
           <div class="footer-brand">
             <span class="nav-logo">⚔</span>
-            <span class="nav-title">Riftbound <span class="nav-title-accent">Nights</span> <span class="nav-title-sub">Deck Manager</span></span>
+            <span class="nav-title">Riftbound <span class="nav-title-accent">NIGHTS</span> <span class="nav-title-sub">Deck Manager</span></span>
           </div>
           <p class="footer-rights">{{ $t('footer.rights') }}</p>
           <div class="footer-links">

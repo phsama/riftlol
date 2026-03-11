@@ -1,19 +1,19 @@
 {
   "seo": {
     "catalog": {
-      "title": "Card Catalog | Riftbound Deck Manager",
+      "title": "Card Catalog | Riftbound NIGHTS",
       "desc": "Explore all Riftbound cards. Filter by domains, types, and rarities to find what you need."
     },
     "collection": {
-      "title": "Riftnights - Your Riftbound TCG Strategy Hub",
+      "title": "Riftbound NIGHTS - Strategic Hub",
       "description": "Explore the complete Riftbound TCG card catalog, organize your collection, and build unbeatable decks. The ultimate manager for buying, selling, and trading."
     },
     "decks": {
-      "title": "My Decks | Riftbound Deck Manager",
+      "title": "My Decks | Riftbound NIGHTS",
       "desc": "Create, edit, and share your best Riftbound decks."
     },
     "scanner": {
-      "title": "Card Scanner | Riftbound Deck Manager",
+      "title": "Card Scanner | Riftbound NIGHTS",
       "desc": "Quickly identify your physical cards using the camera and add them to your collection."
     },
     "how_to_play": {
@@ -21,15 +21,15 @@
       "desc": "Learn the basic rules, rune mechanics, and game terms of Riftbound TCG."
     },
     "privacy": {
-      "title": "Privacy Policy | Riftbound Deck Manager",
+      "title": "Privacy Policy | Riftbound NIGHTS",
       "desc": "Learn how we handle your data and ensure your privacy."
     },
     "terms": {
-      "title": "Terms of Use | Riftbound Deck Manager",
-      "desc": "Read the terms and conditions for using Riftbound Deck Manager."
+      "title": "Terms of Use | Riftbound NIGHTS",
+      "desc": "Read the terms and conditions for using Riftbound NIGHTS."
     },
     "default": {
-      "title": "Riftbound Deck Manager",
+      "title": "Riftbound NIGHTS Deck Manager",
       "desc": "Your ultimate companion for managing your journey in Riftbound TCG."
     }
   },
@@ -199,7 +199,7 @@
     "title": "How to Play Riftbound",
     "intro": {
       "title": "Quick Start",
-      "p1": "Riftbound is a trading card game (TCG) where you choose a Champion, build your army, and battle for control of strategic battlefields.",
+      "p1": "Riftbound NIGHTS is a trading card game (TCG) where you choose a Champion, build your army, and fight for control of strategic battlefields.",
       "p2": "The goal is simple: be the first to reach **8 points** (or 11 in team games). You earn points by taking control of a Battlefield and maintaining it at the start of your turn."
     },
     "deckbuilding": {
@@ -273,7 +273,7 @@
       }
   },
   "footer": {
-    "rights": "© 2026 Riftbound Deck Manager. All rights reserved.",
+    "rights": "© 2026 Riftbound NIGHTS Deck Manager. All rights reserved.",
     "privacy": "Privacy",
     "terms": "Terms"
   },
@@ -281,12 +281,12 @@
     "privacy": {
       "title": "Privacy Policy",
       "last_updated": "Last updated: March 2026",
-      "content": "Your privacy is important to us. This policy explains how we collect and use your data while using Riftbound Deck Manager.\n\n### 1. Data Collection\nWe collect basic information such as email (when creating an account) and collection data for cross-device synchronization. We do not sell your data to third parties.\n\n### 2. Information Usage\nWe use your data to personalize your experience, save your decks, and provide system functionalities.\n\n### 3. Cookies and Advertising\nWe may use cookies to improve navigation and display relevant ads through partners like Google AdSense.\n\n### 4. Security\nWe employ modern security measures like encryption and Supabase authentication to protect your information."
+      "content": "Your privacy is important to us. This policy explains how we collect and use your data while using Riftbound NIGHTS Deck Manager.\n\n### 1. Data Collection\nWe collect basic information such as email (when creating an account) and collection data for cross-device synchronization. We do not sell your data to third parties.\n\n### 2. Information Usage\nWe use your data to personalize your experience, save your decks, and provide system functionalities.\n\n### 3. Cookies and Advertising\nWe may use cookies to improve navigation and display relevant ads through partners like Google AdSense.\n\n### 4. Security\nWe employ modern security measures like encryption and Supabase authentication to protect your information."
     },
     "terms": {
       "title": "Terms of Use",
       "last_updated": "Last updated: March 2026",
-      "content": "By accessing Riftbound Deck Manager, you agree to the following terms:\n\n### 1. Service Usage\nThis site is a utility tool for Riftbound TCG players. Use must be personal and non-commercial.\n\n### 2. Intellectual Property\nRiftbound and all related art are properties of Riftbound TCG / League of Legends. This project is a fan tool with no official affiliation.\n\n### 3. Limitation of Liability\nThe service is provided 'as is'. We are not responsible for data loss or misinterpreted game rules.\n\n### 4. Modifications\nWe reserve the right to change these terms at any time to improve the service."
+      "content": "By accessing Riftbound NIGHTS Deck Manager, you agree to the following terms:\n\n### 1. Service Usage\nThis site is a utility tool for Riftbound TCG players. Use must be personal and non-commercial.\n\n### 2. Intellectual Property\nRiftbound and all related art are properties of Riftbound TCG / League of Legends. This project is a fan tool with no official affiliation.\n\n### 3. Limitation of Liability\nThe service is provided 'as is'. We are not responsible for data loss or misinterpreted game rules.\n\n### 4. Modifications\nWe reserve the right to change these terms at any time to improve the service."
     }
   }
 }
