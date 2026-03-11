@@ -138,38 +138,6 @@
       >
         <img :src="hoveredCard.media?.image_url" :alt="hoveredCard.name" />
         
-        <!-- Price Section -->
-        <div class="preview-price-box">
-          <div v-if="loadingPrices" class="price-loading">
-            <div class="spinner-sm"></div>
-            <span>{{ $t('catalog.loading_prices') }}</span>
-          </div>
-          <div v-else-if="cardPrices && cardPrices.found" class="price-content">
-            <div class="price-header">
-              <span class="price-market-label">{{ $t('catalog.market_prices') }}</span>
-              <span class="price-currency-badge" :class="{ 'fallback': cardPrices.is_fallback }">
-                {{ cardPrices.currency }}
-              </span>
-            </div>
-            <div class="price-grid">
-              <div v-if="cardPrices.prices.min" class="price-item">
-                <span class="p-label">{{ $t('catalog.price_min') }}</span>
-                <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.min }}</span>
-              </div>
-              <div v-if="cardPrices.prices.avg" class="price-item">
-                <span class="p-label">{{ $t('catalog.price_avg') }}</span>
-                <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.avg }}</span>
-              </div>
-              <div v-if="cardPrices.prices.max" class="price-item">
-                <span class="p-label">{{ $t('catalog.price_max') }}</span>
-                <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.max }}</span>
-              </div>
-            </div>
-            <a :href="cardPrices.url" target="_blank" class="btn-liga-link">
-              {{ $t('catalog.view_on_liga') }} ↗
-            </a>
-          </div>
-        </div>
       </div>
     </Teleport>
   </div>
@@ -180,7 +148,6 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import riftcodex from '@/services/riftcodex'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown.vue'
 import { useI18n } from 'vue-i18n'
-import { useDebounceFn } from '@vueuse/core'
 
 const { t, locale } = useI18n()
 
@@ -198,10 +165,8 @@ const selectedTypes = ref([])
 const selectedRarities = ref([])
 const selectedEnergy = ref(null)
 const hoveredCard = ref(null)
-const cardPrices = ref(null)
-const loadingPrices = ref(false)
-const mouseY = ref(0)
 const mouseX = ref(0)
+const mouseY = ref(0)
 
 const availableDomains = ['Body', 'Calm', 'Chaos', 'Fury', 'Mind', 'Order', 'Colorless']
 
@@ -376,25 +341,8 @@ function setupObserver() {
   observer.observe(sentinel.value)
 }
 
-const fetchPrices = useDebounceFn(async (card) => {
-  if (!card) return
-  loadingPrices.value = true
-  try {
-    const data = await riftcodex.getCardPrices(card.name, locale.value)
-    cardPrices.value = data
-  } catch (err) {
-    console.error('Error fetching prices:', err)
-  } finally {
-    loadingPrices.value = false
-  }
-}, 300)
-
 watch(hoveredCard, (newCard) => {
-  if (!newCard) {
-    cardPrices.value = null
-    return
-  }
-  fetchPrices(newCard)
+  if (!newCard) return
 })
 
 async function fetchAllData() {
@@ -651,110 +599,9 @@ onBeforeUnmount(() => {
     height: auto;
     display: block;
   }
+}
 
-  /* Price logic */
-  .preview-price-box {
-    background: rgba(15, 17, 26, 0.95);
-    backdrop-filter: blur(8px);
-    border-top: 1px solid rgba(201, 168, 76, 0.2);
-    padding: 16px;
-  }
-  
-  .price-loading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    justify-content: center;
-    padding: 10px 0;
-  }
-  
-  .spinner-sm {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255,255,255,0.1);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  
-  .price-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  
-  .price-market-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--primary-light);
-  }
-  
-  .price-currency-badge {
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    background: rgba(201, 168, 76, 0.2);
-    border: 1px solid rgba(201, 168, 76, 0.3);
-    color: var(--primary);
-    border-radius: 4px;
-    font-weight: bold;
-  }
-  
-  .price-currency-badge.fallback {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
-  }
-  
-  .price-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  
-  .price-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  
-  .p-label {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-  }
-  
-  .p-value {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #fff;
-  }
-  
-  .btn-liga-link {
-    display: block;
-    width: 100%;
-    padding: 8px;
-    background: linear-gradient(135deg, var(--primary), #b08d3e);
-    color: #000;
-    text-align: center;
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 700;
-    border-radius: var(--radius-md);
-    transition: all 0.2s;
-  }
-  
-  .btn-liga-link:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
