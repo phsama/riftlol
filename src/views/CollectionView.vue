@@ -132,6 +132,14 @@
         >
           <!-- Left side: Image & Name -->
           <div class="card-horizontal-main">
+            <div class="card-info-horizontal">
+              <h3 class="card-name">{{ card.name }}</h3>
+              <div class="card-meta">
+                <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
+                <span v-if="card.attributes?.energy != null" class="card-energy">{{ card.attributes.energy }}</span>
+              </div>
+            </div>
+
             <div 
               class="card-image-wrap-horizontal"
               :class="[
@@ -148,14 +156,6 @@
                 @mouseleave="hoveredCard = null"
               />
               <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
-            </div>
-            
-            <div class="card-info-horizontal">
-              <h3 class="card-name">{{ card.name }}</h3>
-              <div class="card-meta">
-                <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
-                <span v-if="card.attributes?.energy != null" class="card-energy">{{ card.attributes.energy }}</span>
-              </div>
             </div>
           </div>
 
@@ -603,13 +603,13 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 .filter-pill-owned.filter-pill--active { background: rgba(250, 189, 47, 0.15); color: #fabd2f; border-color: rgba(250, 189, 47, 0.6); }
 .filter-pill-energy { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; background: var(--color-bg-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); }
 .filter-pill-energy.filter-pill--active { background: rgba(74, 127, 255, 0.15); color: var(--color-rift-400); border-color: var(--color-rift-500); }
-.filter-selects { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-selects { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* ── Cards grid ── */
 .cards-grid { 
   display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); 
-  gap: 20px; 
+  grid-template-columns: repeat(auto-fill, minmax(650px, 1fr)); 
+  gap: 32px; 
 }
 
 /* Horizontal Card Tile */
@@ -619,10 +619,10 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
   align-items: stretch;
   background: var(--color-bg-raised);
   border: 1px solid var(--color-border-subtle);
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 180px;
+  transition: all 0.3s ease;
+  min-height: 400px;
 }
 
 .collection-tile-horizontal:hover {
@@ -642,29 +642,30 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 /* Left Section: Image & Basic Info */
 .card-horizontal-main {
   display: flex;
-  align-items: center;
-  padding: 16px;
+  flex-direction: column; /* Stack name above image for better space */
+  align-items: flex-start;
+  padding: 24px;
   gap: 20px;
-  flex: 1.2;
-  min-width: 0;
+  flex-shrink: 0;
+  width: 320px;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .card-image-wrap-horizontal {
   position: relative;
-  width: 130px; /* Signficantly larger */
-  height: 182px;
+  width: 260px; 
+  height: 364px;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
   transition: transform 0.3s ease;
 }
 
 .card-image-wrap--landscape {
-  width: 182px;
-  height: 130px;
+  width: 364px;
+  height: 260px;
 }
 
 .card-image-wrap-horizontal .card-image {
@@ -674,19 +675,17 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 }
 
 .card-info-horizontal {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .card-info-horizontal .card-name {
   font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--color-text-primary);
-  margin-bottom: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 8px;
+  white-space: normal; /* Allow wrap for long names */
+  line-height: 1.2;
 }
 
 /* Right Section: Matrix Controls */
@@ -694,9 +693,9 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  padding: 12px 20px;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 32px;
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -708,14 +707,14 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 }
 
 .v-h-label {
-  font-size: 0.65rem;
-  font-weight: 800;
+  font-size: 0.75rem;
+  font-weight: 900;
   text-transform: uppercase;
   color: var(--color-text-secondary);
-  width: 65px;
+  width: 85px;
   flex-shrink: 0;
-  letter-spacing: 0.08em;
-  opacity: 0.8;
+  letter-spacing: 0.1em;
+  opacity: 0.9;
 }
 
 .v-h-stepper-multi {
@@ -729,18 +728,18 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 }
 
 .v-mini-btn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  color: var(--color-text-secondary);
-  font-size: 1.25rem;
+  color: #fff;
+  font-size: 1.5rem;
   cursor: pointer;
   transition: all 0.2s;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .v-mini-btn:hover:not(:disabled) {
