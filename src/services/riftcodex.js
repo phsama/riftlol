@@ -2,7 +2,7 @@ import axios from 'axios'
 import { api as localApi } from '@/services/api'
 
 const api = axios.create({
-    baseURL: '/riftcodex-api',
+    baseURL: '/api',
     timeout: 15000,
 })
 
@@ -43,8 +43,7 @@ export async function getCards() {
     if (cached) return cached
 
     // Nosso DB interno agora cospe o array inteiro direto em `items` num pull só!
-    // Usamos axios puro para ignorar interceptor de Auth, permitindo Vercel Edge Caching ⚡
-    const { data } = await axios.get('/api/cards', { baseURL: import.meta.env.VITE_API_URL || '' })
+    const { data } = await axios.get('/api/cards')
     const allItems = data?.items || data || []
 
     setCache(cacheKey, allItems)
