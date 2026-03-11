@@ -264,7 +264,6 @@ import { useCollectionStore } from '@/stores/collection'
 import { exportCollection, copyToClipboard } from '@/composables/useDeckExport'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown.vue'
 import { useI18n } from 'vue-i18n'
-import { useDebounceFn } from '@vueuse/core'
 
 const { t, locale } = useI18n()
 
@@ -576,8 +575,9 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 /* ── Cards grid ── */
 .cards-grid { 
   display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); 
+  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); 
   gap: 20px; 
+  min-height: 60vh;
 }
 
 /* Horizontal Card Tile */
@@ -588,9 +588,8 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   background: var(--color-bg-raised);
   border: 1px solid var(--color-border-subtle);
   border-radius: 12px;
-  overflow: hidden;
   transition: all 0.2s ease;
-  min-height: 240px;
+  min-height: 280px;
 }
 
 .collection-tile-horizontal:hover {
@@ -599,34 +598,24 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   transform: translateY(-2px);
 }
 
-.collection-tile-horizontal {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  background: var(--color-bg-raised);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  min-height: 280px;
-}
+
 
 /* Left Section: Image & Basic Info */
 .card-horizontal-main {
   display: flex;
   flex-direction: column; 
   align-items: flex-start;
-  padding: 20px;
-  gap: 12px;
-  width: 220px; /* Balanced width for 180px image + padding */
+  padding: 12px;
+  gap: 8px;
+  width: 244px;
   flex-shrink: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .card-image-wrap-horizontal {
   position: relative;
-  width: 180px; 
-  height: 252px;
+  width: 220px; 
+  height: 308px;
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
@@ -667,11 +656,11 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Align with top of image area */
-  gap: 8px;
-  padding: 62px 20px 20px 20px; /* Padding-top to align Normal row with top of image area */
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 16px 16px 16px;
   background: rgba(255, 255, 255, 0.02);
-  min-width: 250px;
+  min-width: 220px;
 }
 
 .v-h-row {
@@ -698,23 +687,26 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   align-items: center;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 8px;
-  padding: 2px;
+  padding: 4px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 2px;
 }
 
 .v-mini-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   border: none;
   color: #fff;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   cursor: pointer;
   transition: all 0.2s;
   border-radius: 8px;
+  position: relative;
+  z-index: 1;
 }
 
 .v-mini-btn:hover:not(:disabled) {
@@ -795,7 +787,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 
 @media (min-width: 1600px) {
   .cards-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -819,8 +811,8 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   }
   
   .card-image-wrap-horizontal {
-    width: 80px;
-    height: 112px;
+    width: 100px;
+    height: 140px;
   }
   
   .card-image-wrap--landscape {
