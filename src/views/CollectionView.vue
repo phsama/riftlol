@@ -160,78 +160,28 @@
               <span v-if="card.attributes?.energy != null" class="card-energy">⚡{{ card.attributes.energy }}</span>
             </div>
             
-            <!-- Collection matrix controls -->
-            <div class="collection-controls">
-                <!-- Normal Version -->
-                <div class="v-matrix-row">
-                    <span class="v-matrix-label">{{ $t('collection.normal') }}</span>
-                    <div class="v-matrix-steppers">
-                      <div class="v-matrix-stepper">
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
-                          <span class="v-step-val">{{ getQty(card.id, 'normal_qty') }}</span>
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
-                      </div>
-                      <div class="v-matrix-stepper v-foil">
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
-                          <span class="v-step-val"><span class="star-mini">⭐</span>{{ getQty(card.id, 'foil_qty') }}</span>
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
-                      </div>
+            <!-- Simplified Collection Controls -->
+            <div class="collection-controls-clean">
+                <div class="qty-stepper-row">
+                    <div class="qty-stepper">
+                        <button class="qty-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
+                        <span class="qty-val">{{ getQty(card.id, 'normal_qty') }}</span>
+                        <button class="qty-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
                     </div>
-                </div>
-
-                <!-- Alt Art -->
-                <div class="v-matrix-row" v-if="hasAltArt(card)">
-                    <span class="v-matrix-label v-label-alt">{{ $t('collection.aart') || 'AART' }}</span>
-                    <div class="v-matrix-steppers">
-                      <div class="v-matrix-stepper">
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
-                          <span class="v-step-val">{{ getQty(card.id, 'alt_art_qty') }}</span>
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
-                      </div>
-                      <div class="v-matrix-stepper v-foil">
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', -1)">−</button>
-                          <span class="v-step-val"><span class="star-mini">⭐</span>{{ getQty(card.id, 'alt_art_foil_qty') }}</span>
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', 1)">+</button>
-                      </div>
-                    </div>
-                </div>
-
-                <!-- Signed -->
-                <div class="v-matrix-row" v-if="hasSigned(card)">
-                    <span class="v-matrix-label v-label-sign">{{ $t('collection.signed') || 'SIGN' }}</span>
-                    <div class="v-matrix-steppers">
-                      <div class="v-matrix-stepper">
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_qty', -1)">−</button>
-                          <span class="v-step-val">{{ getQty(card.id, 'signed_qty') }}</span>
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_qty', 1)">+</button>
-                      </div>
-                      <div class="v-matrix-stepper v-foil">
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_foil_qty', -1)">−</button>
-                          <span class="v-step-val"><span class="star-mini">⭐</span>{{ getQty(card.id, 'signed_foil_qty') }}</span>
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_foil_qty', 1)">+</button>
-                      </div>
-                    </div>
-                </div>
-
-                <!-- Overnumbered -->
-                <div class="v-matrix-row" v-if="hasOvernumbered(card)">
-                    <span class="v-matrix-label v-label-over">{{ $t('collection.over') || 'OVER' }}</span>
-                    <div class="v-matrix-steppers">
-                      <div class="v-matrix-stepper">
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', -1)">−</button>
-                          <span class="v-step-val">{{ getQty(card.id, 'overnumbered_qty') }}</span>
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', 1)">+</button>
-                      </div>
-                      <div class="v-matrix-stepper v-foil">
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', -1)">−</button>
-                          <span class="v-step-val"><span class="star-mini">⭐</span>{{ getQty(card.id, 'overnumbered_foil_qty') }}</span>
-                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', 1)">+</button>
-                      </div>
+                    
+                    <div class="qty-stepper foil-stepper-mini" :class="{ 'has-qty': getQty(card.id, 'foil_qty') > 0 }">
+                        <button class="qty-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
+                        <span class="qty-val">
+                          <span class="star-tiny">⭐</span>
+                          {{ getQty(card.id, 'foil_qty') }}
+                        </span>
+                        <button class="qty-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
                     </div>
                 </div>
                 
-                <button v-if="hasSpecialArt(card)" class="manage-btn-compact" @click.prevent="managingCard = card">
-                   <span>{{ $t('collection.manage_variants') }}</span>
+                <button class="manage-variants-btn" @click.prevent="managingCard = card">
+                   <span v-if="hasSpecialArt(card)">{{ $t('collection.manage_variants') }}</span>
+                   <span v-else>{{ $t('common.edit') }}</span>
                 </button>
             </div>
             
@@ -671,103 +621,100 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 .card-info { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
 .card-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-meta { display: flex; align-items: center; gap: 4px; margin-top: 3px; margin-bottom: 8px; }
-/* Matrix Collection Styles */
-.collection-controls {
-  padding: 10px;
+/* Clean Collection Controls */
+.collection-controls-clean {
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.02);
   margin-top: auto;
   border-top: 1px solid var(--color-border-subtle);
 }
 
-.v-matrix-row {
+.qty-stepper-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.qty-stepper {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 4px 6px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
-}
-
-.v-matrix-label {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #94a3b8;
-  min-width: 48px;
-}
-
-.v-matrix-steppers {
-  display: flex;
-  gap: 4px;
-}
-
-.v-matrix-stepper {
-  display: flex;
-  align-items: center;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
-  padding: 1px;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.v-step-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  width: 22px;
-  height: 22px;
+.qty-btn {
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
   cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 6px;
+  transition: background 0.2s;
 }
 
-.v-step-btn:hover {
+.qty-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.v-step-val {
+.qty-val {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
   min-width: 20px;
   text-align: center;
-  font-size: 0.8rem;
-  font-weight: 600;
 }
 
-.v-matrix-stepper.v-foil {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
-  border: 1px solid rgba(255, 215, 0, 0.2);
+.foil-stepper-mini {
+  background: rgba(255, 215, 0, 0.05);
+  border-color: rgba(255, 215, 0, 0.15);
+  opacity: 0.6;
+  transition: opacity 0.3s;
 }
 
-.star-mini {
+.foil-stepper-mini.has-qty {
+  opacity: 1;
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.star-tiny {
   color: #ffd700;
   font-size: 10px;
   margin-right: 2px;
 }
 
-.manage-btn-compact {
+.manage-variants-btn {
   width: 100%;
-  padding: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  color: #fff;
-  font-size: 0.7rem;
+  padding: 8px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 4px;
   transition: all 0.2s;
 }
 
-.manage-btn-compact:hover {
-  background: rgba(255, 255, 255, 0.15);
+.manage-variants-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Modal Variant Colors */
+/* Modal Variant Design */
 .v-label-alt { color: #818cf8; }
 .v-label-sign { color: #fbbf24; }
 .v-label-over { color: #f472b6; }
