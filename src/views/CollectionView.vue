@@ -183,38 +183,36 @@
 
 
       <!-- ── Export Modal ── -->
-      <Teleport to="body">
-        <div v-if="showExportModal" class="modal-overlay fade-in" @click.self="showExportModal = false">
-          <div class="modal glass fade-in export-modal scrollable">
-            <div class="modal-header">
-              <h3>{{ $t('collection.export_title') }}</h3>
-              <button class="btn-ghost" @click="showExportModal = false">
-                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-            <div class="modal-body">
-              <p class="export-hint">{{ $t('collection.export_hint') }}</p>
+      <div v-if="showExportModal" class="modal-overlay fade-in" @click.self="showExportModal = false">
+        <div class="modal glass fade-in export-modal scrollable">
+          <div class="modal-header">
+            <h3>{{ $t('collection.export_title') }}</h3>
+            <button class="btn-ghost" @click="showExportModal = false">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="export-hint">{{ $t('collection.export_hint') }}</p>
 
-              <div v-if="isExporting" class="export-loading">
-                <div class="spinner-sm"></div>
-                <span>{{ $t('common.loading') }}</span>
-              </div>
-              
-              <textarea 
-                v-else
-                readonly 
-                class="export-textarea glass" 
-                :value="exportText"
-                ref="exportArea"
-              ></textarea>
+            <div v-if="isExporting" class="export-loading">
+              <div class="spinner-sm"></div>
+              <span>{{ $t('common.loading') }}</span>
             </div>
-            <div class="modal-footer export-modal-footer">
-              <button class="btn btn-ghost btn-sm" @click="showExportModal = false">{{ $t('common.close') }}</button>
-              <button class="btn btn-primary" @click="copyCollectionExport" :disabled="isExporting">{{ copyLabel }}</button>
-            </div>
+            
+            <textarea 
+              v-else
+              readonly 
+              class="export-textarea glass" 
+              :value="exportText"
+              ref="exportArea"
+            ></textarea>
+          </div>
+          <div class="modal-footer export-modal-footer">
+            <button class="btn btn-ghost btn-sm" @click="showExportModal = false">{{ $t('common.close') }}</button>
+            <button class="btn btn-primary" @click="copyCollectionExport" :disabled="isExporting">{{ copyLabel }}</button>
           </div>
         </div>
-      </Teleport>
+      </div>
     </div>
   </div>
 </template>
@@ -500,6 +498,27 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 
 <style scoped>
 .collection { display: flex; flex-direction: column; gap: 12px; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(6, 6, 16, 0.85); display: flex;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal {
+  width: 100%; max-width: 500px; padding: 24px 20px;
+  border-radius: var(--radius-xl);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h3 {
+  font-family: var(--font-display); font-size: 1.05rem; font-weight: 700;
+}
+.modal-body { display: flex; flex-direction: column; gap: 12px; }
+.modal-footer { display: flex; gap: 8px; justify-content: flex-end; }
 
 /* ── Header ── */
 .collection-header { margin-bottom: 24px; }
