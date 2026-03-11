@@ -124,25 +124,24 @@
         <div
           v-for="card in displayCards"
           :key="card.id"
-          class="card-tile collection-tile-horizontal"
+          class="card-tile collection-tile"
           :class="[
             { 'card-tile--champion': card.classification?.type === 'Legend' },
             { 'collection-unowned': collectionStore.getCardTotal(card.id) === 0 }
           ]"
         >
-          <!-- Left side: Image & Name -->
-          <div class="card-horizontal-main">
-            <div class="card-info-horizontal">
-              <h3 class="card-name">{{ card.name }}</h3>
-              <div class="card-meta">
-                <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
-              </div>
-            </div>
+          <!-- Header: Name & Rarity -->
+          <div class="tile-header">
+            <h3 class="tile-name">{{ card.name }}</h3>
+            <span v-if="card.classification?.rarity" class="rarity-badge" :class="`rarity-${card.classification.rarity.toLowerCase()}`">{{ card.classification.rarity }}</span>
+          </div>
 
+          <!-- Body: Image + Controls side by side -->
+          <div class="tile-body">
             <div 
-              class="card-image-wrap-horizontal"
+              class="tile-image-wrap"
               :class="[
-                {'card-image-wrap--landscape': card.orientation === 'landscape' || card.classification?.type === 'Battlefield'},
+                {'tile-image-wrap--landscape': card.orientation === 'landscape' || card.classification?.type === 'Battlefield'},
                 {'foil-glow': card.is_display_foil}
               ]"
             >
@@ -154,59 +153,24 @@
               />
               <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
             </div>
-          </div>
 
-          <!-- Right side: Matrix Controls -->
-          <div class="collection-controls-matrix-horizontal">
-            <!-- Normal -->
-            <div class="v-h-row">
-              <span class="v-h-label">Normal</span>
-              <div class="v-h-stepper-multi">
-                <button class="v-mini-btn" @click="handleDecrement(card.id, 'normal')">−</button>
-                <span class="v-mini-val" :class="{ 'v-val-has-foil': getQty(card.id, 'foil_qty') > 0 }">
-                  {{ getVariantTotal(card.id, 'normal') }}
-                </span>
-                <button class="v-mini-btn" @click="handleIncrement(card.id, 'normal', false)">+</button>
-                <button class="v-mini-btn btn-plus-gold" @click="handleIncrement(card.id, 'normal', true)">+</button>
-              </div>
-            </div>
-
-            <!-- AArt -->
-            <div class="v-h-row" :class="{ 'v-row-off': !hasAltArt(card) }">
-              <span class="v-h-label">AArt</span>
-              <div class="v-h-stepper-multi">
-                <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="handleDecrement(card.id, 'aart')">−</button>
-                <span class="v-mini-val" :class="{ 'v-val-has-foil': getQty(card.id, 'alt_art_foil_qty') > 0 }">
-                  {{ getVariantTotal(card.id, 'aart') }}
-                </span>
-                <button class="v-mini-btn" :disabled="!hasAltArt(card)" @click="handleIncrement(card.id, 'aart', false)">+</button>
-                <button class="v-mini-btn btn-plus-gold" :disabled="!hasAltArt(card)" @click="handleIncrement(card.id, 'aart', true)">+</button>
-              </div>
-            </div>
-
-            <!-- Signature -->
-            <div class="v-h-row" :class="{ 'v-row-off': !hasSignature(card) }">
-              <span class="v-h-label">Signature</span>
-              <div class="v-h-stepper-multi">
-                <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="handleDecrement(card.id, 'signature')">−</button>
-                <span class="v-mini-val" :class="{ 'v-val-has-foil': getQty(card.id, 'signed_foil_qty') > 0 }">
-                  {{ getVariantTotal(card.id, 'signature') }}
-                </span>
-                <button class="v-mini-btn" :disabled="!hasSignature(card)" @click="handleIncrement(card.id, 'signature', false)">+</button>
-                <button class="v-mini-btn btn-plus-gold" :disabled="!hasSignature(card)" @click="handleIncrement(card.id, 'signature', true)">+</button>
-              </div>
-            </div>
-
-            <!-- Over -->
-            <div class="v-h-row" :class="{ 'v-row-off': !hasOvernumbered(card) }">
-              <span class="v-h-label">Over</span>
-              <div class="v-h-stepper-multi">
-                <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="handleDecrement(card.id, 'over')">−</button>
-                <span class="v-mini-val" :class="{ 'v-val-has-foil': getQty(card.id, 'overnumbered_foil_qty') > 0 }">
-                  {{ getVariantTotal(card.id, 'over') }}
-                </span>
-                <button class="v-mini-btn" :disabled="!hasOvernumbered(card)" @click="handleIncrement(card.id, 'over', false)">+</button>
-                <button class="v-mini-btn btn-plus-gold" :disabled="!hasOvernumbered(card)" @click="handleIncrement(card.id, 'over', true)">+</button>
+            <!-- Controls -->
+            <div class="tile-controls">
+              <div class="v-row" v-for="variant in [
+                { key: 'normal', label: 'Normal', enabled: true, foilField: 'foil_qty' },
+                { key: 'aart', label: 'AArt', enabled: hasAltArt(card), foilField: 'alt_art_foil_qty' },
+                { key: 'signature', label: 'Sign', enabled: hasSignature(card), foilField: 'signed_foil_qty' },
+                { key: 'over', label: 'Over', enabled: hasOvernumbered(card), foilField: 'overnumbered_foil_qty' }
+              ]" :key="variant.key" :class="{ 'v-row-off': !variant.enabled }">
+                <span class="v-label">{{ variant.label }}</span>
+                <div class="v-stepper">
+                  <button class="v-btn v-btn-minus" :disabled="!variant.enabled" @click="handleDecrement(card.id, variant.key)">−</button>
+                  <span class="v-val" :class="{ 'v-val-foil': getQty(card.id, variant.foilField) > 0 }">
+                    {{ getVariantTotal(card.id, variant.key) }}
+                  </span>
+                  <button class="v-btn" :disabled="!variant.enabled" @click="handleIncrement(card.id, variant.key, false)">+</button>
+                  <button class="v-btn v-btn-gold" :disabled="!variant.enabled" @click="handleIncrement(card.id, variant.key, true)">✦</button>
+                </div>
               </div>
             </div>
           </div>
@@ -575,179 +539,175 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 /* ── Cards grid ── */
 .cards-grid { 
   display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); 
-  gap: 20px; 
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); 
+  gap: 16px; 
   min-height: 60vh;
 }
 
-/* Horizontal Card Tile */
-.collection-tile-horizontal {
+/* ── Card Tile ── */
+.collection-tile {
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
+  flex-direction: column;
   background: var(--color-bg-raised);
   border: 1px solid var(--color-border-subtle);
   border-radius: 12px;
-  transition: all 0.2s ease;
-  min-height: 280px;
+  transition: all 0.25s ease;
+  overflow: hidden;
 }
 
-.collection-tile-horizontal:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+.collection-tile:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   transform: translateY(-2px);
 }
 
-
-
-/* Left Section: Image & Basic Info */
-.card-horizontal-main {
+/* ── Tile Header ── */
+.tile-header {
   display: flex;
-  flex-direction: column; 
-  align-items: flex-start;
-  padding: 12px;
-  gap: 8px;
-  width: 244px;
-  flex-shrink: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.card-image-wrap-horizontal {
-  position: relative;
-  width: 220px; 
-  height: 308px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.card-image-wrap--landscape {
-  width: 252px;
-  height: 180px;
-}
-
-.card-image-wrap-horizontal .card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.card-info-horizontal {
-  width: 100%;
-}
-
-.card-info-horizontal .card-name {
+.tile-name {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #fff;
-  margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+  flex: 1;
+  min-width: 0;
 }
 
-/* Right Section: Matrix Controls */
-.collection-controls-matrix-horizontal {
+/* ── Tile Body ── */
+.tile-body {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex: 1;
+}
+
+/* ── Image ── */
+.tile-image-wrap {
+  position: relative;
+  width: 180px;
+  flex-shrink: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.tile-image-wrap--landscape {
+  width: 220px;
+}
+
+.tile-image-wrap .card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Controls ── */
+.tile-controls {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
-  padding: 16px 16px 16px 16px;
-  background: rgba(255, 255, 255, 0.02);
-  min-width: 220px;
+  gap: 6px;
+  padding: 10px 12px;
+  min-width: 0;
 }
 
-.v-h-row {
+.v-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 2px 0;
+  gap: 8px;
 }
 
-.v-h-label {
-  font-size: 0.75rem;
-  font-weight: 900;
+.v-label {
+  font-size: 0.65rem;
+  font-weight: 800;
   text-transform: uppercase;
-  color: var(--color-text-secondary);
-  width: 85px;
+  color: var(--color-text-tertiary);
+  width: 52px;
   flex-shrink: 0;
-  letter-spacing: 0.1em;
-  opacity: 0.9;
+  letter-spacing: 0.08em;
 }
 
-.v-h-stepper-multi {
+.v-stepper {
   flex: 1;
   display: flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
   border-radius: 8px;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  gap: 2px;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 1px;
 }
 
-.v-mini-btn {
-  width: 36px;
-  height: 36px;
+.v-btn {
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.04);
   border: none;
-  color: #fff;
-  font-size: 1.4rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  border-radius: 8px;
-  position: relative;
-  z-index: 1;
+  transition: all 0.15s;
+  border-radius: 6px;
 }
 
-.v-mini-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+.v-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
 }
 
-.btn-plus-gold {
+.v-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.v-btn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.v-btn-gold {
   color: #fbbf24 !important;
-  font-weight: 900;
-  margin-left: 2px;
-  background: rgba(251, 191, 36, 0.05) !important;
+  background: rgba(251, 191, 36, 0.06) !important;
+  font-size: 0.8rem;
 }
 
-.btn-plus-gold:hover:not(:disabled) {
-  background: rgba(251, 191, 36, 0.15) !important;
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+.v-btn-gold:hover:not(:disabled) {
+  background: rgba(251, 191, 36, 0.18) !important;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.15);
 }
 
-.v-mini-val {
+.v-val {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 900;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.9);
+  min-width: 24px;
 }
 
-.v-val-has-foil {
+.v-val-foil {
   color: #fbbf24;
-  text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
-}
-
-.v-star {
-  font-size: 0.6rem;
-  margin-right: 2px;
-  vertical-align: middle;
+  text-shadow: 0 0 6px rgba(251, 191, 36, 0.35);
 }
 
 .v-row-off {
-  opacity: 0.1;
+  opacity: 0.12;
   pointer-events: none;
   filter: grayscale(1);
 }
@@ -781,8 +741,6 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   100% { background-position: -200% center; } 
 }
 
-
-/* ── Preview (Removed) ── */
 .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
 
 @media (min-width: 1600px) {
@@ -795,49 +753,38 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   .global-card-preview { display: none !important; }
   .cards-grid { 
     grid-template-columns: 1fr; 
-    gap: 12px; 
+    gap: 10px; 
   }
   
-  .collection-tile-horizontal {
-    flex-direction: column;
-    min-height: auto;
+  .tile-image-wrap {
+    width: 120px;
+  }
+
+  .tile-image-wrap--landscape {
+    width: 140px;
   }
   
-  .card-horizontal-main {
-    padding: 12px;
-    gap: 16px;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  .tile-name {
+    font-size: 0.9rem;
   }
   
-  .card-image-wrap-horizontal {
-    width: 100px;
-    height: 140px;
+  .tile-controls {
+    padding: 8px;
   }
   
-  .card-image-wrap--landscape {
-    width: 112px;
-    height: 80px;
-  }
-  
-  .card-info-horizontal .card-name {
-    font-size: 1rem;
-  }
-  
-  .collection-controls-matrix-horizontal {
-    width: 100%;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.1);
-  }
-  
-  .v-h-label {
-    width: 60px;
+  .v-label {
+    width: 40px;
     font-size: 0.6rem;
+  }
+
+  .v-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
   }
 
   .export-trigger span { display: none; }
   
-  /* Export Modal Mobile Adjustments */
   .export-modal { 
     max-width: 95vw; 
     max-height: 85vh;
@@ -855,10 +802,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 
 /* Extra small mobile */
 @media (max-width: 400px) {
-  .collection-controls-matrix-horizontal {
-    width: 150px;
-  }
-  .v-h-label {
+  .v-label {
     display: none;
   }
 }
