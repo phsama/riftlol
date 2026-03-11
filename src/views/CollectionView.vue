@@ -537,8 +537,6 @@ const uniqueCardsOwned = computed(() => {
 })
 
 const visibleCards = computed(() => filteredCards.value.slice(0, visibleCount.value))
-const hasAltArt = (card) => card._versions.length > 1
-const hasSigned = (card) => card._versions.some(v => v.metadata?.signature === true || (v.tags && v.tags.some(t => t.toLowerCase().includes('sign'))))
 
 const displayCards = computed(() => {
   return visibleCards.value.map(baseCard => {
@@ -673,15 +671,106 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 .card-info { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
 .card-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-meta { display: flex; align-items: center; gap: 4px; margin-top: 3px; margin-bottom: 8px; }
-.collection-controls { display: flex; flex-direction: column; gap: 4px; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--color-border-subtle); }
-.variant-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 6px; border-radius: 4px; background: rgba(0,0,0,0.1); }
-.variant-row--active { background: rgba(255,255,255,0.06); }
-.variant-row--disabled { opacity: 0.25; pointer-events: none; }
-.variant-label { font-size: 0.6rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; }
-.variant-stepper { display: flex; align-items: center; gap: 6px; }
-.step-val { font-size: 0.75rem; font-weight: 700; width: 14px; text-align: center; }
-.step-btn { width: 20px; height: 20px; border: none; border-radius: 3px; background: var(--color-bg-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
-.manage-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 4px; font-size: 0.65rem; font-weight: 700; background: transparent; border: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); border-radius: 4px; cursor: pointer; margin-top: 4px; }
+/* Matrix Collection Styles */
+.collection-controls {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  margin-top: auto;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.v-matrix-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+.v-matrix-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  min-width: 48px;
+}
+
+.v-matrix-steppers {
+  display: flex;
+  gap: 4px;
+}
+
+.v-matrix-stepper {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 1px;
+}
+
+.v-step-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.v-step-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.v-step-val {
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.v-matrix-stepper.v-foil {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.star-mini {
+  color: #ffd700;
+  font-size: 10px;
+  margin-right: 2px;
+}
+
+.manage-btn-compact {
+  width: 100%;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+
+.manage-btn-compact:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Modal Variant Colors */
+.v-label-alt { color: #818cf8; }
+.v-label-sign { color: #fbbf24; }
+.v-label-over { color: #f472b6; }
 
 /* ── Modals ── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
