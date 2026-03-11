@@ -651,9 +651,9 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
 .card-tile { display: flex; flex-direction: column; border-radius: var(--radius-md); background: var(--color-bg-raised); border: 1px solid var(--color-border-subtle); transition: all 0.2s ease; position: relative; }
 .collection-unowned .card-image { filter: grayscale(100%) opacity(0.4); }
-.card-image-wrap { position: relative; width: 100%; aspect-ratio: 744 / 1039; overflow: hidden; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.card-image-wrap { position: relative; width: 100%; aspect-ratio: 744 / 1039; overflow: hidden; border-radius: var(--radius-md) var(--radius-md) 0 0; background: #000; }
 .card-image-wrap--landscape { aspect-ratio: 1039 / 744; }
-.card-image { width: 100%; height: 100%; object-fit: cover; }
+.card-image { width: 100%; height: 100%; object-fit: contain; }
 .alt-arts-badge { position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; border-radius: var(--radius-full); background: rgba(0,0,0,0.7); font-size: 0.55rem; color: var(--color-gold-400); z-index: 10; }
 
 /* ── Foil Glow ── */
@@ -700,7 +700,9 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 .btn-liga-link { display: block; width: 100%; padding: 8px; background: var(--primary); color: #000; text-align: center; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-decoration: none; }
 
 @media (max-width: 768px) {
-  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 8px; }
   .export-trigger span { display: none; }
+  .card-info { padding: 6px 8px 8px; }
+  .card-name { font-size: 0.75rem; }
 }
 </style>
