@@ -31,6 +31,7 @@ export const useCollectionStore = defineStore('collection', () => {
                     alt_art_qty: item.alt_art_qty,
                     alt_art_foil_qty: item.alt_art_foil_qty || 0,
                     signed_qty: item.signed_qty,
+                    signed_foil_qty: item.signed_foil_qty || 0,
                     overnumbered_qty: item.overnumbered_qty,
                     overnumbered_foil_qty: item.overnumbered_foil_qty || 0
                 }
@@ -49,7 +50,7 @@ export const useCollectionStore = defineStore('collection', () => {
         if (!authStore.user) return
 
         const current = items.value[cardId] || {
-            normal_qty: 0, foil_qty: 0, alt_art_qty: 0, alt_art_foil_qty: 0, signed_qty: 0, overnumbered_qty: 0, overnumbered_foil_qty: 0
+            normal_qty: 0, foil_qty: 0, alt_art_qty: 0, alt_art_foil_qty: 0, signed_qty: 0, signed_foil_qty: 0, overnumbered_qty: 0, overnumbered_foil_qty: 0
         }
 
         const newValue = Math.max(0, current[field] + delta)
@@ -73,7 +74,7 @@ export const useCollectionStore = defineStore('collection', () => {
     function getCardTotal(cardId) {
         const item = items.value[cardId]
         if (!item) return 0
-        return item.normal_qty + item.foil_qty + item.alt_art_qty + (item.alt_art_foil_qty || 0) + item.signed_qty + item.overnumbered_qty + (item.overnumbered_foil_qty || 0)
+        return item.normal_qty + item.foil_qty + item.alt_art_qty + (item.alt_art_foil_qty || 0) + item.signed_qty + (item.signed_foil_qty || 0) + item.overnumbered_qty + (item.overnumbered_foil_qty || 0)
     }
 
     return {

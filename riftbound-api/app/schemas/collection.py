@@ -8,6 +8,7 @@ class CollectionItemBase(BaseModel):
     alt_art_qty: int = 0
     alt_art_foil_qty: int = 0
     signed_qty: int = 0
+    signed_foil_qty: int = 0
     overnumbered_qty: int = 0
     overnumbered_foil_qty: int = 0
 
@@ -20,6 +21,7 @@ class CollectionItemUpdate(BaseModel):
     alt_art_qty: int | None = None
     alt_art_foil_qty: int | None = None
     signed_qty: int | None = None
+    signed_foil_qty: int | None = None
     overnumbered_qty: int | None = None
     overnumbered_foil_qty: int | None = None
 

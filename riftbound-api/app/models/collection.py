@@ -18,6 +18,7 @@ class CollectionItem(Base):
     alt_art_qty = Column(Integer, default=0, nullable=False)
     alt_art_foil_qty = Column(Integer, default=0, nullable=False)
     signed_qty = Column(Integer, default=0, nullable=False)
+    signed_foil_qty = Column(Integer, default=0, nullable=False)
     overnumbered_qty = Column(Integer, default=0, nullable=False)
     overnumbered_foil_qty = Column(Integer, default=0, nullable=False)
 

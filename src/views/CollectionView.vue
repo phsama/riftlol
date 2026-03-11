@@ -160,59 +160,77 @@
               <span v-if="card.attributes?.energy != null" class="card-energy">⚡{{ card.attributes.energy }}</span>
             </div>
             
-            <!-- Collection controls -->
+            <!-- Collection matrix controls -->
             <div class="collection-controls">
-                <!-- Base Variant -->
-                <div class="variant-row" :class="{'variant-row--active': getQty(card.id, 'normal_qty') > 0 || getQty(card.id, 'foil_qty') > 0}">
-                    <span class="variant-label">{{ $t('collection.normal') }}</span>
-                    <div class="variant-stepper-group">
-                      <div class="variant-stepper">
-                          <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
-                          <span class="step-val">{{ getQty(card.id, 'normal_qty') }}</span>
-                          <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
+                <!-- Normal Version -->
+                <div class="v-matrix-row">
+                    <span class="v-matrix-label">{{ $t('collection.normal') }}</span>
+                    <div class="v-matrix-steppers">
+                      <div class="v-matrix-stepper">
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
+                          <span class="v-step-val">{{ getQty(card.id, 'normal_qty') }}</span>
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
                       </div>
-                      <div class="variant-stepper foil-stepper">
-                          <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
-                          <span class="step-val foil-val"><span class="foil-star">⭐</span>{{ getQty(card.id, 'foil_qty') }}</span>
-                          <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
-                      </div>
-                    </div>
-                </div>
-                <!-- Alt Art Variant -->
-                <div class="variant-row" v-if="hasAltArt(card)" :class="{'variant-row--active': getQty(card.id, 'alt_art_qty') > 0 || getQty(card.id, 'alt_art_foil_qty') > 0}">
-                    <span class="variant-label v-alt">{{ $t('collection.aart') }}</span>
-                    <div class="variant-stepper-group">
-                      <div class="variant-stepper">
-                          <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
-                          <span class="step-val">{{ getQty(card.id, 'alt_art_qty') }}</span>
-                          <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
-                      </div>
-                      <div class="variant-stepper foil-stepper">
-                          <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', -1)">−</button>
-                          <span class="step-val foil-val"><span class="foil-star">⭐</span>{{ getQty(card.id, 'alt_art_foil_qty') }}</span>
-                          <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', 1)">+</button>
+                      <div class="v-matrix-stepper v-foil">
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
+                          <span class="v-step-val"><span class="star-mini">⭐</span>{{ getQty(card.id, 'foil_qty') }}</span>
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
                       </div>
                     </div>
                 </div>
-                <!-- Overnumbered/Signed Variant -->
-                <div class="variant-row" v-if="hasSigned(card)" :class="{'variant-row--active': getQty(card.id, 'overnumbered_qty') > 0 || getQty(card.id, 'overnumbered_foil_qty') > 0}">
-                    <span class="variant-label v-sign">{{ $t('collection.over') }}</span>
-                    <div class="variant-stepper-group">
-                      <div class="variant-stepper">
-                          <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', -1)">−</button>
-                          <span class="step-val">{{ getQty(card.id, 'overnumbered_qty') }}</span>
-                          <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', 1)">+</button>
+
+                <!-- Alt Art -->
+                <div class="v-matrix-row" v-if="hasAltArt(card)">
+                    <span class="v-matrix-label v-label-alt">{{ $t('collection.aart') || 'AART' }}</span>
+                    <div class="v-matrix-steppers">
+                      <div class="v-matrix-stepper">
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', -1)">−</button>
+                          <span class="v-step-val">{{ getQty(card.id, 'alt_art_qty') }}</span>
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_qty', 1)">+</button>
                       </div>
-                      <div class="variant-stepper foil-stepper">
-                          <button class="step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', -1)">−</button>
-                          <span class="step-val foil-val"><span class="foil-star">⭐</span>{{ getQty(card.id, 'overnumbered_foil_qty') }}</span>
-                          <button class="step-btn step-add" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', 1)">+</button>
+                      <div class="v-matrix-stepper v-foil">
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', -1)">−</button>
+                          <span class="v-step-val"><span class="star-mini">⭐</span>{{ getQty(card.id, 'alt_art_foil_qty') }}</span>
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'alt_art_foil_qty', 1)">+</button>
+                      </div>
+                    </div>
+                </div>
+
+                <!-- Signed -->
+                <div class="v-matrix-row" v-if="hasSigned(card)">
+                    <span class="v-matrix-label v-label-sign">{{ $t('collection.signed') || 'SIGN' }}</span>
+                    <div class="v-matrix-steppers">
+                      <div class="v-matrix-stepper">
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_qty', -1)">−</button>
+                          <span class="v-step-val">{{ getQty(card.id, 'signed_qty') }}</span>
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_qty', 1)">+</button>
+                      </div>
+                      <div class="v-matrix-stepper v-foil">
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_foil_qty', -1)">−</button>
+                          <span class="v-step-val"><span class="star-mini">⭐</span>{{ getQty(card.id, 'signed_foil_qty') }}</span>
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'signed_foil_qty', 1)">+</button>
+                      </div>
+                    </div>
+                </div>
+
+                <!-- Overnumbered -->
+                <div class="v-matrix-row" v-if="hasOvernumbered(card)">
+                    <span class="v-matrix-label v-label-over">{{ $t('collection.over') || 'OVER' }}</span>
+                    <div class="v-matrix-steppers">
+                      <div class="v-matrix-stepper">
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', -1)">−</button>
+                          <span class="v-step-val">{{ getQty(card.id, 'overnumbered_qty') }}</span>
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_qty', 1)">+</button>
+                      </div>
+                      <div class="v-matrix-stepper v-foil">
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', -1)">−</button>
+                          <span class="v-step-val"><span class="star-mini">⭐</span>{{ getQty(card.id, 'overnumbered_foil_qty') }}</span>
+                          <button class="v-step-btn" @click="collectionStore.updateItemQty(card.id, 'overnumbered_foil_qty', 1)">+</button>
                       </div>
                     </div>
                 </div>
                 
-                <button class="manage-btn" @click.prevent="managingCard = card">
-                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <button v-if="hasSpecialArt(card)" class="manage-btn-compact" @click.prevent="managingCard = card">
                    <span>{{ $t('collection.manage_variants') }}</span>
                 </button>
             </div>
@@ -274,9 +292,9 @@
               </div>
            </div>
 
-           <!-- AArt Group -->
+           <!-- Alt Art Group -->
            <div class="manage-group" v-if="hasAltArt(managingCard)">
-              <h5 class="manage-group-title v-alt">{{ $t('collection.alt_art') }}</h5>
+              <h5 class="manage-group-title v-label-alt">{{ $t('collection.alt_art') }}</h5>
               <div class="manage-row-group">
                 <div class="manage-row">
                    <span class="manage-label">{{ $t('collection.normal_aart') }}</span>
@@ -297,12 +315,35 @@
               </div>
            </div>
 
-           <!-- Overnumbered Group -->
+           <!-- Signed Group -->
            <div class="manage-group" v-if="hasSigned(managingCard)">
-              <h5 class="manage-group-title v-sign">{{ $t('collection.overnumbered_title') }}</h5>
+              <h5 class="manage-group-title v-label-sign">{{ $t('collection.signed_art') || 'Signed Art' }}</h5>
               <div class="manage-row-group">
                 <div class="manage-row">
-                   <span class="manage-label">{{ $t('collection.normal_over') }}</span>
+                   <span class="manage-label">{{ $t('collection.normal_signed') || 'Regular Signed' }}</span>
+                   <div class="variant-stepper">
+                      <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'signed_qty', -1)">−</button>
+                      <span class="step-val">{{ getQty(managingCard.id, 'signed_qty') }}</span>
+                      <button class="step-btn step-add" @click="collectionStore.updateItemQty(managingCard.id, 'signed_qty', 1)">+</button>
+                   </div>
+                </div>
+                <div class="manage-row foil-row">
+                   <span class="manage-label manage-label-foil">{{ $t('collection.signed_foil') || 'Signed Foil' }}</span>
+                   <div class="variant-stepper foil-stepper">
+                      <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'signed_foil_qty', -1)">−</button>
+                      <span class="step-val foil-val"><span class="foil-star">⭐</span>{{ getQty(managingCard.id, 'signed_foil_qty') }}</span>
+                      <button class="step-btn step-add" @click="collectionStore.updateItemQty(managingCard.id, 'signed_foil_qty', 1)">+</button>
+                   </div>
+                </div>
+              </div>
+           </div>
+
+           <!-- Overnumbered Group -->
+           <div class="manage-group" v-if="hasOvernumbered(managingCard)">
+              <h5 class="manage-group-title v-label-over">{{ $t('collection.overnumbered_art') || 'Overnumbered Art' }}</h5>
+              <div class="manage-row-group">
+                <div class="manage-row">
+                   <span class="manage-label">{{ $t('collection.normal_over') || 'Regular Over' }}</span>
                    <div class="variant-stepper">
                       <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'overnumbered_qty', -1)">−</button>
                       <span class="step-val">{{ getQty(managingCard.id, 'overnumbered_qty') }}</span>
@@ -310,7 +351,7 @@
                    </div>
                 </div>
                 <div class="manage-row foil-row">
-                   <span class="manage-label manage-label-foil">{{ $t('collection.over_foil') }}</span>
+                   <span class="manage-label manage-label-foil">{{ $t('collection.over_foil') || 'Overnumbered Foil' }}</span>
                    <div class="variant-stepper foil-stepper">
                       <button class="step-btn" @click="collectionStore.updateItemQty(managingCard.id, 'overnumbered_foil_qty', -1)">−</button>
                       <span class="step-val foil-val"><span class="foil-star">⭐</span>{{ getQty(managingCard.id, 'overnumbered_foil_qty') }}</span>
@@ -422,6 +463,11 @@ const availableDomains = ['Body', 'Calm', 'Chaos', 'Fury', 'Mind', 'Order', 'Col
 function getQty(cardId, field) {
     return collectionStore.items[cardId]?.[field] || 0
 }
+
+const hasAltArt = (c) => c._versions?.some(v => v.metadata?.alternate_art)
+const hasOvernumbered = (c) => c._versions?.some(v => v.metadata?.overnumbered)
+const hasSigned = (c) => c._versions?.some(v => v.metadata?.signature)
+const hasSpecialArt = (c) => hasAltArt(c) || hasOvernumbered(c) || hasSigned(c)
 
 
 const availableTypes = computed(() => {
