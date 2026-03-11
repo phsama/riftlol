@@ -160,28 +160,60 @@
               <span v-if="card.attributes?.energy != null" class="card-energy">⚡{{ card.attributes.energy }}</span>
             </div>
             
-            <!-- Simplified Collection Controls -->
-            <div class="collection-controls-clean">
-                <div class="qty-stepper-row">
-                    <div class="qty-stepper">
-                        <button class="qty-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', -1)">−</button>
-                        <span class="qty-val">{{ getQty(card.id, 'normal_qty') }}</span>
-                        <button class="qty-btn" @click="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">+</button>
+            <!-- Matrix Collection Controls with Foil Mode -->
+            <div class="collection-controls-matrix">
+                <div class="matrix-header">
+                    <button 
+                        class="foil-toggle-btn" 
+                        :class="{ 'foil-active': isFoilMode(card.id) }"
+                        @click.prevent="toggleFoilMode(card.id)"
+                    >
+                        <span>{{ isFoilMode(card.id) ? '⭐ FOIL MODE' : '⭐ REGULAR' }}</span>
+                    </button>
+                </div>
+
+                <!-- Normal Row -->
+                <div class="v-matrix-clean-row">
+                    <span class="v-matrix-label">{{ $t('collection.normal') }}</span>
+                    <div class="v-matrix-stepper-mini" :class="{ 'mode-foil': isFoilMode(card.id) }">
+                        <button class="v-qty-btn" @click="collectionStore.updateItemQty(card.id, isFoilMode(card.id) ? 'foil_qty' : 'normal_qty', -1)">−</button>
+                        <span class="v-qty-val">{{ getQty(card.id, isFoilMode(card.id) ? 'foil_qty' : 'normal_qty') }}</span>
+                        <button class="v-qty-btn" @click="collectionStore.updateItemQty(card.id, isFoilMode(card.id) ? 'foil_qty' : 'normal_qty', 1)">+</button>
                     </div>
-                    
-                    <div class="qty-stepper foil-stepper-mini" :class="{ 'has-qty': getQty(card.id, 'foil_qty') > 0 }">
-                        <button class="qty-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', -1)">−</button>
-                        <span class="qty-val">
-                          <span class="star-tiny">⭐</span>
-                          {{ getQty(card.id, 'foil_qty') }}
-                        </span>
-                        <button class="qty-btn" @click="collectionStore.updateItemQty(card.id, 'foil_qty', 1)">+</button>
+                </div>
+
+                <!-- Alt Art Row -->
+                <div class="v-matrix-clean-row" :class="{ 'v-row-disabled': !hasAltArt(card) }">
+                    <span class="v-matrix-label v-label-alt">{{ $t('collection.aart') || 'ALT ART' }}</span>
+                    <div class="v-matrix-stepper-mini" :class="{ 'mode-foil': isFoilMode(card.id) }">
+                        <button class="v-qty-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode(card.id) ? 'alt_art_foil_qty' : 'alt_art_qty', -1)">−</button>
+                        <span class="v-qty-val">{{ getQty(card.id, isFoilMode(card.id) ? 'alt_art_foil_qty' : 'alt_art_qty') }}</span>
+                        <button class="v-qty-btn" :disabled="!hasAltArt(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode(card.id) ? 'alt_art_foil_qty' : 'alt_art_qty', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- Signature Row -->
+                <div class="v-matrix-clean-row" :class="{ 'v-row-disabled': !hasSignature(card) }">
+                    <span class="v-matrix-label v-label-sign">{{ $t('collection.signed') || 'SIGN' }}</span>
+                    <div class="v-matrix-stepper-mini" :class="{ 'mode-foil': isFoilMode(card.id) }">
+                        <button class="v-qty-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode(card.id) ? 'signed_foil_qty' : 'signed_qty', -1)">−</button>
+                        <span class="v-qty-val">{{ getQty(card.id, isFoilMode(card.id) ? 'signed_foil_qty' : 'signed_qty') }}</span>
+                        <button class="v-qty-btn" :disabled="!hasSignature(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode(card.id) ? 'signed_foil_qty' : 'signed_qty', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- Overnumbered Row -->
+                <div class="v-matrix-clean-row" :class="{ 'v-row-disabled': !hasOvernumbered(card) }">
+                    <span class="v-matrix-label v-label-over">{{ $t('collection.over') || 'OVER' }}</span>
+                    <div class="v-matrix-stepper-mini" :class="{ 'mode-foil': isFoilMode(card.id) }">
+                        <button class="v-qty-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode(card.id) ? 'overnumbered_foil_qty' : 'overnumbered_qty', -1)">−</button>
+                        <span class="v-qty-val">{{ getQty(card.id, isFoilMode(card.id) ? 'overnumbered_foil_qty' : 'overnumbered_qty') }}</span>
+                        <button class="v-qty-btn" :disabled="!hasOvernumbered(card)" @click="collectionStore.updateItemQty(card.id, isFoilMode(card.id) ? 'overnumbered_foil_qty' : 'overnumbered_qty', 1)">+</button>
                     </div>
                 </div>
                 
-                <button class="manage-variants-btn" @click.prevent="managingCard = card">
-                   <span v-if="hasSpecialArt(card)">{{ $t('collection.manage_variants') }}</span>
-                   <span v-else>{{ $t('common.edit') }}</span>
+                <button class="manage-variants-btn-compact" @click.prevent="managingCard = card">
+                   <span>{{ $t('collection.manage_variants') }}</span>
                 </button>
             </div>
             
@@ -353,7 +385,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick, reactive } from 'vue'
 import riftcodex from '@/services/riftcodex'
 import { useAuthStore } from '@/stores/auth'
 import { useCollectionStore } from '@/stores/collection'
@@ -414,10 +446,14 @@ function getQty(cardId, field) {
     return collectionStore.items[cardId]?.[field] || 0
 }
 
+const foilModes = reactive(new Map())
+function isFoilMode(cardId) { return foilModes.get(cardId) || false }
+function toggleFoilMode(cardId) { foilModes.set(cardId, !isFoilMode(cardId)) }
+
 const hasAltArt = (c) => c._versions?.some(v => v.metadata?.alternate_art)
 const hasOvernumbered = (c) => c._versions?.some(v => v.metadata?.overnumbered)
-const hasSigned = (c) => c._versions?.some(v => v.metadata?.signature)
-const hasSpecialArt = (c) => hasAltArt(c) || hasOvernumbered(c) || hasSigned(c)
+const hasSignature = (c) => c._versions?.some(v => v.metadata?.signature)
+const hasSpecialArt = (card) => hasAltArt(card) || hasOvernumbered(card) || hasSignature(card)
 
 
 const availableTypes = computed(() => {
@@ -621,97 +657,130 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 .card-info { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
 .card-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-meta { display: flex; align-items: center; gap: 4px; margin-top: 3px; margin-bottom: 8px; }
-/* Clean Collection Controls */
-.collection-controls-clean {
-  padding: 12px;
+/* Matrix Collection Styles V4 */
+.collection-controls-matrix {
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
   background: rgba(255, 255, 255, 0.02);
   margin-top: auto;
   border-top: 1px solid var(--color-border-subtle);
 }
 
-.qty-stepper-row {
+.matrix-header {
   display: flex;
-  gap: 8px;
-  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
 }
 
-.qty-stepper {
-  flex: 1;
+.foil-toggle-btn {
+  width: 100%;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--color-text-tertiary);
+  font-size: 0.6rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.foil-toggle-btn.foil-active {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05));
+  border-color: rgba(255, 215, 0, 0.4);
+  color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.v-matrix-clean-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 2px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 6px;
+  padding: 2px 0;
+  transition: opacity 0.2s;
 }
 
-.qty-btn {
-  width: 28px;
-  height: 28px;
+.v-row-disabled {
+  opacity: 0.2;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+.v-matrix-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.v-matrix-stepper-mini {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  padding: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s;
+}
+
+.v-matrix-stepper-mini.mode-foil {
+  background: rgba(255, 215, 0, 0.08);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.v-qty-btn {
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
   color: #fff;
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
-  border-radius: 6px;
-  transition: background 0.2s;
+  border-radius: 4px;
 }
 
-.qty-btn:hover {
+.v-qty-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.qty-val {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  min-width: 20px;
+.v-qty-val {
+  min-width: 16px;
   text-align: center;
-}
-
-.foil-stepper-mini {
-  background: rgba(255, 215, 0, 0.05);
-  border-color: rgba(255, 215, 0, 0.15);
-  opacity: 0.6;
-  transition: opacity 0.3s;
-}
-
-.foil-stepper-mini.has-qty {
-  opacity: 1;
-  background: rgba(255, 215, 0, 0.1);
-  border-color: rgba(255, 215, 0, 0.3);
-}
-
-.star-tiny {
-  color: #ffd700;
-  font-size: 10px;
-  margin-right: 2px;
-}
-
-.manage-variants-btn {
-  width: 100%;
-  padding: 8px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: var(--color-text-secondary);
   font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.mode-foil .v-qty-val {
+  color: #ffd700;
+}
+
+.manage-variants-btn-compact {
+  width: 100%;
+  padding: 6px;
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: var(--color-text-tertiary);
+  font-size: 0.65rem;
   font-weight: 600;
   cursor: pointer;
+  margin-top: 4px;
   transition: all 0.2s;
 }
 
-.manage-variants-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
+.manage-variants-btn-compact:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-secondary);
 }
 
 /* Modal Variant Design */
