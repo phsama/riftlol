@@ -576,7 +576,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 /* ── Cards grid ── */
 .cards-grid { 
   display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); 
+  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); 
   gap: 20px; 
 }
 
@@ -599,12 +599,16 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   transform: translateY(-2px);
 }
 
-.collection-unowned {
-  opacity: 0.7;
-}
-
-.collection-unowned .card-image {
-  filter: grayscale(100%) contrast(0.7) opacity(0.6);
+.collection-tile-horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  min-height: 280px;
 }
 
 /* Left Section: Image & Basic Info */
@@ -612,27 +616,28 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   display: flex;
   flex-direction: column; 
   align-items: flex-start;
-  padding: 16px;
+  padding: 20px;
   gap: 12px;
-  width: 192px; /* Balanced width for 160px image + padding */
+  width: 220px; /* Balanced width for 180px image + padding */
   flex-shrink: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .card-image-wrap-horizontal {
   position: relative;
-  width: 160px; 
-  height: 224px;
+  width: 180px; 
+  height: 252px;
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .card-image-wrap--landscape {
-  width: 224px;
-  height: 160px;
+  width: 252px;
+  height: 180px;
 }
 
 .card-image-wrap-horizontal .card-image {
@@ -662,11 +667,11 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; /* Align with top of image area */
   gap: 8px;
-  padding: 16px 20px;
+  padding: 62px 20px 20px 20px; /* Padding-top to align Normal row with top of image area */
   background: rgba(255, 255, 255, 0.02);
-  min-width: 250px; /* Increased to ensure no cuts */
+  min-width: 250px;
 }
 
 .v-h-row {
