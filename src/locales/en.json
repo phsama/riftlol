@@ -84,6 +84,8 @@
     "export_title": "Export My Collection",
     "export_hint": "Here are all the cards you own, formatted with their special versions (Foil, Alt.Art, etc).",
     "copy_collection": "Copy Collection",
+    "include_prices": "Include market prices (LigaRiftbound)",
+    "exporting_with_prices": "Fetching prices... This may take a few seconds.",
     "search_placeholder": "Search collection...",
     "manage_variants": "Manage Variants / Foil",
     "variants_title": "Foil Variants / Editions",

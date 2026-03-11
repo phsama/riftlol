@@ -1,3 +1,5 @@
+import riftcodex from '@/services/riftcodex'
+
 export function exportGeneric(cards, sideboard = []) {
     let text = cards
         .map((c) => `${c.quantity}x ${c.cardName}`)
@@ -52,7 +54,7 @@ export function exportFull(cards, sideboard = []) {
     return text
 }
 
-export function exportCollection(items, allCards) {
+export async function exportCollection(items, allCards, includePrices = false) {
     const lines = []
     
     // Sort allCards by name for a better list
@@ -63,10 +65,23 @@ export function exportCollection(items, allCards) {
     // items is an object: card_id -> { normal_qty, foil_qty, ... }
     const processedIds = new Set()
     
-    sortedCards.forEach(card => {
-        if (processedIds.has(card.id)) return
+    for (const card of sortedCards) {
+        if (processedIds.has(card.id)) continue
         const qtyObj = items[card.id]
-        if (!qtyObj) return
+        if (!qtyObj) continue
+
+        let priceStr = ''
+        if (includePrices) {
+            try {
+                const priceData = await riftcodex.getCardPrices(card.name)
+                if (priceData && priceData.found && priceData.prices?.avg) {
+                    const currency = priceData.currency === 'BRL' ? 'R$' : '$'
+                    priceStr = ` - ${currency}${priceData.prices.avg}`
+                }
+            } catch (err) {
+                console.error(`Error fetching price for ${card.name}:`, err)
+            }
+        }
         
         const variants = [
             { key: 'normal_qty', label: '' },
@@ -82,12 +97,12 @@ export function exportCollection(items, allCards) {
             const q = qtyObj[v.key] || 0
             if (q > 0) {
                 const label = v.label ? ` (${v.label})` : ''
-                lines.push(`${q} ${card.name}${label}`)
+                lines.push(`${q} ${card.name}${label}${priceStr}`)
             }
         })
         
         processedIds.add(card.id)
-    })
+    }
     
     return lines.join('\n')
 }

@@ -20,7 +20,7 @@
               {{ $t('common.progress') }}: {{ uniqueCardsOwned }} / {{ groupedCards.length }}
             </p>
           </div>
-          <button class="btn btn-secondary btn-sm export-trigger" @click="showExportModal = true" :disabled="loading || uniqueCardsOwned === 0">
+          <button class="btn btn-secondary btn-sm export-trigger" @click="openExport" :disabled="loading || uniqueCardsOwned === 0">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             {{ $t('collection.export') }}
           </button>
@@ -328,22 +328,44 @@
       </div>
       </div>
     </Teleport>
+
     <!-- ── Export Modal ── -->
     <Teleport to="body">
       <div v-if="showExportModal" class="modal-overlay fade-in" @click.self="showExportModal = false">
-        <div class="modal glass fade-in export-modal">
+        <div class="modal glass fade-in export-modal scrollable">
           <div class="modal-header">
             <h3>{{ $t('collection.export_title') }}</h3>
+            <button class="btn-ghost" @click="showExportModal = false">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
           <div class="modal-body">
-             <p class="export-hint">{{ $t('collection.export_hint') }}</p>
-             <div class="export-preview">
-                <pre class="export-text">{{ exportedText }}</pre>
-             </div>
+            <p class="export-hint">{{ $t('collection.export_hint') }}</p>
+
+            <div class="export-options">
+              <label class="checkbox-container">
+                <input type="checkbox" v-model="includePricesInExport" :disabled="isExporting">
+                <span class="checkmark"></span>
+                <span class="checkbox-label">{{ $t('collection.include_prices') }}</span>
+              </label>
+            </div>
+
+            <div v-if="isExporting" class="export-loading">
+              <div class="spinner-sm"></div>
+              <span>{{ $t('collection.exporting_with_prices') }}</span>
+            </div>
+            
+            <textarea 
+              v-else
+              readonly 
+              class="export-textarea glass" 
+              :value="exportText"
+              ref="exportArea"
+            ></textarea>
           </div>
           <div class="modal-footer">
             <button class="btn btn-ghost" @click="showExportModal = false">{{ $t('common.close') }}</button>
-            <button class="btn btn-primary" @click="copyCollectionExport">{{ copyLabel }}</button>
+            <button class="btn btn-primary" @click="copyCollectionExport" :disabled="isExporting">{{ copyLabel }}</button>
           </div>
         </div>
       </div>
@@ -371,17 +393,38 @@ const BATCH_SIZE = 24
 const allCards = ref([])
 
 const showExportModal = ref(false)
+const includePricesInExport = ref(false)
+const isExporting = ref(false)
+const exportText = ref('')
 const copyLabel = ref(t('collection.copy_collection'))
 
-const exportedText = computed(() => {
-    return exportCollection(collectionStore.items, allCards.value)
+async function openExport() {
+  isExporting.value = true
+  showExportModal.value = true
+  try {
+    exportText.value = await exportCollection(collectionStore.items, allCards.value, includePricesInExport.value)
+  } finally {
+    isExporting.value = false
+  }
+}
+
+watch(includePricesInExport, async (newVal) => {
+  if (showExportModal.value) {
+    isExporting.value = true
+    try {
+      exportText.value = await exportCollection(collectionStore.items, allCards.value, newVal)
+    } finally {
+      isExporting.value = false
+    }
+  }
 })
 
 async function copyCollectionExport() {
-    const ok = await copyToClipboard(exportedText.value)
-    copyLabel.value = ok ? `✓ ${t('common.copied')}` : t('common.error')
-    setTimeout(() => { copyLabel.value = t('collection.copy_collection') }, 2500)
+  const ok = await copyToClipboard(exportText.value)
+  copyLabel.value = ok ? `✓ ${t('common.copied')}` : t('common.error')
+  setTimeout(() => { copyLabel.value = t('collection.copy_collection') }, 2500)
 }
+
 const loading = ref(true)
 const error = ref(null)
 const visibleCount = ref(BATCH_SIZE)
@@ -435,7 +478,6 @@ const energyOptions = [
   { value: 3, label: '3' }, { value: 4, label: '4' }, { value: 5, label: '5' }, { value: 6, label: '6+' },
 ]
 
-// Deduplicate by name, keeping first version and organizing versions across ALL cards
 const groupedCards = computed(() => {
   const seen = new Map()
   for (const card of allCards.value) {
@@ -448,162 +490,77 @@ const groupedCards = computed(() => {
       seen.set(card.name, entry)
     }
   }
-  
   return [...seen.values()].map(entry => {
-      // Sort versions: Normal/Standard first, then others
       entry._versions.sort((a, b) => {
-          // 1. Check for "Showcase" or "Alternate Art" or "Promo" flags in classification or tags
-          const aIsAlt = (
-            a.metadata?.alternate_art || 
-            a.classification?.rarity === 'Promo' || 
-            a.classification?.rarity === 'Showcase' ||
-            a.tags?.some(t => {
-                const tl = t.toLowerCase();
-                return tl.includes('art') || tl.includes('showcase') || tl.includes('promo');
-            })
-          ) ? 1 : 0;
-          
-          const bIsAlt = (
-            b.metadata?.alternate_art || 
-            b.classification?.rarity === 'Promo' || 
-            b.classification?.rarity === 'Showcase' ||
-            b.tags?.some(t => {
-                const tl = t.toLowerCase();
-                return tl.includes('art') || tl.includes('showcase') || tl.includes('promo');
-            })
-          ) ? 1 : 0;
-          
-          if (aIsAlt !== bIsAlt) return aIsAlt - bIsAlt; // Normal (0) comes before Alt (1)
-          
-          // 2. Secondary: compare collector_number strings (numeric part)
+          const aIsAlt = (a.metadata?.alternate_art || a.classification?.rarity === 'Promo' || a.classification?.rarity === 'Showcase') ? 1 : 0;
+          const bIsAlt = (b.metadata?.alternate_art || b.classification?.rarity === 'Promo' || b.classification?.rarity === 'Showcase') ? 1 : 0;
+          if (aIsAlt !== bIsAlt) return aIsAlt - bIsAlt;
           const aNum = parseInt(a.collector_number) || 999;
           const bNum = parseInt(b.collector_number) || 999;
           if (aNum !== bNum) return aNum - bNum;
-          
-          // 3. Fallback: alphanumerical sort on public_code or id
           return (a.public_code || a.id).localeCompare(b.public_code || b.id);
       })
-      
       const standard = entry._versions[0]
-      return { 
-          ...standard, 
-          _altCount: entry._altCount, 
-          _versions: entry._versions 
-      }
+      return { ...standard, _altCount: entry._altCount, _versions: entry._versions }
   })
 })
 
 const filteredCards = computed(() => {
-  // Always work with a fresh copy to avoid mutating the original groupedCards array
   let result = [...groupedCards.value]
-  
-  if (showOnlyOwned.value) {
-      result = result.filter(c => collectionStore.getCardTotal(c.id) > 0)
-  }
-  
+  if (showOnlyOwned.value) result = result.filter(c => collectionStore.getCardTotal(c.id) > 0)
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.trim().toLowerCase()
-    result = result.filter((c) => {
-      return c.name.toLowerCase().includes(q) ||
-             c.text?.raw?.toLowerCase().includes(q) ||
-             c.text?.rich?.toLowerCase().includes(q) ||
-             c.classification?.supertype?.toLowerCase().includes(q) ||
-             c.classification?.subtype?.toLowerCase().includes(q) ||
-             c.tags?.some((t) => t.toLowerCase().includes(q))
-    })
+    result = result.filter((c) => c.name.toLowerCase().includes(q) || c.text?.raw?.toLowerCase().includes(q))
   }
-  if (selectedDomains.value.length > 0) {
-    result = result.filter((c) => c.classification?.domain?.some((d) => selectedDomains.value.includes(d)))
-  }
+  if (selectedDomains.value.length > 0) result = result.filter((c) => c.classification?.domain?.some((d) => selectedDomains.value.includes(d)))
   if (selectedTypes.value.length > 0) result = result.filter((c) => selectedTypes.value.includes(c.classification?.type))
   if (selectedRarities.value.length > 0) result = result.filter((c) => selectedRarities.value.includes(c.classification?.rarity))
   if (selectedEnergy.value !== null) {
-    result = selectedEnergy.value === 6
-      ? result.filter((c) => c.attributes?.energy != null && c.attributes.energy >= 6)
-      : result.filter((c) => c.attributes?.energy === selectedEnergy.value)
+    result = selectedEnergy.value === 6 ? result.filter((c) => c.attributes?.energy >= 6) : result.filter((c) => c.attributes?.energy === selectedEnergy.value)
   }
-  
-  // Sort alphabetically typically for Album
   result.sort((a,b) => a.name.localeCompare(b.name))
   return result
 })
 
 const uniqueCardsOwned = computed(() => {
     let count = 0;
-    groupedCards.value.forEach(c => {
-        if (collectionStore.getCardTotal(c.id) > 0) count++;
-    })
+    groupedCards.value.forEach(c => { if (collectionStore.getCardTotal(c.id) > 0) count++; })
     return count;
 })
 
 const visibleCards = computed(() => filteredCards.value.slice(0, visibleCount.value))
-
-// Helpers to know if variants exist
 const hasAltArt = (card) => card._versions.length > 1
+const hasSigned = (card) => card._versions.some(v => v.metadata?.signature === true || (v.tags && v.tags.some(t => t.toLowerCase().includes('sign'))))
 
-const hasSigned = (card) => {
-    return card._versions.some(v => 
-        (v.tags && v.tags.some(t => t.toLowerCase().includes('sign'))) || 
-        v.metadata?.signature === true
-    )
-}
-
-// Map visibleCards to display alternative arts if the user owns them
 const displayCards = computed(() => {
   return visibleCards.value.map(baseCard => {
     const qty = collectionStore.items[baseCard.id] || {}
-    let activeVersion = baseCard._versions[0] // Default to Normal (index 0 after sort)
-    
-    const hasAnySigned = qty.signed_qty > 0 || qty.overnumbered_qty > 0 || qty.overnumbered_foil_qty > 0
-    const hasAnyAltArt = qty.alt_art_qty > 0 || qty.alt_art_foil_qty > 0
-    
-    // IF user has Signed copies, show the signed version if it exists
-    if (hasAnySigned) {
-       const signed = baseCard._versions.find(v => 
-          (v.tags?.some(t => t.toLowerCase().includes('sign') || t.toLowerCase().includes('over'))) || 
-          v.metadata?.signature === true
-       )
+    let activeVersion = baseCard._versions[0]
+    if (qty.signed_qty > 0 || qty.overnumbered_qty > 0) {
+       const signed = baseCard._versions.find(v => v.metadata?.signature === true || (v.tags?.some(t => t.toLowerCase().includes('sign'))))
        if (signed) activeVersion = signed
-    } 
-    // ELSE IF user has Alt Art copies, show the first Alt Art version (index 1+)
-    else if (hasAnyAltArt && baseCard._versions.length > 1) {
+    } else if ((qty.alt_art_qty > 0 || qty.alt_art_foil_qty > 0) && baseCard._versions.length > 1) {
        const altArt = baseCard._versions.find((v, idx) => idx > 0)
        if (altArt) activeVersion = altArt
     }
-    
-    return {
-      ...baseCard,
-      media: { ...baseCard.media, image_url: activeVersion.media?.image_url }
-    }
+    return { ...baseCard, media: { ...baseCard.media, image_url: activeVersion.media?.image_url } }
   })
 })
 
 const hasMore = computed(() => visibleCount.value < filteredCards.value.length)
-
-const hasActiveFilters = computed(() =>
-  searchQuery.value.trim() || selectedDomains.value.length > 0 || selectedTypes.value.length > 0 ||
-  selectedRarities.value.length > 0 || selectedEnergy.value !== null ||
-  showOnlyOwned.value
-)
+const hasActiveFilters = computed(() => searchQuery.value.trim() || selectedDomains.value.length > 0 || selectedTypes.value.length > 0 || selectedRarities.value.length > 0 || selectedEnergy.value !== null || showOnlyOwned.value)
 
 watch([searchQuery, selectedDomains, selectedTypes, selectedRarities, selectedEnergy, showOnlyOwned], () => {
   visibleCount.value = BATCH_SIZE
   nextTick(setupObserver)
 }, { deep: true })
 
-// Fetch user collection on Auth change or mount
-watch(() => authStore.user, (user) => {
-    if (user && !collectionStore.initialized) {
-        collectionStore.loadCollection()
-    }
-}, { immediate: true })
+watch(() => authStore.user, (user) => { if (user && !collectionStore.initialized) collectionStore.loadCollection() }, { immediate: true })
 
 function toggleDomain(d) {
   const i = selectedDomains.value.indexOf(d)
   i === -1 ? selectedDomains.value.push(d) : selectedDomains.value.splice(i, 1)
 }
-
-const resultsCount = computed(() => filteredCards.value.length)
 
 const fetchPrices = useDebounceFn(async (card) => {
   if (!card) return
@@ -611,57 +568,22 @@ const fetchPrices = useDebounceFn(async (card) => {
   try {
     const data = await riftcodex.getCardPrices(card.name, locale.value)
     cardPrices.value = data
-  } catch (err) {
-    console.error('Error fetching prices:', err)
-  } finally {
-    loadingPrices.value = false
-  }
+  } catch (err) { console.error('Error fetching prices:', err) } finally { loadingPrices.value = false }
 }, 300)
 
-watch(hoveredCard, (newCard) => {
-  if (!newCard) {
-    cardPrices.value = null
-    return
-  }
-  fetchPrices(newCard)
-})
+watch(hoveredCard, (newCard) => { if (!newCard) { cardPrices.value = null; return } fetchPrices(newCard) })
 
-function clearFilters() {
-  searchQuery.value = ''
-  selectedDomains.value = []
-  selectedTypes.value = []
-  selectedRarities.value = []
-  selectedEnergy.value = null
-  showOnlyOwned.value = false
-}
-
-function handleGlobalMouseMove(e) {
-  mouseX.value = e.clientX
-  mouseY.value = e.clientY
-}
+function clearFilters() { searchQuery.value = ''; selectedDomains.value = []; selectedTypes.value = []; selectedRarities.value = []; selectedEnergy.value = null; showOnlyOwned.value = false; }
+function handleGlobalMouseMove(e) { mouseX.value = e.clientX; mouseY.value = e.clientY; }
 
 const previewPosition = computed(() => {
   if (!hoveredCard.value) return {}
-  
-  const width = 340
-  const height = 480
-  const padding = 20
-  
-  let left = mouseX.value + padding
-  let top = mouseY.value - (height / 2)
-  
-  // Viewport bounds check
-  if (left + width > window.innerWidth) {
-    left = mouseX.value - width - padding
-  }
-  
+  const width = 340, height = 480, padding = 20
+  let left = mouseX.value + padding, top = mouseY.value - (height / 2)
+  if (left + width > window.innerWidth) left = mouseX.value - width - padding
   if (top < padding) top = padding
   if (top + height > window.innerHeight) top = window.innerHeight - height - padding
-  
-  return {
-    left: `${left}px`,
-    top: `${top}px`
-  }
+  return { left: `${left}px`, top: `${top}px` }
 })
 
 function setupObserver() {
@@ -682,461 +604,103 @@ async function fetchAllData() {
   try {
     const c = await riftcodex.getCards()
     allCards.value = Array.isArray(c) ? c : []
-    
     await nextTick()
     setupObserver()
-  } catch (e) {
-    error.value = t('common.something_went_wrong')
-  } finally {
-    loading.value = false
-  }
+  } catch (e) { error.value = t('common.something_went_wrong') } finally { loading.value = false }
 }
 
-onMounted(() => {
-  fetchAllData()
-  window.addEventListener('mousemove', handleGlobalMouseMove)
-})
-onBeforeUnmount(() => { 
-  if (observer) observer.disconnect()
-  window.removeEventListener('mousemove', handleGlobalMouseMove)
-})
+onMounted(() => { fetchAllData(); window.addEventListener('mousemove', handleGlobalMouseMove) })
+onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventListener('mousemove', handleGlobalMouseMove) })
 </script>
 
 <style scoped>
 .collection { display: flex; flex-direction: column; gap: 12px; }
 
 /* ── Header ── */
-.collection-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-.collection-title {
-  font-family: var(--font-display);
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--color-text-primary), var(--color-gold-400));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+.collection-header { margin-bottom: 24px; }
+.header-content { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.collection-title { font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, var(--color-text-primary), var(--color-gold-400)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .collection-subtitle { color: var(--color-text-secondary); font-size: 0.85rem; margin-top: 4px; }
 
-/* ── Empty auth state ── */
-.login-prompt { padding: 60px 20px; text-align: center; display:flex; flex-direction:column; align-items:center; }
+/* ── Export ── */
+.export-trigger svg { margin-right: 6px; }
+.export-modal { max-width: 500px; }
+.export-hint { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+.export-options { margin-bottom: 16px; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); }
+.export-textarea { width: 100%; height: 260px; font-family: monospace; font-size: 0.85rem; padding: 12px; resize: none; }
+.export-loading { height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: rgba(0, 0, 0, 0.2); border-radius: var(--radius-lg); color: var(--primary); }
 
 /* ── Search & Filters ── */
 .collection-search { position: relative; margin-bottom: 12px; }
-.search-icon {
-  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-  color: var(--color-text-tertiary); pointer-events: none;
-}
-.search-input { padding-left: 44px; padding-right: 36px; height: 48px; border-radius: 12px; font-size: 1rem; }
+.search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--color-text-tertiary); pointer-events: none; }
+.search-input { padding-left: 44px; padding-right: 36px; height: 48px; border-radius: 12px; }
 .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
 
 .filter-bar { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-.filter-scroll {
-  display: flex; gap: 10px; overflow-x: auto;
-  -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  padding: 4px 0;
-}
+.filter-scroll { display: flex; gap: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 4px 0; }
 .filter-scroll::-webkit-scrollbar { display: none; }
-
-.filter-pill {
-  cursor: pointer; transition: all 0.2s ease;
-  opacity: 0.55; white-space: nowrap; flex-shrink: 0;
-}
-.filter-pill:hover { opacity: 0.8; }
+.filter-pill { cursor: pointer; transition: all 0.2s ease; opacity: 0.55; white-space: nowrap; flex-shrink: 0; }
 .filter-pill--active { opacity: 1 !important; box-shadow: 0 0 0 1px currentColor; }
-
-.filter-pill-owned {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 4px 12px; border-radius: var(--radius-full);
-  font-size: 0.72rem; font-weight: 700;
-  background: var(--color-bg-surface); color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-subtle);
-}
-.filter-pill-owned.filter-pill--active {
-  background: rgba(34, 197, 94, 0.15); /* Subtle green background */
-  color: #fabd2f; /* Premium gold-yellow */
-  border-color: rgba(250, 189, 47, 0.6); /* Semi-transparent gold border */
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.1); 
-}
-
-.filter-pill-energy {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 4px 10px; border-radius: var(--radius-full);
-  font-size: 0.72rem; font-weight: 700;
-  background: var(--color-bg-surface); color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-subtle);
-}
-.filter-pill-energy.filter-pill--active {
-  background: rgba(74, 127, 255, 0.15); color: var(--color-rift-400); border-color: var(--color-rift-500);
-}
-
-.filter-selects {
-  display: flex; gap: 6px; flex-wrap: wrap; /* allows multiple dropdowns to fit */
-}
-
-.clear-btn { align-self: flex-start; }
+.filter-pill-owned { display: inline-flex; align-items: center; justify-content: center; padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; background: var(--color-bg-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); }
+.filter-pill-owned.filter-pill--active { background: rgba(250, 189, 47, 0.15); color: #fabd2f; border-color: rgba(250, 189, 47, 0.6); }
+.filter-pill-energy { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; background: var(--color-bg-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); }
+.filter-pill-energy.filter-pill--active { background: rgba(74, 127, 255, 0.15); color: var(--color-rift-400); border-color: var(--color-rift-500); }
+.filter-selects { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* ── Cards grid ── */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
-}
-
-.card-tile {
-  display: flex; flex-direction: column;
-  border-radius: var(--radius-md); background: var(--color-bg-raised);
-  border: 1px solid var(--color-border-subtle);
-  transition: all 0.2s ease; position: relative;
-}
-.card-tile--champion { border-color: rgba(201, 168, 76, 0.3); }
-
-/* Ownership grayscale toggle */
-.collection-unowned {
-    opacity: 0.9;
-}
-.collection-unowned .card-image {
-    filter: grayscale(100%) opacity(0.4);
-}
-.collection-unowned .card-hover-preview img {
-    filter: grayscale(100%) opacity(0.8);
-}
-.collection-unowned .collection-controls {
-    opacity: 0.5;
-}
-
-.card-image-wrap {
-  position: relative; width: 100%; aspect-ratio: 744 / 1039;
-  background: var(--color-bg-deep); border-radius: var(--radius-md) var(--radius-md) 0 0;
-  overflow: hidden;
-}
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.card-tile { display: flex; flex-direction: column; border-radius: var(--radius-md); background: var(--color-bg-raised); border: 1px solid var(--color-border-subtle); transition: all 0.2s ease; position: relative; }
+.collection-unowned .card-image { filter: grayscale(100%) opacity(0.4); }
+.card-image-wrap { position: relative; width: 100%; aspect-ratio: 744 / 1039; overflow: hidden; border-radius: var(--radius-md) var(--radius-md) 0 0; }
 .card-image-wrap--landscape { aspect-ratio: 1039 / 744; }
+.card-image { width: 100%; height: 100%; object-fit: cover; }
+.alt-arts-badge { position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; border-radius: var(--radius-full); background: rgba(0,0,0,0.7); font-size: 0.55rem; color: var(--color-gold-400); z-index: 10; }
 
-/* Foil Glow Effect */
-.foil-glow::after {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  background: linear-gradient(
-    115deg, 
-    transparent 20%, 
-    rgba(255, 255, 255, 0.7) 30%, 
-    rgba(255, 215, 0, 0.4) 45%, 
-    rgba(255, 50, 255, 0.4) 55%, 
-    rgba(100, 200, 255, 0.4) 70%, 
-    transparent 80%
-  );
-  mix-blend-mode: color-dodge;
-  opacity: 0.75;
-  background-size: 200% auto;
-  pointer-events: none;
-  z-index: 5;
-  animation: foil-shine 3s linear infinite;
-}
+/* ── Foil Glow ── */
+.foil-glow::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.4) 30%, rgba(255, 215, 0, 0.2) 45%, transparent 80%); mix-blend-mode: color-dodge; opacity: 0.75; animation: foil-shine 3s linear infinite; pointer-events: none; }
+@keyframes foil-shine { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
 
-@keyframes foil-shine {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
-
-.alt-arts-badge {
-  position: absolute; bottom: 4px; right: 4px; padding: 2px 6px;
-  border-radius: var(--radius-full); background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-  font-size: 0.55rem; font-weight: 600; color: var(--color-gold-400); white-space: nowrap;
-  z-index: 10;
-}
-.card-image {
-  width: 100%; height: 100%; object-fit: cover;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  transition: filter 0.3s;
-}
-
-/* Quick add overlay */
-.collection-overlay-actions {
-    position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;
-    background: rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.2s;
-    border-radius: var(--radius-md) var(--radius-md) 0 0;
-    z-index: 10;
-}
-.card-image-wrap:hover .collection-overlay-actions {
-    opacity: 1;
-}
-.col-add-btn {
-    width: 48px; height: 48px; border-radius: 50%;
-    background: var(--color-rift-500); color: white; border: none;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transform: scale(0.9); transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(74, 127, 255, 0.4);
-}
-.col-add-btn:hover { transform: scale(1.05); background: var(--color-rift-400); }
-
-.card-info { padding: 8px 10px 10px; display:flex; flex-direction:column; flex:1; }
-.card-name { font-size: 0.8rem; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-meta { display: flex; align-items: center; gap: 4px; margin-top: 3px; margin-bottom: 12px; }
-.card-meta .rarity-badge { font-size: 0.55rem; padding: 1px 5px; }
-.card-energy { font-size: 0.65rem; font-weight: 600; color: var(--color-rift-400); }
-
-/* Control panel */
-.collection-controls {
-    display: flex; flex-direction: column; gap: 4px;
-    margin-top: auto; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);
-    transition: opacity 0.3s;
-}
-
-.manage-btn {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    background: transparent; border: 1px solid var(--color-border-subtle);
-    color: var(--color-text-secondary); border-radius: 4px; padding: 4px;
-    font-size: 0.65rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
-    margin-top: 2px;
-}
-.manage-btn:hover { background: rgba(255,255,255,0.05); color: var(--color-text-primary); }
-
-.variant-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 3px 6px; border-radius: 4px; background: rgba(0,0,0,0.1);
-    transition: background 0.2s;
-}
-.variant-row--active {
-    background: rgba(255,255,255,0.06);
-}
-.variant-row--disabled {
-    opacity: 0.25;
-    pointer-events: none;
-    filter: grayscale(100%);
-}
-.variant-label { font-size: 0.6rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; }
-.variant-row--active .variant-label { color: var(--color-text-primary); }
-.variant-row--active .v-foil { color: var(--color-gold-400) !important; text-shadow: 0 0 6px rgba(201,168,76,0.3);}
-.variant-row--active .v-alt { color: #d67cf2 !important; }
-.variant-row--active .v-sign { color: #50b88a !important; }
-
+.card-info { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
+.card-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-meta { display: flex; align-items: center; gap: 4px; margin-top: 3px; margin-bottom: 8px; }
+.collection-controls { display: flex; flex-direction: column; gap: 4px; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--color-border-subtle); }
+.variant-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 6px; border-radius: 4px; background: rgba(0,0,0,0.1); }
+.variant-row--active { background: rgba(255,255,255,0.06); }
+.variant-row--disabled { opacity: 0.25; pointer-events: none; }
+.variant-label { font-size: 0.6rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; }
 .variant-stepper { display: flex; align-items: center; gap: 6px; }
-.step-val { font-family: var(--font-display); font-size: 0.75rem; font-weight: 700; width: 14px; text-align: center; }
-.variant-row--active .step-val { color: var(--color-text-primary); }
-.step-btn {
-    width: 20px; height: 20px; border:none; border-radius:3px;
-    background: var(--color-bg-surface); color: var(--color-text-secondary);
-    display:flex; align-items:center; justify-content:center; font-weight:700; font-family: var(--font-body);
-    cursor:pointer; transition:all 0.15s;
-}
-.step-btn:hover { background: var(--color-border-subtle); color: var(--color-text-primary); }
-.step-add { color: var(--color-text-primary); }
-.step-add:hover { background: rgba(74, 127, 255, 0.2); color: var(--color-rift-400); }
+.step-val { font-size: 0.75rem; font-weight: 700; width: 14px; text-align: center; }
+.step-btn { width: 20px; height: 20px; border: none; border-radius: 3px; background: var(--color-bg-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+.manage-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 4px; font-size: 0.65rem; font-weight: 700; background: transparent; border: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); border-radius: 4px; cursor: pointer; margin-top: 4px; }
 
-/* ── Skeleton ── */
-.card-skeleton { border-radius: var(--radius-md); background: var(--color-bg-raised); }
-.card-skeleton-img { width: 100%; aspect-ratio: 744 / 1039; border-radius: var(--radius-md) var(--radius-md) 0 0;}
+/* ── Modals ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+.manage-modal { background: var(--color-bg-deep); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); width: 100%; max-width: 360px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--color-border-subtle); }
+.modal-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.manage-group { background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+.manage-group-title { font-size: 0.7rem; color: var(--color-text-tertiary); margin-bottom: 6px; text-transform: uppercase; font-weight: 700; }
+.manage-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.foil-row { border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 4px; padding-top: 6px; }
 
-/* ── Empty state ── */
-.empty-state { display: flex; flex-direction: column; align-items: center; padding: 48px 20px; text-align: center; gap: 10px; }
-.empty-icon { font-size: 2.5rem; }
-.empty-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
-.empty-text { color: var(--color-text-secondary); font-size: 0.85rem; max-width: 320px; }
+/* ── Preview ── */
+.global-card-preview { position: fixed; width: 340px; border-radius: var(--radius-lg); overflow: hidden; z-index: 1000; box-shadow: var(--shadow-2xl); pointer-events: none; }
+.global-card-preview img { width: 100%; display: block; }
+.preview-price-box { background: rgba(15, 17, 26, 0.95); backdrop-filter: blur(8px); padding: 16px; border-top: 1px solid rgba(201, 168, 76, 0.2); pointer-events: auto; }
+.price-loading { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.85rem; padding: 10px 0; }
+.spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.price-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.price-market-label { font-size: 0.75rem; color: var(--primary-light); font-weight: 600; }
+.price-currency-badge { font-size: 0.65rem; padding: 2px 6px; background: rgba(201, 168, 76, 0.2); border-radius: 4px; }
+.price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.price-item { display: flex; flex-direction: column; }
+.p-label { font-size: 0.6rem; color: var(--text-muted); }
+.p-value { font-size: 0.85rem; font-weight: 700; color: #fff; }
+.btn-liga-link { display: block; width: 100%; padding: 8px; background: var(--primary); color: #000; text-align: center; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-decoration: none; }
 
-/* ── Manage Variants Modal ── */
-.modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
-    display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px;
-}
-.manage-modal {
-    background: var(--color-bg-deep); border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-lg); width: 100%; max-width: 360px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5); overflow: hidden;
-}
-.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-bg-surface); }
-.modal-header h3 { font-size: 1rem; font-weight: 700; }
-.modal-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; max-height: 70vh; overflow-y: auto; }
-.manage-group { display: flex; flex-direction: column; gap: 6px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-.manage-group-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-tertiary); font-weight: 700; margin-bottom: 4px; }
-.v-alt { color: #d67cf2 !important; }
-.v-sign { color: #50b88a !important; }
-.manage-row { display: flex; justify-content: space-between; align-items: center; }
-.foil-row { margin-top: 4px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.05); }
-.manage-label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
-.manage-label-foil { color: var(--color-gold-400); text-shadow: 0 0 6px rgba(201,168,76,0.3); }
-
-/* ── Loading more (infinite scroll) ── */
-.loading-more { display: flex; align-items: center; justify-content: center; padding: 24px 0; }
-.loading-dots { display: flex; gap: 6px; }
-.loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--color-text-tertiary); animation: dot-pulse 1.2s ease-in-out infinite; }
-.loading-dots span:nth-child(2) { animation-delay: 0.15s; }
-.loading-dots span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes dot-pulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1.1); } }
-
-/* ── Desktop enhancements ── */
-@media (min-width: 769px) {
-  .collection-title { font-size: 1.8rem; }
-  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-}
-/* ── Export Modal Specifics ── */
-.export-modal {
-    max-width: 500px;
-    display: flex;
-    flex-direction: column;
-}
-.export-hint {
-    font-size: 0.8rem;
-    color: var(--color-text-secondary);
-    margin-bottom: 12px;
-}
-.export-preview {
-    background: var(--color-bg-deep);
-    border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-md);
-    padding: 12px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-.export-text {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 0.75rem;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    margin: 0;
-}
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    padding: 16px;
-    border-top: 1px solid var(--color-border-subtle);
-}
-.header-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-}
-.export-trigger svg {
-    margin-right: 6px;
-}
-@media (max-width: 600px) {
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    .export-trigger {
-        width: 100%;
-        justify-content: center;
-    }
-    .global-card-preview img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  /* Price logic */
-  .preview-price-box {
-    background: rgba(15, 17, 26, 0.95);
-    backdrop-filter: blur(8px);
-    border-top: 1px solid rgba(201, 168, 76, 0.2);
-    padding: 16px;
-  }
-  
-  .price-loading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    justify-content: center;
-    padding: 10px 0;
-  }
-  
-  .spinner-sm {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255,255,255,0.1);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  
-  .price-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  
-  .price-market-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--primary-light);
-  }
-  
-  .price-currency-badge {
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    background: rgba(201, 168, 76, 0.2);
-    border: 1px solid rgba(201, 168, 76, 0.3);
-    color: var(--primary);
-    border-radius: 4px;
-    font-weight: bold;
-  }
-  
-  .price-currency-badge.fallback {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
-  }
-  
-  .price-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  
-  .price-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  
-  .p-label {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-  }
-  
-  .p-value {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #fff;
-  }
-  
-  .btn-liga-link {
-    display: block;
-    width: 100%;
-    padding: 8px;
-    background: linear-gradient(135deg, var(--primary), #b08d3e);
-    color: #000;
-    text-align: center;
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 700;
-    border-radius: var(--radius-md);
-    transition: all 0.2s;
-  }
-  
-  .btn-liga-link:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+@media (max-width: 768px) {
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .export-trigger span { display: none; }
 }
 </style>
-```
