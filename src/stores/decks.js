@@ -37,7 +37,7 @@ export const useDecksStore = defineStore('decks', () => {
         }
         loading.value = true
         try {
-            const { data } = await api.get('/decks')
+            const { data } = await api.get('/api/decks')
             
             const allCards = await riftcodex.getCards()
             const cardMap = new Map((allCards || []).map(c => [c.id, c]))
@@ -69,7 +69,7 @@ export const useDecksStore = defineStore('decks', () => {
                 })
             }))
         } catch (e) {
-            // fallback silently
+            console.error('[Decks Sync Error]', e)
             decks.value = loadFromStorage() // fallback
         } finally {
             loading.value = false
@@ -88,9 +88,10 @@ export const useDecksStore = defineStore('decks', () => {
                     ...(deck.sideboard || []).map(c => ({ card_id: c.cardId, quantity: c.quantity, is_sideboard: true }))
                 ]
             }
-            await api.put(`/decks/${deck.id}`, payload)
+            await api.put(`/api/decks/${deck.id}`, payload)
         } catch (e) {
-            // auth or net failure silently skipped
+            console.error('[Decks Auto-Save Error]', e)
+            // auth or net failure silently skipped (handled locally)
         }
     }, 1000)
 
@@ -123,10 +124,10 @@ export const useDecksStore = defineStore('decks', () => {
         if (authStore.user) {
             try {
                 // Post API expects different structure (cards: []) e vai retornar uuid
-                const { data } = await api.post('/decks/', { name, cards: [] })
+                const { data } = await api.post('/api/decks/', { name, cards: [] })
                 deck.id = data.id // Atualiza o ID fake pelo do DB
             } catch (e) { 
-                // silently fallback to local fake UUID
+                console.error('[Deck Create API Error]', e)
             }
         }
         return deck
@@ -142,7 +143,7 @@ export const useDecksStore = defineStore('decks', () => {
             decks.value.splice(idx, 1)
             saveToStorage(decks.value)
             if (authStore.user) {
-                api.delete(`/decks/${id}`).catch(() => {})
+                api.delete(`/api/decks/${id}`).catch(err => console.error('[Deck Delete Error]', err))
             }
         }
     }

@@ -432,6 +432,14 @@ async function handleEmailAuth() {
     padding: 16px;
     padding-bottom: 80px; /* space for bottom tabs */
   }
+  .app-footer {
+    display: flex;
+    margin-bottom: 70px;
+    padding-bottom: 40px; /* give some room for mobile nav */
+  }
+  .footer-links {
+    gap: 16px;
+  }
 }
 
 /* ── Auth Modal ── */
