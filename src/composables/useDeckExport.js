@@ -89,6 +89,7 @@ export async function exportCollection(items, allCards, includePrices = false) {
             { key: 'alt_art_qty', label: 'Alt.Art' },
             { key: 'alt_art_foil_qty', label: 'Alt.Art, Foil' },
             { key: 'signed_qty', label: 'Signed' },
+            { key: 'signed_foil_qty', label: 'Signed, Foil' },
             { key: 'overnumbered_qty', label: 'Overnumbered' },
             { key: 'overnumbered_foil_qty', label: 'Overnumbered, Foil' }
         ]

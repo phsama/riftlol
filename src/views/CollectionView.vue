@@ -20,7 +20,7 @@
               {{ $t('common.progress') }}: {{ collectionProgress.owned }} / {{ collectionProgress.total }}
             </p>
           </div>
-          <button class="btn btn-secondary btn-sm export-trigger" @click="openExport" :disabled="loading || collectionProgress.owned === 0">
+          <button class="btn btn-secondary btn-sm export-trigger" @click="openExport" :disabled="loading || collectionStore.isLoading">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             {{ $t('collection.export') }}
           </button>
@@ -94,7 +94,7 @@
       </div>
 
       <!-- ── Loading ── -->
-      <div v-if="loading || collectionStore.isLoading" class="cards-grid">
+      <div v-if="loading || collectionStore.isLoading" class="cards-grid" style="min-height: 60vh;">
         <div v-for="i in 12" :key="i" class="card-skeleton">
           <div class="skeleton card-skeleton-img"></div>
           <div class="skeleton" style="width: 70%; height: 12px; margin: 8px 8px 0;"></div>
@@ -548,7 +548,6 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   display: grid; 
   grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); 
   gap: 16px; 
-  min-height: 60vh;
 }
 
 /* ── Card Tile ── */
@@ -560,6 +559,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   border-radius: 12px;
   transition: all 0.25s ease;
   overflow: hidden;
+  max-width: 540px;
 }
 
 .collection-tile:hover {
