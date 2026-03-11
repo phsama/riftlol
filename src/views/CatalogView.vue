@@ -109,12 +109,10 @@
             :alt="card.name"
             class="card-image"
             loading="lazy"
+            @mouseenter="hoveredCard = card"
+            @mouseleave="hoveredCard = null"
           />
           <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ $t('catalog.alt_arts_count', { count: card._altCount }) }}</span>
-          <!-- Desktop hover preview -->
-          <div class="card-hover-preview">
-            <img :src="card.media?.image_url" :alt="card.name" />
-          </div>
         </div>
         <div class="card-info">
           <h3 class="card-name">{{ card.name }}</h3>
@@ -130,16 +128,61 @@
     <div v-if="hasMore" ref="sentinel" class="loading-more">
       <div class="loading-dots"><span></span><span></span><span></span></div>
     </div>
+
+    <!-- ── Global Hover Preview ── -->
+    <Teleport to="body">
+      <div 
+        v-if="hoveredCard" 
+        class="global-card-preview"
+        :style="previewPosition"
+      >
+        <img :src="hoveredCard.media?.image_url" :alt="hoveredCard.name" />
+        
+        <!-- Price Section -->
+        <div class="preview-price-box">
+          <div v-if="loadingPrices" class="price-loading">
+            <div class="spinner-sm"></div>
+            <span>{{ $t('catalog.loading_prices') }}</span>
+          </div>
+          <div v-else-if="cardPrices && cardPrices.found" class="price-content">
+            <div class="price-header">
+              <span class="price-market-label">{{ $t('catalog.market_prices') }}</span>
+              <span class="price-currency-badge" :class="{ 'fallback': cardPrices.is_fallback }">
+                {{ cardPrices.currency }}
+              </span>
+            </div>
+            <div class="price-grid">
+              <div v-if="cardPrices.prices.min" class="price-item">
+                <span class="p-label">{{ $t('catalog.price_min') }}</span>
+                <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.min }}</span>
+              </div>
+              <div v-if="cardPrices.prices.avg" class="price-item">
+                <span class="p-label">{{ $t('catalog.price_avg') }}</span>
+                <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.avg }}</span>
+              </div>
+              <div v-if="cardPrices.prices.max" class="price-item">
+                <span class="p-label">{{ $t('catalog.price_max') }}</span>
+                <span class="p-value">{{ cardPrices.currency === 'BRL' ? 'R$' : '$' }} {{ cardPrices.prices.max }}</span>
+              </div>
+            </div>
+            <a :href="cardPrices.url" target="_blank" class="btn-liga-link">
+              {{ $t('catalog.view_on_liga') }} ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { getCards } from '@/services/riftcodex'
+import riftcodex from '@/services/riftcodex'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown.vue'
 import { useI18n } from 'vue-i18n'
+import { useDebounceFn } from '@vueuse/core'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const BATCH_SIZE = 24
 const allCards = ref([])
@@ -154,6 +197,11 @@ const selectedDomains = ref([])
 const selectedTypes = ref([])
 const selectedRarities = ref([])
 const selectedEnergy = ref(null)
+const hoveredCard = ref(null)
+const cardPrices = ref(null)
+const loadingPrices = ref(false)
+const mouseY = ref(0)
+const mouseX = ref(0)
 
 const availableDomains = ['Body', 'Calm', 'Chaos', 'Fury', 'Mind', 'Order', 'Colorless']
 
@@ -267,6 +315,8 @@ const hasActiveFilters = computed(() =>
   selectedRarities.value.length > 0 || selectedEnergy.value !== null
 )
 
+const resultsCount = computed(() => filteredCards.value.length)
+
 watch([searchQuery, selectedDomains, selectedTypes, selectedRarities, selectedEnergy], () => {
   visibleCount.value = BATCH_SIZE
   nextTick(setupObserver)
@@ -285,6 +335,35 @@ function clearFilters() {
   selectedEnergy.value = null
 }
 
+function handleGlobalMouseMove(e) {
+  mouseX.value = e.clientX
+  mouseY.value = e.clientY
+}
+
+const previewPosition = computed(() => {
+  if (!hoveredCard.value) return {}
+  
+  const width = 340
+  const height = 480
+  const padding = 20
+  
+  let left = mouseX.value + padding
+  let top = mouseY.value - (height / 2)
+  
+  // Viewport bounds check
+  if (left + width > window.innerWidth) {
+    left = mouseX.value - width - padding
+  }
+  
+  if (top < padding) top = padding
+  if (top + height > window.innerHeight) top = window.innerHeight - height - padding
+  
+  return {
+    left: `${left}px`,
+    top: `${top}px`
+  }
+})
+
 function setupObserver() {
   if (observer) observer.disconnect()
   if (!sentinel.value) return
@@ -296,6 +375,27 @@ function setupObserver() {
   }, { rootMargin: '200px' })
   observer.observe(sentinel.value)
 }
+
+const fetchPrices = useDebounceFn(async (card) => {
+  if (!card) return
+  loadingPrices.value = true
+  try {
+    const data = await riftcodex.getCardPrices(card.name, locale.value)
+    cardPrices.value = data
+  } catch (err) {
+    console.error('Error fetching prices:', err)
+  } finally {
+    loadingPrices.value = false
+  }
+}, 300)
+
+watch(hoveredCard, (newCard) => {
+  if (!newCard) {
+    cardPrices.value = null
+    return
+  }
+  fetchPrices(newCard)
+})
 
 async function fetchAllData() {
   loading.value = true
@@ -313,8 +413,14 @@ async function fetchAllData() {
   }
 }
 
-onMounted(fetchAllData)
-onBeforeUnmount(() => { if (observer) observer.disconnect() })
+onMounted(() => {
+  fetchAllData()
+  window.addEventListener('mousemove', handleGlobalMouseMove)
+})
+onBeforeUnmount(() => { 
+  if (observer) observer.disconnect()
+  window.removeEventListener('mousemove', handleGlobalMouseMove)
+})
 </script>
 
 <style scoped>
@@ -529,37 +635,126 @@ onBeforeUnmount(() => { if (observer) observer.disconnect() })
   .card-name { font-size: 0.8rem; }
   .card-info { padding: 8px 10px 10px; }
 
-  /* Hover preview */
-  .card-hover-preview {
-    display: block; position: absolute; z-index: 9999;
-    top: 50%; transform: translateY(-50%) scale(0.92);
-    width: 340px; border-radius: var(--radius-lg); overflow: hidden;
+  /* Global Hover Preview */
+  .global-card-preview {
+    position: fixed;
+    z-index: 9999;
+    width: 340px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
     box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.12);
-    opacity: 0; pointer-events: none !important; /* Force to prevent stuck ghosts */
-    transition: all 0.15s ease-out;
-    left: 105%; /* Default show to the right */
+    pointer-events: none;
+    transition: opacity 0.1s ease-out;
   }
-  .card-hover-preview img {
+  .global-card-preview img {
     width: 100%;
     height: auto;
     display: block;
   }
-  
-  /* Show preview when hovering the image wrapper */
-  .card-image-wrap:hover .card-hover-preview {
-    opacity: 1;
-    transform: translateY(-50%) scale(1);
+
+  /* Price logic */
+  .preview-price-box {
+    background: rgba(15, 17, 26, 0.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(201, 168, 76, 0.2);
+    padding: 16px;
   }
   
-  /* Flip to left side for the last two columns to prevent screen overflow */
-  .card-tile:nth-child(4n) .card-hover-preview,
-  .card-tile:nth-child(4n-1) .card-hover-preview,
-  .card-tile:nth-child(5n) .card-hover-preview,
-  .card-tile:nth-child(5n-1) .card-hover-preview,
-  .card-tile:nth-child(6n) .card-hover-preview,
-  .card-tile:nth-child(6n-1) .card-hover-preview {
-    left: auto;
-    right: 105%;
+  .price-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    justify-content: center;
+    padding: 10px 0;
+  }
+  
+  .spinner-sm {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  .price-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .price-market-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--primary-light);
+  }
+  
+  .price-currency-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    background: rgba(201, 168, 76, 0.2);
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    color: var(--primary);
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  
+  .price-currency-badge.fallback {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+  
+  .price-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  
+  .price-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .p-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+  
+  .p-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  
+  .btn-liga-link {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    background: linear-gradient(135deg, var(--primary), #b08d3e);
+    color: #000;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+  }
+  
+  .btn-liga-link:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 }
 </style>

@@ -4,7 +4,7 @@
     <nav class="app-nav glass">
       <router-link to="/" class="nav-brand">
         <span class="nav-logo">⚔</span>
-        <span class="nav-title">Riftbound <span class="nav-title-accent">Deck Manager</span></span>
+        <span class="nav-title">Riftbound <span class="nav-title-accent">Nights</span> <span class="nav-title-sub">Deck Manager</span></span>
       </router-link>
 
       <!-- Desktop nav links -->
@@ -89,7 +89,7 @@
         <div class="footer-content">
           <div class="footer-brand">
             <span class="nav-logo">⚔</span>
-            <span class="nav-title">Riftbound <span class="nav-title-accent">Deck Manager</span></span>
+            <span class="nav-title">Riftbound <span class="nav-title-accent">Nights</span> <span class="nav-title-sub">Deck Manager</span></span>
           </div>
           <p class="footer-rights">{{ $t('footer.rights') }}</p>
           <div class="footer-links">
@@ -277,11 +277,19 @@ async function handleEmailAuth() {
 .nav-logo { font-size: 1.2rem; }
 .nav-title {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 .nav-title-accent { color: var(--color-gold-400); }
+.nav-title-sub { 
+  font-size: 0.8rem; 
+  color: var(--color-text-secondary); 
+  font-weight: 500;
+  text-transform: none;
+  margin-left: 4px;
+}
 
 .nav-links-desktop {
   display: flex;

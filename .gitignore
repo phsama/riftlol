@@ -4,3 +4,16 @@ dist
 .env.local
 *.log
 .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+.venv/
+.pytest_cache/
+
+# OS
+Thumbs.db
+desktop.ini

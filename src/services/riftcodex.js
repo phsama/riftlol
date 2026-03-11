@@ -101,6 +101,15 @@ export async function getSupertypes() {
     return getIndex('supertypes')
 }
 
+// ── Prices ──
+
+export async function getCardPrices(cardName, lang = 'pt') {
+    // We don't use cachedGet here to ensure fresh prices, 
+    // but we could use a shorter cache if needed.
+    const { data } = await localApi.get(`/prices/${encodeURIComponent(cardName)}`, { params: { lang } })
+    return data
+}
+
 export default {
     getCards,
     searchCards,
@@ -113,4 +122,5 @@ export default {
     getRarities,
     getTypes,
     getSupertypes,
+    getCardPrices,
 }

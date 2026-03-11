@@ -5,8 +5,8 @@
       "desc": "Explore todas as cartas de Riftbound. Filtre por domínios, tipos e raridades para encontrar o que precisa."
     },
     "collection": {
-      "title": "Minha Coleção | Riftbound Deck Manager",
-      "desc": "Gerencie sua coleção pessoal de Riftbound. Acompanhe cartas possuídas, variantes foil e exporte sua lista."
+      "title": "Riftnights - Seu Portal de Estratégia Riftbound TCG",
+      "desc": "Explore o catálogo completo de cartas do Riftbound TCG, organize sua coleção e crie decks imbatíveis. O gerenciador definitivo para compra, venda e troca."
     },
     "decks": {
       "title": "Meus Decks | Riftbound Deck Manager",
@@ -115,7 +115,13 @@
       "rarities": "Raridades",
       "energy": "Energia"
     },
-    "alt_arts_count": "{count} arte | {count} artes"
+    "alt_arts_count": "{count} arte | {count} artes",
+    "market_prices": "Preços na LigaRiftbound",
+    "price_min": "Mínimo",
+    "price_avg": "Médio",
+    "price_max": "Máximo",
+    "view_on_liga": "Ver na LigaRiftbound",
+    "loading_prices": "Buscando preços..."
   },
   "decks": {
     "title": "Meus Decks",
@@ -211,39 +217,55 @@
     },
     "keywords": {
       "title": "Coração da Maestria: Keywords",
-      "subtitle": "Dominar as Keywords é o passo mais importante para se tornar um mestre em Riftbound.",
+      "description": "Dominar as Keywords é o passo mais importante para se tornar um mestre em Riftbound.",
       "list": {
-        "vanguard": {
-          "name": "Vanguard",
-          "desc": "Esta unidade começa o jogo virada para cima no Battlefield central."
-        },
-        "warded": {
-          "name": "Warded",
-          "desc": "Esta unidade não pode ser alvo de habilidades ou feitiços de oponentes."
-        },
-        "fervor": {
-          "name": "Fervor X",
-          "desc": "Ganha +X de Might enquanto estiver atacando."
+        "accelerate": {
+          "name": "Accelerate",
+          "desc": "Custo opcional ao jogar uma Unidade que permite que ela entre pronta (desvirada) pagando 1 Energia e reciclando uma Runa."
         },
         "action": {
           "name": "Action",
-          "desc": "Habilidades que você pode ativar voluntariamente durante sua fase principal."
+          "desc": "Permite que a habilidade ou carta seja jogada durante Showdowns, mesmo fora do seu turno."
         },
-        "repeat": {
-          "name": "Repeat",
-          "desc": "Efeitos que acontecem múltiplas vezes sob certas condições."
+        "assault": {
+          "name": "Assault X",
+          "desc": "Ganha +X de Might enquanto estiver atacando durante o combate."
+        },
+        "deathknell": {
+          "name": "Deathknell",
+          "desc": "Habilidade que é ativada quando a unidade que a possui morre."
         },
         "deflect": {
           "name": "Deflect X",
-          "desc": "Reduz o dano recebido em X."
+          "desc": "Oponente deve pagar X adicional de Poder para alvejar esta carta com feitiços ou habilidades."
         },
-        "ambush": {
-          "name": "Ambush",
-          "desc": "Pode ser jogada durante o turno do oponente ou em resposta a ações."
+        "ganking": {
+          "name": "Ganking",
+          "desc": "Habilidade de movimento que permite que a unidade se mova diretamente entre campos de batalha."
         },
-        "legendary": {
-          "name": "Legendary",
-          "desc": "Você só pode ter uma cópia desta carta em jogo por vez."
+        "hidden": {
+          "name": "Hidden",
+          "desc": "Pode ser jogada virada para baixo por um custo reduzido e revelada posteriormente como uma Reação."
+        },
+        "legion": {
+          "name": "Legion",
+          "desc": "Efeito ativado se você já jogou outra carta neste turno."
+        },
+        "reaction": {
+          "name": "Reaction",
+          "desc": "Timing especial que permite responder a ações do oponente instantaneamente, resolvendo antes da ação original."
+        },
+        "repeat": {
+          "name": "Repeat",
+          "desc": "Permite pagar o custo base novamente para repetir o efeito de um feitiço."
+        },
+        "shield": {
+          "name": "Shield X",
+          "desc": "Ganha +X de Might enquanto estiver defendendo durante o combate."
+        },
+        "tank": {
+          "name": "Tank",
+          "desc": "Unidades com Tank devem receber dano letal antes de qualquer outra unidade não-Tank no mesmo campo."
         }
       }
     }

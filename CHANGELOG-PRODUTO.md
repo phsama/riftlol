@@ -1,14 +1,29 @@
-## [2026-03-10] - Guia "Como Jogar" e Redesign de Interface
+# Changelog - Riftbound Deck Manager (RiftNights.com)
 
 ### 🟢 O que entregamos nesta iteração:
-- **Área "Como Jogar"**: Lançamos um guia digital completo e imersivo, cobrindo regras básicas, montagem de deck, runas e fluxo de jogo. 
-- **Correção e Renomeação**: Corrigimos um erro técnico (TypeError) que impedia a abertura da tela de Coleção e renomeamos o termo "Álbum" para **"Coleção"** em todos os idiomas, tornando a navegação mais intuitiva.
-- **Destaque em Keywords**: O glossário de efeitos (Keywords) recebeu um design premium focado em facilitar o aprendizado dos termos técnicos mais complexos do TCG.
-- **Novo Seletor de Idiomas**: Substituímos o seletor padrão por um componente customizado com flags, glassmorphism e animações suaves, elevando o padrão visual do produto.
-- **Navegação Inteligente**: O guia foi integrado dinamicamente no menu superior (desktop) e na barra de abas (mobile) para acesso rápido.
-- **SEO Premium**: Implementamos metadados dinâmicos (títulos e descrições) que mudam conforme a página e o idioma, além de tags para redes sociais (Open Graph/Twitter) e arquivos de indexação (`robots.txt`, `sitemap.xml`).
-- **Identidade Visual**: Criamos um novo favicon e imagem de preview (`og-image.png`) com design elegante e minimalista, reforçando a marca no navegador e em compartilhamentos sociais.
-- **Ajustes Visuais**: Refinamos o espaçamento das badges de domínio e o estilo dos filtros na coleção para evitar cortes e poluição visual.
+- **Riftbound Nights**: Evoluímos a marca para **Riftbound Nights**, alinhando o Deck Manager com o portal principal. O design do logo foi refinado para um visual mais imponente e moderno.
+- **Integração de Preços (LigaRiftbound)**: O preview de cartas agora exibe cotações em tempo real (Mínimo, Médio, Máximo) vindas da LigaRiftbound. 
+- **Suporte Internacional de Moeda**: Para usuários em Inglês ou Espanhol, o sistema prioriza a exibição em Dólar ($) ou sinaliza a cotação em Real (R$) se for a única disponível, garantindo utilidade global.
+- **Botão de Compra Direta**: Adicionamos um link direto para o marketplace da LigaRiftbound em cada carta, facilitando a aquisição de unidades faltantes para o seu deck.
+- **Estabilidade de Preview**: Refatoramos o sistema de miniaturas para ser 100% estável e não "quebrar" mais o layout ao passar o mouse rapidamente.
+- **Área "Como Jogar" & Keywords**: Re-verificamos e corrigimos todos os termos técnicos (Keywords) para os nomes oficiais de Riftbound (Accelerate, Assault, Deathknell), eliminando termos de outros card games.
+- **Favicon & SEO Final**: Favicon premium com cache-busting e tags SEO devidamente propagadas para o domínio `riftnights.com`.
+
+---
+
+## [1.1.0] - 2026-03-10
+### Adicionado
+- Rodapé elegante nas versões desktop e mobile com links para páginas legais.
+- Páginas de Privacidade e Termos de Uso (PT, EN, ES).
+- Novo favicon premium e imagem OG para redes sociais.
+- Lançamento oficial no domínio `riftnights.com`.
+- Guia Digital "Como Jogar" com termos oficiais do Riftbound TCG.
+
+### Corrigido
+- Miniaturas de preview ("miniaturas abrindo errado") agora usam um sistema de posicionamento global estável.
+- Favicon forçado com cache-busting e suporte redundante a `.ico`.
+- Keywords oficiais do jogo (Accelerate, Shield, etc) em todos os idiomas.
+- Limpeza de arquivos legados (Dockerfile, render.yaml) e logs de erro.
 
 ---
 
@@ -16,7 +31,24 @@
 - **Filtro de Edições Funcional**: Corrigido o bug que impedia o filtro por expansão/set de funcionar corretamente no Catálogo e no Álbum da Coleção. O sistema agora lê a nova estrutura de dados de set da API (`c.set.set_id`) e aplica a busca local sem falhas.
 - **Identidade Visual das Runas/Domínios**: Ajustamos as cores globais de representação dos domínios (Mind, Body, Calm, Chaos, Order, Fury) para refletir os tons oficiais e idênticos aos dos ícones, garantindo consistência pela aplicação inteira.
 - **Sincronização de Decks na Nuvem**: Corrigido um problema onde decks criados no PC apareciam como "0 cartas" no celular. Agora o aplicativo se reconecta automaticamente ao banco de cartas global para "reidratar" as cartas salvas apenas pelo ID, garantindo que o deck carregue perfeitamente independente do dispositivo onde a conta for acessada.
-- **Correção de Variantes "Presas" no Álbum**: Resolvemos um bug onde o filtro "Apenas Possuídas" impedia que o usuário removesse uma carta de arte alternativa (AART) se ele não possuísse a arte normal da mesma carta. Agora as variantes folham e expandem corretamente em qualquer tipo de filtro ativo.
+- [x] Correção do bug de variantes AART na Coleção
+- [x] Limpeza de console.logs e alertas
+- [x] Remover filtro "Sets" (não funcional) da Home e Coleção
+- [x] Implementar Guia Digital "Como Jogar"
+    - [x] Criar `HowToPlayView.vue` e rota
+    - [x] Traduzir conteúdo completo (PT, EN, ES)
+    - [x] Integrar no menu de navegação
+    - [x] Corrigir Keywords para termos oficiais de Riftbound
+- [x] Corrigir deploy do Favicon ✨ (Cache-busting + .ico)
+- [x] Otimização de SEO Premium ✨ (Metas + Títulos)
+- [x] Páginas Legais (AdSense Ready)
+    - [x] Criar conteúdo e traduções (PT, EN, ES)
+    - [x] Implementar `LegalView.vue`
+    - [x] Integrar rodapé elegante (Desktop/Mobile)
+- [x] Limpeza de Débito Técnico e Coerência Arquitetural
+- [x] Identidade Visual (Novo Favicon)
+- [x] Fix: Miniaturas de preview instáveis no catálogo/coleção ✨
+- [x] Validação final com o usuário
 - **Otimização Extrema de Carregamento (Edge Caching)**: Habilitamos o uso nativo de infraestrutura global da Vercel (Edge Network) que intercepta a rota `/api/cards` e guarda a cópia inteira do banco de dados na memória. Isso vai derrubar o tempo de loading de absurdos `~1500ms` por usuário, para levíssimos `~50ms`, melhorando intensamente a experiência em dispositivos móveis.
 - **Respiro Visual no Álbum**: O cabeçalho e a barra de filtros da Coleção estavam muito comprimidos. Adicionamos margens, espaçamentos generosos e aumentamos sutilmente os campos de busca, trazendo um design mais limpo e "respirável" que condiz com produtos premium.
 - **Auto-Limpeza de Cartas Vazias**: Refatoramos o backend (`collections.py`) para que sempre que uma carta tiver todas as suas versões alteradas para quantidade "ZERO" (0), o sistema delete fisicamente esse relacionamento do banco de dados, mantendo a coleção limpa em vez de guardar lixo (registros vazios).

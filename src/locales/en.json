@@ -5,8 +5,8 @@
       "desc": "Explore all Riftbound cards. Filter by domains, types, and rarities to find what you need."
     },
     "collection": {
-      "title": "My Collection | Riftbound Deck Manager",
-      "desc": "Manage your personal Riftbound collection. Track owned cards, foil variants, and export your list."
+      "title": "Riftnights - Your Riftbound TCG Strategy Hub",
+      "description": "Explore the complete Riftbound TCG card catalog, organize your collection, and build unbeatable decks. The ultimate manager for buying, selling, and trading."
     },
     "decks": {
       "title": "My Decks | Riftbound Deck Manager",
@@ -115,7 +115,13 @@
       "rarities": "Rarities",
       "energy": "Energy"
     },
-    "alt_arts_count": "{count} art | {count} arts"
+    "alt_arts_count": "{count} arts",
+    "market_prices": "LigaRiftbound Prices",
+    "price_min": "Minimum",
+    "price_avg": "Average",
+    "price_max": "Maximum",
+    "view_on_liga": "View on LigaRiftbound",
+    "loading_prices": "Fetching prices..."
   },
   "decks": {
     "title": "My Decks",
@@ -209,44 +215,60 @@
       "p1": "Units fight using their **Might** (Combat Power). When units from different players are on the same Battlefield, they automatically enter combat at the end of the turn.",
       "p2": "There are 6 main domains: **Body**, **Mind**, **Calm**, **Chaos**, **Order**, and **Fury**."
     },
-    "keywords": {
-      "title": "The Heart of Mastery: Keywords",
-      "subtitle": "Mastering Keywords is the most important step to becoming a Riftbound master.",
-      "list": {
-        "vanguard": {
-          "name": "Vanguard",
-          "desc": "This unit starts the game face-up on the central Battlefield."
-        },
-        "warded": {
-          "name": "Warded",
-          "desc": "This unit cannot be targeted by opponent's abilities or spells."
-        },
-        "fervor": {
-          "name": "Fervor X",
-          "desc": "Gains +X Might while attacking."
-        },
-        "action": {
-          "name": "Action",
-          "desc": "Abilities you can voluntarily activate during your main phase."
-        },
-        "repeat": {
-          "name": "Repeat",
-          "desc": "Effects that happen multiple times under certain conditions."
-        },
-        "deflect": {
-          "name": "Deflect X",
-          "desc": "Reduces damage taken by X."
-        },
-        "ambush": {
-          "name": "Ambush",
-          "desc": "Can be played during the opponent's turn or in response to actions."
-        },
-        "legendary": {
-          "name": "Legendary",
-          "desc": "You can only have one copy of this card in play at a time."
+      "keywords": {
+        "title": "Heart of Mastery: Keywords",
+        "description": "Mastering Keywords is the most important step to becoming a Riftbound pro.",
+        "list": {
+          "accelerate": {
+            "name": "Accelerate",
+            "desc": "Optional cost when playing a Unit that allows it to enter ready by paying 1 Energy and recycling a Rune."
+          },
+          "action": {
+            "name": "Action",
+            "desc": "Allows an ability or card to be played during Showdowns, even outside your turn."
+          },
+          "assault": {
+            "name": "Assault X",
+            "desc": "Gains +X Might while attacking during combat."
+          },
+          "deathknell": {
+            "name": "Deathknell",
+            "desc": "Ability that triggers when the unit with this keyword dies."
+          },
+          "deflect": {
+            "name": "Deflect X",
+            "desc": "Opponent must pay X additional Power to target this card with spells or abilities."
+          },
+          "ganking": {
+            "name": "Ganking",
+            "desc": "Movement ability that allows units to move directly between battlefields."
+          },
+          "hidden": {
+            "name": "Hidden",
+            "desc": "Can be played face down for reduced cost and later revealed as a Reaction."
+          },
+          "legion": {
+            "name": "Legion",
+            "desc": "Effect triggered if you have already played another card this turn."
+          },
+          "reaction": {
+            "name": "Reaction",
+            "desc": "Special timing that allows responding to opponent actions instantly, resolving before the original action."
+          },
+          "repeat": {
+            "name": "Repeat",
+            "desc": "Allows paying the base cost again to repeat a spell's effect."
+          },
+          "shield": {
+            "name": "Shield X",
+            "desc": "Gains +X Might while defending during combat."
+          },
+          "tank": {
+            "name": "Tank",
+            "desc": "Units with Tank must be assigned lethal damage before any other non-Tank units in the same battlefield."
+          }
         }
       }
-    }
   },
   "footer": {
     "rights": "© 2024 Riftbound Deck Manager. All rights reserved.",
