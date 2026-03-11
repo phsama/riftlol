@@ -397,15 +397,15 @@ async function handleEmailAuth() {
   align-items: center;
   gap: 2px;
   padding: 6px 16px;
-  color: var(--color-text-tertiary);
+  color: #B0B0B0; /* Visible Silver */
   text-decoration: none;
-  font-size: 0.65rem;
-  font-weight: 600;
-  transition: color 0.2s;
+  font-size: 0.7rem;
+  font-weight: 700; /* Bold */
+  transition: all 0.2s;
   border-radius: var(--radius-md);
 }
 .tab-item--active {
-  color: var(--color-gold-400);
+  color: var(--color-gold-500); /* Softer Gold */
 }
 
 /* ── Page transition ── */
