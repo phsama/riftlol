@@ -550,7 +550,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
 
 .filter-bar { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-.filter-scroll { display: flex; gap: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 4px 0; }
+.filter-scroll { display: flex; gap: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 6px 4px; margin: 0 -4px; }
 .filter-scroll::-webkit-scrollbar { display: none; }
 .filter-pill { cursor: pointer; transition: all 0.2s ease; opacity: 0.55; white-space: nowrap; flex-shrink: 0; }
 .filter-pill--active { opacity: 1 !important; box-shadow: 0 0 0 1px currentColor; }

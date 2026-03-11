@@ -398,14 +398,21 @@ async function handleEmailAuth() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 6px 16px;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 2px;
   color: #B0B0B0; /* Visible Silver */
   text-decoration: none;
   font-size: 0.7rem;
   font-weight: 700; /* Bold */
   transition: all 0.2s;
   border-radius: var(--radius-md);
+  flex: 1;
+  text-align: center;
+}
+.tab-item span {
+  text-align: center;
+  line-height: 1.1;
 }
 .tab-item--active {
   color: var(--color-gold-500); /* Softer Gold */
