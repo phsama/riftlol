@@ -580,7 +580,7 @@ onBeforeUnmount(() => {
   margin-top: 3px;
 }
 .card-meta .rarity-badge { font-size: 0.55rem; padding: 1px 5px; }
-.card-energy { font-size: 0.65rem; font-weight: 600; color: var(--color-rift-400); }
+.card-energy { font-size: 0.65rem; font-weight: 600; color: #fff; }
 
 .card-hover-preview { display: none; } /* Hide on mobile to prevent DOM explosion */
 

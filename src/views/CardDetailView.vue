@@ -375,9 +375,9 @@ onMounted(async () => {
   letter-spacing: 0.05em; color: var(--color-text-tertiary);
 }
 .attr-value { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; }
-.attr-energy { color: var(--color-rift-400); }
-.attr-might  { color: var(--color-domain-fury); }
-.attr-power  { color: var(--color-gold-400); }
+.attr-energy { color: #fff; }
+.attr-might  { color: #fff; }
+.attr-power  { color: #fff; }
 
 .detail-text {
   padding: 16px; background: rgba(0, 0, 0, 0.2);
