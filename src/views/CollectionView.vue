@@ -577,8 +577,8 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 /* ── Cards grid ── */
 .cards-grid { 
   display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(650px, 1fr)); 
-  gap: 32px; 
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); 
+  gap: 20px; 
 }
 
 /* Horizontal Card Tile */
@@ -588,10 +588,10 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   align-items: stretch;
   background: var(--color-bg-raised);
   border: 1px solid var(--color-border-subtle);
-  border-radius: 20px;
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
-  min-height: 400px;
+  transition: all 0.2s ease;
+  min-height: 240px;
 }
 
 .collection-tile-horizontal:hover {
@@ -611,30 +611,29 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 /* Left Section: Image & Basic Info */
 .card-horizontal-main {
   display: flex;
-  flex-direction: column; /* Stack name above image for better space */
+  flex-direction: column; 
   align-items: flex-start;
-  padding: 24px;
-  gap: 20px;
+  padding: 16px;
+  gap: 12px;
+  width: 192px; /* Balanced width for 160px image + padding */
   flex-shrink: 0;
-  width: 320px;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .card-image-wrap-horizontal {
   position: relative;
-  width: 260px; 
-  height: 364px;
+  width: 160px; 
+  height: 224px;
   flex-shrink: 0;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-  transition: transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
 .card-image-wrap--landscape {
-  width: 364px;
-  height: 260px;
+  width: 224px;
+  height: 160px;
 }
 
 .card-image-wrap-horizontal .card-image {
@@ -649,11 +648,13 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 
 .card-info-horizontal .card-name {
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 900;
+  font-size: 1.1rem;
+  font-weight: 800;
   color: #fff;
-  margin-bottom: 8px;
-  white-space: normal; /* Allow wrap for long names */
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   line-height: 1.2;
 }
 
@@ -662,10 +663,11 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 32px;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
   background: rgba(255, 255, 255, 0.02);
+  min-width: 220px;
 }
 
 .v-h-row {
