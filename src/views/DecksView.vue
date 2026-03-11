@@ -264,4 +264,14 @@ function deleteDeck() {
   .modal-overlay { align-items: center; padding: 20px; }
   .modal { border-radius: var(--radius-xl); }
 }
+
+@media (max-width: 768px) {
+  .decks-header {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+  }
+}
 </style>

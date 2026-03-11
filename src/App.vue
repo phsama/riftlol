@@ -85,21 +85,22 @@
         </transition>
       </router-view>
 
-      <!-- Global Footer -->
-      <footer class="app-footer fade-in" v-if="$route.name !== 'deck-editor'">
-        <div class="footer-content">
-          <div class="footer-brand">
-            <span class="nav-logo">⚔</span>
-            <span class="nav-title">Riftbound <span class="nav-title-accent">NIGHTS</span> <span class="nav-title-sub">Deck Manager</span></span>
-          </div>
-          <p class="footer-rights">{{ $t('footer.rights') }}</p>
-          <div class="footer-links">
-            <router-link to="/privacy" class="footer-link">{{ $t('footer.privacy') }}</router-link>
-            <router-link to="/terms" class="footer-link">{{ $t('footer.terms') }}</router-link>
-          </div>
-        </div>
-      </footer>
     </main>
+
+    <!-- Global Footer -->
+    <footer class="app-footer fade-in" v-if="$route.name !== 'deck-editor'">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span class="nav-logo">⚔</span>
+          <span class="nav-title">Riftbound <span class="nav-title-accent">NIGHTS</span> <span class="nav-title-sub">Deck Manager</span></span>
+        </div>
+        <p class="footer-rights">{{ $t('footer.rights') }}</p>
+        <div class="footer-links">
+          <router-link to="/privacy" class="footer-link">{{ $t('footer.privacy') }}</router-link>
+          <router-link to="/terms" class="footer-link">{{ $t('footer.terms') }}</router-link>
+        </div>
+      </div>
+    </footer>
 
     <!-- ── Bottom tab bar (mobile only) ── -->
     <nav class="bottom-tabs glass">
@@ -120,7 +121,7 @@
         <span>{{ $t('nav.decks') }}</span>
       </router-link>
       <router-link to="/how-to-play" class="tab-item" :class="{ 'tab-item--active': $route.name === 'how-to-play' }">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         <span>{{ $t('nav.how_to_play') }}</span>
       </router-link>
     </nav>
@@ -618,9 +619,10 @@ async function handleEmailAuth() {
 
 @media (max-width: 768px) {
   .app-footer {
-    padding-bottom: 100px;
-    margin-top: 40px;
-    background: var(--color-bg-base); /* match body so it blends nicely over the empty space */
+    padding: 32px 16px 100px; /* space for bottom tabs */
+    margin-top: 16px;
+    border-top: none;
+    background: transparent;
   }
   .footer-links {
     gap: 16px;

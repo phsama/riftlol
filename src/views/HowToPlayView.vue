@@ -433,9 +433,20 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
-  .section-title { font-size: 1.4rem; }
+  .section-header { 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center; 
+    gap: 12px;
+  }
+  .section-body { text-align: center; }
+  .section-title { font-size: 1.5rem; }
   .mastery-title { font-size: 1.6rem; }
   .keywords-grid { grid-template-columns: 1fr; }
+  .infographic { flex-direction: column; align-items: center; text-align: center; }
+  .rune-mechanics { align-items: center; text-align: center; }
+  .domains-grid { justify-content: center; }
 }
 
 .mt-4 { margin-top: 1rem; }
