@@ -50,6 +50,7 @@ class CollectionRepository:
                 (item.alt_art_qty or 0) +
                 (item.alt_art_foil_qty or 0) +
                 (item.signed_qty or 0) +
+                (item.signed_foil_qty or 0) +
                 (item.overnumbered_qty or 0) +
                 (item.overnumbered_foil_qty or 0)
             )
