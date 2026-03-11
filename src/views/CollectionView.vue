@@ -147,11 +147,6 @@
             />
             <span v-if="card._altCount > 1" class="alt-arts-badge">🎨 {{ card._altCount }} artes</span>
             
-            <div class="collection-overlay-actions">
-              <button class="col-add-btn" @click.prevent="collectionStore.updateItemQty(card.id, 'normal_qty', 1)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </button>
-            </div>
           </div>
           <div class="card-info">
             <h3 class="card-name">{{ card.name }}</h3>
@@ -617,7 +612,8 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 
 .v-final-steppers {
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 2px;
   flex: 1;
 }
 
