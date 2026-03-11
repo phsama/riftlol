@@ -153,6 +153,9 @@ function formatCardText(text) {
   // Exhaust/Vire icon: :rb_exhaust:
   formatted = formatted.replace(/:rb_exhaust:/g, '<span class="inline-icon icon-exhaust" title="Exhaust (Vire)"></span>')
   
+  // Might icon: :rb_might:
+  formatted = formatted.replace(/:rb_might:/g, '<span class="inline-icon icon-might" title="Might"></span>')
+  
   // Rune cost parser: :rb_rune_mind:
   formatted = formatted.replace(/:rb_rune_([a-zA-Z]+):/g, (match, runeGroup) => {
       const rune = runeGroup.toLowerCase()
