@@ -350,8 +350,8 @@
               ref="exportArea"
             ></textarea>
           </div>
-          <div class="modal-footer">
-            <button class="btn btn-ghost" @click="showExportModal = false">{{ $t('common.close') }}</button>
+          <div class="modal-footer export-modal-footer">
+            <button class="btn btn-ghost btn-sm" @click="showExportModal = false">{{ $t('common.close') }}</button>
             <button class="btn btn-primary" @click="copyCollectionExport" :disabled="isExporting">{{ copyLabel }}</button>
           </div>
         </div>
@@ -580,7 +580,16 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
 /* ── Export ── */
 .export-trigger svg { margin-right: 6px; }
 .export-modal { max-width: 500px; }
-.export-hint { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+.export-modal-footer { 
+  display: flex; 
+  align-items: center; 
+  justify-content: flex-end; 
+  gap: 12px; 
+  padding: 16px; 
+  border-top: 1px solid var(--color-border-subtle);
+  background: rgba(255, 255, 255, 0.02);
+}
+.export-hint { font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 16px; line-height: 1.5; }
 .export-options { margin-bottom: 16px; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); }
 .export-textarea { width: 100%; height: 260px; font-family: monospace; font-size: 0.85rem; padding: 12px; resize: none; }
 .export-loading { height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: rgba(0, 0, 0, 0.2); border-radius: var(--radius-lg); color: var(--primary); }
@@ -661,5 +670,20 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
   .export-trigger span { display: none; }
   .card-info { padding: 6px 8px 8px; }
   .card-name { font-size: 0.75rem; }
+  
+  /* Export Modal Mobile Adjustments */
+  .export-modal { 
+    max-width: 95vw; 
+    max-height: 85vh;
+  }
+  .export-modal-footer {
+    flex-direction: column-reverse;
+    gap: 12px;
+    padding: 16px;
+  }
+  .export-modal-footer .btn {
+    width: 100%;
+    height: 48px;
+  }
 }
 </style>
