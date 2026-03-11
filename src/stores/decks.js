@@ -68,6 +68,34 @@ export const useDecksStore = defineStore('decks', () => {
                     return { cardId: c.card_id, quantity: c.quantity }
                 })
             }))
+
+            // Emergency Sync: Send decks stuck in localstorage to the cloud
+            const localDecks = loadFromStorage()
+            const unsyncedDecks = localDecks.filter(ld => !decks.value.find(rd => rd.id === ld.id))
+            
+            if (unsyncedDecks.length > 0) {
+                for (const ld of unsyncedDecks) {
+                    try {
+                        const { data: newDeck } = await api.post('/api/decks/', { name: ld.name, cards: [] })
+                        const payload = {
+                            name: ld.name,
+                            main_champion_id: ld.mainChampionId,
+                            cards: [
+                                ...ld.cards.map(c => ({ card_id: c.cardId, quantity: c.quantity, is_sideboard: false })),
+                                ...(ld.sideboard || []).map(c => ({ card_id: c.cardId, quantity: c.quantity, is_sideboard: true }))
+                            ]
+                        }
+                        await api.put(`/api/decks/${newDeck.id}`, payload)
+                        
+                        ld.id = newDeck.id 
+                        decks.value.push(ld)
+                    } catch (err) {
+                        console.error('[Deck Auto-Sync] Failed to sync legacy deck', err)
+                        decks.value.push(ld) 
+                    }
+                }
+                saveToStorage(decks.value)
+            }
         } catch (e) {
             console.error('[Decks Sync Error]', e)
             decks.value = loadFromStorage() // fallback

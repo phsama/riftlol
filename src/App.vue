@@ -618,8 +618,9 @@ async function handleEmailAuth() {
 
 @media (max-width: 768px) {
   .app-footer {
-    padding-bottom: 20px; /* Space handled by app-main padding-bottom */
+    padding-bottom: 100px;
     margin-top: 40px;
+    background: var(--color-bg-base); /* match body so it blends nicely over the empty space */
   }
   .footer-links {
     gap: 16px;
