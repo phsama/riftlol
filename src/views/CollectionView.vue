@@ -79,7 +79,7 @@
           >{{ e.label }}</button>
         </div>
         
-        <!-- Only Owned toggle -->
+        <!-- Only Owned toggle + Clear -->
         <div class="filter-scroll">
            <button
             class="filter-pill filter-pill-owned"
@@ -89,9 +89,8 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>
             {{ $t('collection.only_owned') }}
           </button>
+          <button v-if="hasActiveFilters" class="filter-pill filter-pill-clear" @click="clearFilters">✕ {{ $t('common.clear') }}</button>
         </div>
-
-        <button v-if="hasActiveFilters" class="btn btn-ghost btn-sm clear-btn" @click="clearFilters">✕ {{ $t('common.clear') }}</button>
       </div>
 
       <!-- ── Loading ── -->
@@ -478,7 +477,13 @@ function setupObserver() {
   observer.observe(sentinel.value)
 }
 
-async function fetchAllData() {
+async function fetchAllData(force = false) {
+  if (!force && allCards.value.length > 0) {
+    // Already loaded, just setup observer
+    await nextTick()
+    setupObserver()
+    return
+  }
   loading.value = true
   error.value = null
   try {
@@ -532,6 +537,8 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 .filter-pill--active { opacity: 1 !important; box-shadow: 0 0 0 1px currentColor; }
 .filter-pill-owned { display: inline-flex; align-items: center; justify-content: center; padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; background: var(--color-bg-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); }
 .filter-pill-owned.filter-pill--active { background: rgba(250, 189, 47, 0.15); color: #fabd2f; border-color: rgba(250, 189, 47, 0.6); }
+.filter-pill-clear { display: inline-flex; align-items: center; justify-content: center; padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; background: rgba(255, 80, 80, 0.1); color: #ff6b6b; border: 1px solid rgba(255, 80, 80, 0.3); cursor: pointer; transition: all 0.2s; opacity: 1; white-space: nowrap; flex-shrink: 0; }
+.filter-pill-clear:hover { background: rgba(255, 80, 80, 0.2); border-color: rgba(255, 80, 80, 0.5); }
 .filter-pill-energy { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; background: var(--color-bg-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); }
 .filter-pill-energy.filter-pill--active { background: rgba(74, 127, 255, 0.15); color: var(--color-rift-400); border-color: var(--color-rift-500); }
 .filter-selects { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -588,7 +595,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 .tile-body {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: flex-start;
   flex: 1;
 }
 
@@ -596,6 +603,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 .tile-image-wrap {
   position: relative;
   width: 180px;
+  min-height: 252px;
   flex-shrink: 0;
   background: #000;
   overflow: hidden;
@@ -715,26 +723,20 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 /* ── Foil Glow ── */
 .foil-glow {
   position: relative;
-}
-.foil-glow::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(45deg, #ffd700, #fff, #ffd700);
-  filter: blur(8px);
-  opacity: 0.3;
-  z-index: -1;
-  border-radius: inherit;
+  isolation: isolate;
+  box-shadow: 0 0 12px 2px rgba(255, 215, 0, 0.25), 0 0 24px 4px rgba(255, 215, 0, 0.1);
 }
 .foil-glow::after { 
   content: ''; 
   position: absolute; 
   inset: 0; 
   background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.4) 30%, rgba(255, 215, 0, 0.2) 45%, transparent 80%); 
+  background-size: 200% 100%;
   mix-blend-mode: color-dodge; 
   opacity: 0.75; 
   animation: foil-shine 3s linear infinite; 
   pointer-events: none; 
+  z-index: 2;
 }
 @keyframes foil-shine { 
   0% { background-position: 200% center; } 
