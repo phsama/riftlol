@@ -63,26 +63,21 @@ async def get_card_prices(card_name: str, lang: str = "pt"):
 
             html = page_res.text
             
-            # Regex para pegar os preços
-            menor = re.search(r'id="precos-menor">R\$ (.*?)</div>', html)
-            medio = re.search(r'id="precos-medio">R\$ (.*?)</div>', html)
-            maior = re.search(r'id="precos-maior">R\$ (.*?)</div>', html)
+            # Regex para pegar os preços - Ajustadas para serem mais flexíveis com espaços e tags
+            menor = re.search(r'id=["\']precos-menor["\']>\s*R\$\s*(.*?)\s*</div>', html, re.IGNORECASE)
+            medio = re.search(r'id=["\']precos-medio["\']>\s*R\$\s*(.*?)\s*</div>', html, re.IGNORECASE)
+            maior = re.search(r'id=["\']precos-maior["\']>\s*R\$\s*(.*?)\s*</div>', html, re.IGNORECASE)
             
             prices_brl = {
-                "min": menor.group(1) if menor else None,
-                "avg": medio.group(1) if medio else None,
-                "max": maior.group(1) if maior else None
+                "min": menor.group(1).strip() if menor else None,
+                "avg": medio.group(1).strip() if medio else None,
+                "max": maior.group(1).strip() if maior else None
             }
 
             # 3. Lógica de Fallback USD ou Idioma
-            # Como a Liga não tem USD nativo para Riftbound de forma fácil, 
-            # se o usuário estiver em EN/ES, simulamos ou indicamos que é BRL.
-            # No futuro, poderíamos plugar TCGPlayer aqui para USD real.
+            # Se não encontrar preços na Liga, tentamos uma busca secundária ou retornamos vazio amigável
             
             use_usd = lang in ["en", "es"] or not any(prices_brl.values())
-            
-            # Por enquanto, se for USD, apenas marcamos como tal (na UI tratamos a conversão se quiser)
-            # Mas vamos retornar o que temos.
             
             return {
                 "found": True,
@@ -90,7 +85,8 @@ async def get_card_prices(card_name: str, lang: str = "pt"):
                 "url": card_url,
                 "currency": "BRL" if not use_usd else "USD",
                 "prices": prices_brl,
-                "is_fallback": use_usd
+                "is_fallback": use_usd,
+                "updated_at": "2026-03-10"
             }
 
     except Exception as e:

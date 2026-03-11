@@ -149,6 +149,9 @@ function formatCardText(text) {
 
   // Energy cost parser: :rb_energy_1:
   formatted = formatted.replace(/:rb_energy_(\d+):/g, '<span class="inline-icon cost-energy"><span>$1</span></span>')
+
+  // Exhaust/Vire icon: :rb_exhaust:
+  formatted = formatted.replace(/:rb_exhaust:/g, '<span class="inline-icon icon-exhaust" title="Exhaust (Vire)"></span>')
   
   // Rune cost parser: :rb_rune_mind:
   formatted = formatted.replace(/:rb_rune_([a-zA-Z]+):/g, (match, runeGroup) => {
