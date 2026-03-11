@@ -648,6 +648,7 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); window.removeEventL
   .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
 
 @media (max-width: 768px) {
+  .global-card-preview { display: none !important; }
   .cards-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 8px; }
   .export-trigger span { display: none; }
   .card-info { padding: 6px 8px 8px; }

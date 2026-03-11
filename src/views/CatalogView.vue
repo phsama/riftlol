@@ -601,6 +601,11 @@ onBeforeUnmount(() => {
   }
 }
 
+/* Hide on mobile */
+@media (max-width: 768px) {
+  .global-card-preview { display: none !important; }
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
