@@ -1,0 +1,340 @@
+{
+  "meta": {
+    "title": "Como Jogar Riftbound | Guia Completo para Iniciantes",
+    "description": "Aprenda como jogar Riftbound: objetivo da partida, cartas, Runes, turnos, combate, keywords, modos de jogo e dicas para começar melhor."
+  },
+  "hero": {
+    "eyebrow": "Guia Essencial",
+    "title": "Como Jogar Riftbound",
+    "subtitle": "Entenda o objetivo da partida, como funcionam as cartas, as Runes, o turno, o combate e os principais termos do jogo para começar a jogar com segurança.",
+    "primaryCta": "Ver regras",
+    "secondaryCta": "Explorar keywords"
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "O que é Riftbound?",
+      "body": "Riftbound é um trading card game em que os jogadores disputam o controle de Battlefields usando campeões, unidades, magias, equipamentos e recursos. Mais do que apenas vencer cartas inimigas, o foco do jogo está em conquistar posições, sustentar vantagem e administrar bem o ritmo da partida."
+    },
+    {
+      "id": "objective",
+      "title": "Como vencer uma partida",
+      "body": "No formato padrão, vence quem chegar primeiro a 8 pontos. Você marca pontos ao conquistar Battlefields e também ao começar seu turno ainda controlando um deles. O ponto final exige condição especial: ele precisa vir de segurar um Battlefield até o seu próximo turno ou de conquistar os dois Battlefields no mesmo turno."
+    },
+    {
+      "id": "requirements",
+      "title": "Estrutura básica da partida",
+      "items": [
+        "1 Champion Legend",
+        "1 Chosen Champion",
+        "1 Main Deck com 39 cartas",
+        "1 Rune Deck com 12 cartas",
+        "3 Battlefields por jogador"
+      ],
+      "note": "Durante a partida padrão, dois Battlefields ficam ativos ao mesmo tempo.",
+      "asset": "/assets/01_table_layout.png"
+    },
+    {
+      "id": "deck",
+      "title": "Como o deck é dividido",
+      "blocks": [
+        {
+          "title": "Champion Legend",
+          "body": "Seu campeão principal, que define a identidade do deck."
+        },
+        {
+          "title": "Chosen Champion",
+          "body": "Sua unidade especial garantida fora do Main Deck."
+        },
+        {
+          "title": "Main Deck",
+          "body": "39 cartas com Units, Spells, Gear e demais peças da estratégia."
+        },
+        {
+          "title": "Rune Deck",
+          "body": "12 cartas separadas para gerar recursos."
+        },
+        {
+          "title": "Battlefields",
+          "body": "Territórios que você disputa para pontuar."
+        }
+      ]
+    },
+    {
+      "id": "card-types",
+      "title": "Entendendo cada tipo de carta",
+      "blocks": [
+        {
+          "title": "Legends",
+          "body": "Campeões principais com habilidades centrais."
+        },
+        {
+          "title": "Units",
+          "body": "Cartas que lutam pelos Battlefields."
+        },
+        {
+          "title": "Spells",
+          "body": "Efeitos de uso único."
+        },
+        {
+          "title": "Gear",
+          "body": "Permanentes de suporte."
+        },
+        {
+          "title": "Equipment",
+          "body": "Gear anexado a Units."
+        },
+        {
+          "title": "Runes",
+          "body": "Recursos do jogo."
+        },
+        {
+          "title": "Tokens",
+          "body": "Permanentes criados por efeito."
+        }
+      ],
+      "asset": "/assets/02_card_anatomy.png"
+    },
+    {
+      "id": "domains",
+      "title": "As identidades do jogo",
+      "body": "Domains são as facções de Riftbound. Seu Champion Legend define quais Domains o deck pode usar, e isso influencia as cartas disponíveis e a forma como as sinergias funcionam.",
+      "blocks": [
+        {
+          "title": "Fury",
+          "body": "Agressão e pressão"
+        },
+        {
+          "title": "Calm",
+          "body": "Cura e resistência"
+        },
+        {
+          "title": "Mind",
+          "body": "Truques e controle"
+        },
+        {
+          "title": "Body",
+          "body": "Força bruta"
+        },
+        {
+          "title": "Chaos",
+          "body": "Risco e explosão"
+        },
+        {
+          "title": "Order",
+          "body": "Proteção e consistência"
+        }
+      ],
+      "asset": "/assets/05_domains_grid.png"
+    },
+    {
+      "id": "runes",
+      "title": "O sistema de recursos",
+      "blocks": [
+        {
+          "title": "Energy",
+          "body": "Pago ao exaurir Runes."
+        },
+        {
+          "title": "Power",
+          "body": "Pago ao reciclar uma Rune do Domain correspondente."
+        },
+        {
+          "title": "Regra importante",
+          "body": "A mesma Rune pode pagar Energy primeiro e depois ser reciclada para cobrir Power no mesmo pagamento."
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "Antes de começar",
+      "steps": [
+        "Coloque seu Legend na Legend Zone.",
+        "Coloque seu Chosen Champion na Champion Zone.",
+        "Prepare Main Deck, Rune Deck e Battlefields.",
+        "Compre 4 cartas.",
+        "Faça mulligan de até 2 cartas.",
+        "Inicie a partida com 2 Battlefields ativos."
+      ]
+    },
+    {
+      "id": "turn",
+      "title": "O turno em Riftbound",
+      "blocks": [
+        {
+          "title": "Awaken",
+          "body": "Desvire cartas exaustas."
+        },
+        {
+          "title": "Beginning",
+          "body": "Marque pontos de Hold e resolva efeitos de início de turno."
+        },
+        {
+          "title": "Channel",
+          "body": "Pegue 2 Runes do topo do Rune Deck."
+        },
+        {
+          "title": "Draw",
+          "body": "Compre 1 carta."
+        },
+        {
+          "title": "Action Phase",
+          "body": "Jogue cartas, mova Units, inicie combate e use habilidades."
+        }
+      ],
+      "note": "No fim do turno, efeitos finais resolvem e todo o dano é removido das Units sobreviventes.",
+      "asset": "/assets/03_turn_flow.png"
+    },
+    {
+      "id": "combat",
+      "title": "Como funciona um Showdown",
+      "body": "O combate em Riftbound é chamado de Showdown e começa quando uma Unit é movida para um Battlefield.",
+      "blocks": [
+        {
+          "title": "Open Showdown",
+          "body": "Acontece quando o Battlefield não tem Units inimigas."
+        },
+        {
+          "title": "Combat Showdown",
+          "body": "Acontece quando os dois lados têm Units no mesmo Battlefield."
+        },
+        {
+          "title": "Might",
+          "body": "Representa ao mesmo tempo o dano causado e o dano suportado por uma Unit."
+        },
+        {
+          "title": "Distribuição de dano",
+          "body": "O dano é aplicado simultaneamente e deve ser atribuído de forma letal a uma Unit antes de passar para outra."
+        }
+      ],
+      "asset": "/assets/04_showdown_example.png"
+    },
+    {
+      "id": "timing",
+      "title": "Actions e Reactions",
+      "body": "O combate não é apenas uma soma de força. Durante um Showdown, os jogadores podem usar Actions e Reactions para alterar o resultado da disputa antes que o dano resolva. É aqui que boa parte da profundidade de Riftbound aparece."
+    },
+    {
+      "id": "keywords",
+      "title": "Termos que você vai ver nas cartas",
+      "items": [
+        "Accelerate",
+        "Assault",
+        "Deathknell",
+        "Deflect",
+        "Echo",
+        "Equip",
+        "Ganking",
+        "Hidden",
+        "Legion",
+        "Quick-Draw",
+        "Shield",
+        "Tank",
+        "Temporary",
+        "Unique",
+        "Vision",
+        "Weaponmaster"
+      ]
+    },
+    {
+      "id": "tips",
+      "title": "Como aprender mais rápido",
+      "items": [
+        "Comece com um Champion Deck.",
+        "Construa o deck ao redor do seu Legend.",
+        "Não disperse sua estratégia.",
+        "Use até 3 cópias das cartas-chave.",
+        "Administre suas Runes com cuidado."
+      ]
+    },
+    {
+      "id": "modes",
+      "title": "Formatos disponíveis",
+      "items": [
+        "Duel",
+        "Match",
+        "Skirmish",
+        "War",
+        "Magma Chamber"
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "faq-1",
+      "q": "Quantas cartas compro no começo?",
+      "a": "Você compra 4 cartas e pode trocar até 2 no mulligan."
+    },
+    {
+      "id": "faq-2",
+      "q": "Quantas Runes pego por turno?",
+      "a": "Normalmente 2 Runes na fase Channel. Quem joga por último no primeiro turno pega 3."
+    },
+    {
+      "id": "faq-3",
+      "q": "Units entram prontas?",
+      "a": "Em geral, não. Elas entram exaustas, a menos que algum efeito diga o contrário."
+    },
+    {
+      "id": "faq-4",
+      "q": "O dano permanece entre turnos?",
+      "a": "Não. No fim do turno, o dano das Units sobreviventes é removido."
+    },
+    {
+      "id": "faq-5",
+      "q": "Posso responder durante o combate?",
+      "a": "Sim. Showdowns possuem janelas para Actions e Reactions antes da resolução final."
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Base",
+      "definition": "Zona onde suas Units entram em jogo antes de irem para um Battlefield."
+    },
+    {
+      "term": "Battlefield",
+      "definition": "Território disputado que gera pontuação."
+    },
+    {
+      "term": "Chosen Champion",
+      "definition": "Sua Unit especial, sempre acessível fora do Main Deck."
+    },
+    {
+      "term": "Conquer",
+      "definition": "Tomar o controle de um Battlefield."
+    },
+    {
+      "term": "Hold",
+      "definition": "Começar o turno ainda controlando um Battlefield."
+    },
+    {
+      "term": "Legend",
+      "definition": "Seu campeão principal."
+    },
+    {
+      "term": "Might",
+      "definition": "Valor que funciona como ataque e vida ao mesmo tempo."
+    },
+    {
+      "term": "Runes",
+      "definition": "Recursos usados para pagar cartas e habilidades."
+    },
+    {
+      "term": "Showdown",
+      "definition": "Nome do combate em Riftbound."
+    },
+    {
+      "term": "Trash",
+      "definition": "A pilha de descarte do jogo."
+    }
+  ],
+  "finalCta": {
+    "title": "Pronto para jogar melhor?",
+    "body": "Agora que você já entende o básico de Riftbound, explore cartas, keywords e estratégias para evoluir seu jogo e montar decks melhores.",
+    "buttons": [
+      { "label": "Ver cartas", "link": "/" },
+      { "label": "Ver keywords", "link": "/#keywords" },
+      { "label": "Explorar decks", "link": "/decks" }
+    ]
+  }
+}
