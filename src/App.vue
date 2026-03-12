@@ -1,6 +1,7 @@
 <template>
   <div class="app-layout">
     <Analytics />
+    <SpeedInsights />
     <!-- ── Top bar (mobile: slim, desktop: full) ── -->
     <nav class="app-nav glass">
       <router-link to="/" class="nav-brand">
@@ -160,6 +161,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { Analytics } from '@vercel/analytics/vue'
+import { SpeedInsights } from '@vercel/speed-insights/vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'

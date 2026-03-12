@@ -126,7 +126,7 @@
           class="card-tile collection-tile"
           :class="[
             { 'card-tile--champion': card.classification?.type === 'Legend' },
-            { 'collection-unowned': collectionStore.getCardTotal(card.id) === 0 }
+            { 'collection-unowned': getCardTotalCombined(card) === 0 }
           ]"
         >
           <!-- Header: Name & Rarity -->
@@ -163,12 +163,12 @@
               ]" :key="variant.key" :class="{ 'v-row-off': !variant.enabled }">
                 <span class="v-label">{{ variant.label }}</span>
                 <div class="v-stepper">
-                  <button class="v-btn v-btn-minus" :disabled="!variant.enabled" @click="handleDecrement(card.id, variant.key)">−</button>
-                  <span class="v-val" :class="{ 'v-val-foil': getQty(card.id, variant.foilField) > 0 }">
-                    {{ getVariantTotal(card.id, variant.key) }}
+                  <button class="v-btn v-btn-minus" :disabled="!variant.enabled" @click="handleDecrement(card, variant.key)">−</button>
+                  <span class="v-val" :class="{ 'v-val-foil': getQtyForCard(card, variant.foilField) > 0 }">
+                    {{ getVariantTotal(card, variant.key) }}
                   </span>
-                  <button class="v-btn" :disabled="!variant.enabled" @click="handleIncrement(card.id, variant.key, false)">+</button>
-                  <button class="v-btn v-btn-gold" :disabled="!variant.enabled" @click="handleIncrement(card.id, variant.key, true)">✦</button>
+                  <button class="v-btn" :disabled="!variant.enabled" @click="handleIncrement(card, variant.key, false)">+</button>
+                  <button class="v-btn v-btn-gold" :disabled="!variant.enabled" @click="handleIncrement(card, variant.key, true)">✦</button>
                 </div>
               </div>
             </div>
@@ -274,6 +274,16 @@ function getQty(cardId, field) {
     return collectionStore.items[cardId]?.[field] || 0
 }
 
+function getQtyForCard(card, field) {
+    if (!card._versions) return getQty(card.id, field);
+    return card._versions.reduce((sum, v) => sum + getQty(v.id, field), 0);
+}
+
+function getCardTotalCombined(card) {
+    if (!card._versions) return collectionStore.getCardTotal(card.id);
+    return card._versions.reduce((sum, v) => sum + collectionStore.getCardTotal(v.id), 0);
+}
+
 const hasAltArt = (c) => c._versions?.some(v => v.metadata?.alternate_art)
 const hasOvernumbered = (c) => c._versions?.some(v => v.metadata?.overnumbered)
 const hasSignature = (c) => c._versions?.some(v => v.metadata?.signature)
@@ -325,7 +335,7 @@ const groupedCards = computed(() => {
 
 const filteredCards = computed(() => {
   let result = [...groupedCards.value]
-  if (showOnlyOwned.value) result = result.filter(c => collectionStore.getCardTotal(c.id) > 0)
+  if (showOnlyOwned.value) result = result.filter(c => getCardTotalCombined(c) > 0)
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.trim().toLowerCase()
     result = result.filter((c) => c.name.toLowerCase().includes(q) || c.text?.raw?.toLowerCase().includes(q))
@@ -347,24 +357,24 @@ const collectionProgress = computed(() => {
     groupedCards.value.forEach(card => {
         // 1. Normal version
         total++
-        if (getQty(card.id, 'normal_qty') > 0 || getQty(card.id, 'foil_qty') > 0) owned++
+        if (getQtyForCard(card, 'normal_qty') > 0 || getQtyForCard(card, 'foil_qty') > 0) owned++
         
         // 2. Alt Art
         if (hasAltArt(card)) {
             total++
-            if (getQty(card.id, 'alt_art_qty') > 0 || getQty(card.id, 'alt_art_foil_qty') > 0) owned++
+            if (getQtyForCard(card, 'alt_art_qty') > 0 || getQtyForCard(card, 'alt_art_foil_qty') > 0) owned++
         }
         
         // 3. Signature
         if (hasSignature(card)) {
             total++
-            if (getQty(card.id, 'signed_qty') > 0 || getQty(card.id, 'signed_foil_qty') > 0) owned++
+            if (getQtyForCard(card, 'signed_qty') > 0 || getQtyForCard(card, 'signed_foil_qty') > 0) owned++
         }
         
         // 4. Overnumbered
         if (hasOvernumbered(card)) {
             total++
-            if (getQty(card.id, 'overnumbered_qty') > 0 || getQty(card.id, 'overnumbered_foil_qty') > 0) owned++
+            if (getQtyForCard(card, 'overnumbered_qty') > 0 || getQtyForCard(card, 'overnumbered_foil_qty') > 0) owned++
         }
     })
     
@@ -411,26 +421,30 @@ const displayCards = computed(() => {
   })
 })
 
-function getVariantTotal(cardId, versionPrefix) {
-  const qty = collectionStore.items[cardId] || {}
+function getVariantTotal(card, versionPrefix) {
   const regKey = versionPrefix === 'normal' ? 'normal_qty' : `${versionPrefix}_qty`
   const foilKey = versionPrefix === 'normal' ? 'foil_qty' : `${versionPrefix}_foil_qty`
-  return (qty[regKey] || 0) + (qty[foilKey] || 0)
+  return getQtyForCard(card, regKey) + getQtyForCard(card, foilKey)
 }
 
-function handleDecrement(cardId, versionPrefix) {
-  const qty = collectionStore.items[cardId] || {}
+function handleDecrement(baseCard, versionPrefix) {
   const regKey = versionPrefix === 'normal' ? 'normal_qty' : `${versionPrefix}_qty`
   const foilKey = versionPrefix === 'normal' ? 'foil_qty' : `${versionPrefix}_foil_qty`
   
-  if ((qty[regKey] || 0) > 0) {
-    collectionStore.updateItemQty(cardId, regKey, -1)
-  } else if ((qty[foilKey] || 0) > 0) {
-    collectionStore.updateItemQty(cardId, foilKey, -1)
+  const versions = baseCard._versions || [baseCard]
+  for (const v of versions) {
+    const qty = collectionStore.items[v.id] || {}
+    if ((qty[regKey] || 0) > 0) {
+      collectionStore.updateItemQty(v.id, regKey, -1)
+      return
+    } else if ((qty[foilKey] || 0) > 0) {
+      collectionStore.updateItemQty(v.id, foilKey, -1)
+      return
+    }
   }
 }
 
-function handleIncrement(cardId, versionPrefix, isFoil = false) {
+function handleIncrement(baseCard, versionPrefix, isFoil = false) {
   let key = ''
   if (versionPrefix === 'normal') {
     key = isFoil ? 'foil_qty' : 'normal_qty'
@@ -443,7 +457,7 @@ function handleIncrement(cardId, versionPrefix, isFoil = false) {
   }
   
   if (key) {
-    collectionStore.updateItemQty(cardId, key, 1)
+    collectionStore.updateItemQty(baseCard.id, key, 1)
   }
 }
 
@@ -503,8 +517,9 @@ onBeforeUnmount(() => { if (observer) observer.disconnect(); })
 .modal-overlay {
   position: fixed; inset: 0; z-index: 500;
   background: rgba(6, 6, 16, 0.85); display: flex;
-  align-items: center; justify-content: center;
-  padding: 20px;
+  align-items: flex-start; justify-content: center;
+  padding: 10vh 20px 20px 20px;
+  overflow-y: auto;
 }
 .modal {
   width: 100%; max-width: 500px; padding: 24px 20px;

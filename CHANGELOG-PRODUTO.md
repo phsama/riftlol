@@ -1,6 +1,9 @@
 # Changelog - Riftbound NIGHTS (RiftNights.com)
 
 ### 🟢 O que entregamos nesta iteração:
+- **Correção de Variantes na Coleção**: Fique tranquilo! A interface continua exibindo quantidades separadas para a "Arte Normal" e a "Arte Alternativa" independentemente. O erro era apenas de leitura: quando você escaneava uma versão alternativa, o sistema salvava no ID dela, mas a Coleção só puxava a leitura pelo ID da versão base. Agora o sistema varre todos os IDs daquela carta no banco e direciona as quantidades corretamente para as linhas separadas (Normal, AArt, Sign, Over) no Álbum.
+- **Melhoria no Modal de Exportação**: O pop-up com o texto da sua coleção para copiar (Exportar) agora abre fixado próximo ao topo da tela, eliminando a necessidade de dar scroll para encontrar os botões em coleções muito grandes.
+### 🟢 O que entregamos nesta iteração:
 - **Riftbound NIGHTS**: Consolidamos a marca para **Riftbound NIGHTS**, unificando o Deck Manager em todas as frentes (Header, Footer, Termos Legais e SEO). O design agora reflete a identidade definitiva de lançamento.
 - **Integração de Preços (LigaRiftbound)**: O preview de cartas agora exibe cotações em tempo real (Mínimo, Médio, Máximo) vindas da LigaRiftbound. 
 - **Suporte Internacional de Moeda**: Para usuários em Inglês ou Espanhol, o sistema prioriza a exibição em Dólar ($) ou sinaliza a cotação em Real (R$) se for a única disponível, garantindo utilidade global.
